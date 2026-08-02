@@ -6,7 +6,21 @@ class Auth
 {
     public static function user(): ?array
     {
-        return $_SESSION['user'] ?? null;
+        if (!isset($_SESSION['user'])) {
+            return null;
+        }
+
+        $stmt = Database::connection()->prepare('SELECT id, name, email, role, city FROM users WHERE id = ? LIMIT 1');
+        $stmt->execute([$_SESSION['user']['id']]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            self::logout();
+            return null;
+        }
+
+        self::storeUser($user);
+        return $_SESSION['user'];
     }
 
     public static function check(): bool

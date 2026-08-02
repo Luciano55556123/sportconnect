@@ -25,14 +25,25 @@ class OrganizerRequestController extends Controller
         $this->requireAuth('athlete');
         verify_csrf();
         Security::rateLimit('organizer_request', 3, 3600);
+        $user = (new User())->find(Auth::user()['id']);
+        if (!$user || $user['role'] !== 'athlete') {
+            flash('error', 'Somente usuarios comuns podem solicitar perfil de organizador.');
+            $this->redirect($user && $user['role'] === 'organizer' ? '/organizador' : '/admin');
+        }
+
         $latest = (new OrganizerRequest())->latestForUser(Auth::user()['id']);
-        if ($latest && in_array($latest['status'], ['pending', 'approved', 'suspended'], true)) {
+        if ($latest && in_array($latest['status'], ['pending', 'approved'], true)) {
             flash('error', 'Ja existe uma solicitacao ativa para sua conta.');
             $this->redirect('/solicitar-organizador');
         }
 
         $proof = $this->uploadProof('proof_file');
-        (new OrganizerRequest())->create($_POST, Auth::user()['id'], $proof);
+        $requestId = (new OrganizerRequest())->create($_POST, Auth::user()['id'], $proof);
+        if ($requestId === 0) {
+            flash('error', 'Voce ja possui uma solicitacao pendente.');
+            $this->redirect('/solicitar-organizador');
+        }
+
         (new Notification())->create(Auth::user()['id'], 'Solicitacao enviada', 'Sua solicitacao de organizador foi enviada para analise.', '/solicitar-organizador', 'organizer_request');
         foreach ((new User())->all('admin') as $admin) {
             (new Notification())->create((int) $admin['id'], 'Novo organizador para analisar', 'Ha uma nova solicitacao de perfil de organizador.', '/admin/solicitacoes-organizadores', 'organizer_request');

@@ -33,7 +33,23 @@ class AdminController extends Controller
         $this->requireAuth('admin');
         $this->view('admin/organizer_requests', [
             'title' => 'Solicitacoes de organizadores',
-            'requests' => (new OrganizerRequest())->byStatus($_GET['status'] ?? ''),
+            'requests' => (new OrganizerRequest())->byStatus($_GET['status'] ?? 'pending'),
+        ]);
+    }
+
+    public function showOrganizerRequest(string $id): void
+    {
+        $this->requireAuth('admin');
+        $request = (new OrganizerRequest())->findWithUser((int) $id);
+        if (!$request) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Solicitacao nao encontrada']);
+            return;
+        }
+
+        $this->view('admin/organizer_request_show', [
+            'title' => 'Solicitacao de organizador',
+            'request' => $request,
         ]);
     }
 
@@ -42,22 +58,33 @@ class AdminController extends Controller
         $this->requireAuth('admin');
         verify_csrf();
         $status = $_POST['status'] ?? 'pending';
-        if (!in_array($status, ['approved', 'rejected', 'suspended'], true)) {
+        if (!in_array($status, ['approved', 'rejected'], true)) {
             http_response_code(422);
             flash('error', 'Status invalido.');
             $this->redirect('/admin/solicitacoes-organizadores');
         }
-        $request = (new OrganizerRequest())->review((int) $id, $status, Auth::user()['id'], $_POST['rejection_reason'] ?? null);
+        $reason = trim($_POST['rejection_reason'] ?? '');
+        if ($status === 'rejected' && $reason === '') {
+            flash('error', 'Informe o motivo da rejeicao.');
+            $this->redirect('/admin/solicitacoes-organizadores/' . $id);
+        }
+
+        $model = new OrganizerRequest();
+        $request = $status === 'approved'
+            ? $model->approve((int) $id, Auth::user()['id'])
+            : $model->reject((int) $id, $reason);
+
         if ($request) {
             $messages = [
                 'approved' => 'Seu perfil de organizador foi aprovado.',
                 'rejected' => 'Sua solicitacao de organizador foi rejeitada.',
-                'suspended' => 'Seu perfil de organizador foi suspenso.',
             ];
             (new Notification())->create((int) $request['user_id'], 'Analise de organizador', $messages[$status], '/notificacoes', 'organizer_request');
             (new CompetitionActivityLog())->create(0, Auth::user()['id'], 'organizer_request_' . $status, 'Solicitacao de organizador #' . (int) $id . ' revisada.');
+            flash('success', 'Solicitacao atualizada.');
+        } else {
+            flash('error', 'Solicitacao pendente nao encontrada.');
         }
-        flash('success', 'Solicitacao atualizada.');
         $this->redirect('/admin/solicitacoes-organizadores');
     }
 

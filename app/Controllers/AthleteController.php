@@ -6,6 +6,7 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Models\Favorite;
 use App\Models\Notification;
+use App\Models\OrganizerRequest;
 use App\Models\Recommendation;
 use App\Models\Registration;
 use App\Models\Sport;
@@ -24,6 +25,7 @@ class AthleteController extends Controller
             'favoriteSports' => (new User())->favoriteSportIds(Auth::user()['id']),
             'notifications' => (new Notification())->forUser(Auth::user()['id']),
             'recommendations' => (new Recommendation())->forUser($user),
+            'organizerRequest' => (new OrganizerRequest())->latestForUser(Auth::user()['id']),
         ]);
     }
 
