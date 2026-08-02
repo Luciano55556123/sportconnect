@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Categoria esportiva">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1267d8"/><stop offset="1" stop-color="#0f2747"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#g)"/>
+  <path d="M0 260c120-70 220-80 340-38 94 33 190 23 300-56v194H0z" fill="#0f8f5f" opacity=".72"/>
+  <circle cx="500" cy="95" r="62" fill="#ffca2c" opacity=".9"/>
+  <path d="M90 110h250M70 170h310M115 230h180" stroke="#fff" stroke-width="18" stroke-linecap="round" opacity=".28"/>
+</svg>

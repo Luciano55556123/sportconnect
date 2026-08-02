@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 112" role="img" aria-label="Escudo da equipe">
+  <path d="M48 6 84 20v29c0 25-14 46-36 57C26 95 12 74 12 49V20z" fill="#eef5ff" stroke="#1267d8" stroke-width="6"/>
+  <path d="M48 20 69 28v21c0 16-8 30-21 39-13-9-21-23-21-39V28z" fill="#1267d8" opacity=".18"/>
+  <circle cx="48" cy="51" r="16" fill="#1267d8"/>
+  <path d="M48 36v30M33 51h30" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-label="Evento esportivo">
+  <rect width="1200" height="675" fill="#eaf2ff"/>
+  <path d="M0 505c135-68 278-98 430-90 201 10 333 92 514 82 92-5 177-32 256-80v258H0z" fill="#1267d8"/>
+  <path d="M0 560c185-64 344-72 477-25 173 62 320 82 441 59 94-18 187-60 282-126v207H0z" fill="#0f2747"/>
+  <circle cx="930" cy="185" r="88" fill="#ffca2c"/>
+  <g fill="#fff" opacity=".96">
+    <rect x="164" y="166" width="464" height="38" rx="19"/>
+    <rect x="164" y="232" width="334" height="28" rx="14"/>
+    <rect x="164" y="286" width="410" height="28" rx="14"/>
+  </g>
+  <g transform="translate(690 285)" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="95" cy="80" r="64"/>
+    <path d="M95 144v96M95 190l-86 58M95 190l86 58"/>
+  </g>
+</svg>
