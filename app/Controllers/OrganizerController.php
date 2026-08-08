@@ -7,15 +7,15 @@ use App\Core\Controller;
 use App\Models\Championship;
 use App\Models\Notification;
 use App\Models\Registration;
+use App\Models\RegistrationPayment;
 use App\Models\Sport;
-use App\Models\User;
+use App\Services\RegistrationEmailService;
 
 class OrganizerController extends Controller
 {
     public function dashboard(): void
     {
         $this->requireAuth('organizer');
-        $this->ensureOrganizerActive();
         $this->view('organizer/dashboard', [
             'title' => 'Painel do organizador',
             'stats' => (new Registration())->statsForOrganizer(Auth::user()['id']),
@@ -26,38 +26,25 @@ class OrganizerController extends Controller
     public function create(): void
     {
         $this->requireAuth('organizer');
-        $this->ensureOrganizerActive();
-        $this->view('organizer/form', ['title' => 'Novo campeonato', 'sports' => (new Sport())->all(), 'championship' => null]);
+        $this->view('organizer/form', [
+            'title' => 'Novo campeonato',
+            'sports' => (new Sport())->all(),
+            'championship' => [
+                'email_contato' => Auth::user()['email'] ?? '',
+                'whatsapp_contato' => '',
+            ],
+        ]);
     }
 
     public function store(): void
     {
         $this->requireAuth('organizer');
-        $this->ensureOrganizerActive();
         verify_csrf();
-        $whatsapp = $this->sanitizeWhatsapp($_POST['whatsapp_contato'] ?? '');
-        if (!$this->isValidWhatsapp($whatsapp)) {
-            flash('error', 'Informe um WhatsApp brasileiro valido com DDD.');
-            $this->view('organizer/form', [
-                'title' => 'Novo campeonato',
-                'sports' => (new Sport())->all(),
-                'championship' => $_POST,
-            ]);
-            return;
+        $this->normalizePaymentData($_POST);
+        if (!$this->validateChampionshipPayment($_POST)) {
+            $this->redirect('/organizador/campeonatos/novo');
         }
-        $_POST['whatsapp_contato'] = $whatsapp;
-        try {
-            $_POST['imagem'] = $this->uploadChampionshipImage('imagem');
-        } catch (\RuntimeException $exception) {
-            flash('error', $exception->getMessage());
-            $this->view('organizer/form', [
-                'title' => 'Novo campeonato',
-                'sports' => (new Sport())->all(),
-                'championship' => $_POST,
-            ]);
-            return;
-        }
-        $_POST['image'] = $_POST['imagem'] ?? 'assets/images/campeonato-placeholder.jpg';
+        $_POST['image'] = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']) ?? 'assets/img/default-event.svg';
         $_POST['rules_file'] = $this->upload('rules_file', ['pdf']);
         $id = (new Championship())->create($_POST, Auth::user()['id']);
         (new Notification())->createForFavoriteSport((int) $_POST['sport_id'], 'Novo campeonato disponivel: ' . $_POST['name']);
@@ -68,91 +55,25 @@ class OrganizerController extends Controller
     public function edit(string $id): void
     {
         $this->requireAuth('organizer');
-        $this->ensureOrganizerActive();
-        $model = new Championship();
-        $championship = $model->find((int) $id);
-        if (!$championship || !$model->canManage((int) $id, Auth::user()['id'], $this->isAdmin())) {
-            http_response_code(403);
-            $this->view('errors/403', ['title' => 'Acesso negado']);
-            return;
-        }
-
         $this->view('organizer/form', [
             'title' => 'Editar campeonato',
             'sports' => (new Sport())->all(),
-            'championship' => $championship,
+            'championship' => (new Championship())->find((int) $id),
         ]);
     }
 
     public function update(string $id): void
     {
         $this->requireAuth('organizer');
-        $this->ensureOrganizerActive();
         verify_csrf();
-        $model = new Championship();
-        $championship = $model->find((int) $id);
-        if (!$championship || !$model->canManage((int) $id, Auth::user()['id'], $this->isAdmin())) {
-            http_response_code(403);
-            $this->view('errors/403', ['title' => 'Acesso negado']);
-            return;
+        $this->normalizePaymentData($_POST);
+        if (!$this->validateChampionshipPayment($_POST)) {
+            $this->redirect('/organizador/campeonatos/' . $id . '/editar');
         }
-
-        $whatsapp = $this->sanitizeWhatsapp($_POST['whatsapp_contato'] ?? '');
-        if (!$this->isValidWhatsapp($whatsapp)) {
-            flash('error', 'Informe um WhatsApp brasileiro valido com DDD.');
-            $_POST['id'] = (int) $id;
-            $_POST['image'] = $_POST['current_image'] ?? ($championship['image'] ?? 'assets/img/default-event.svg');
-            $_POST['imagem'] = $_POST['current_imagem'] ?? ($championship['imagem'] ?? null);
-            $_POST['rules_file'] = $_POST['current_rules_file'] ?? ($championship['rules_file'] ?? null);
-            $this->view('organizer/form', [
-                'title' => 'Editar campeonato',
-                'sports' => (new Sport())->all(),
-                'championship' => array_merge($championship, $_POST),
-            ]);
-            return;
-        }
-
-        $_POST['whatsapp_contato'] = $whatsapp;
-        $_POST['is_admin'] = $this->isAdmin();
-        try {
-            $newImage = $this->uploadChampionshipImage('imagem');
-        } catch (\RuntimeException $exception) {
-            flash('error', $exception->getMessage());
-            $_POST['id'] = (int) $id;
-            $_POST['image'] = $_POST['current_image'] ?? ($championship['image'] ?? 'assets/img/default-event.svg');
-            $_POST['imagem'] = $_POST['current_imagem'] ?? ($championship['imagem'] ?? null);
-            $_POST['rules_file'] = $_POST['current_rules_file'] ?? ($championship['rules_file'] ?? null);
-            $this->view('organizer/form', [
-                'title' => 'Editar campeonato',
-                'sports' => (new Sport())->all(),
-                'championship' => array_merge($championship, $_POST),
-            ]);
-            return;
-        }
-
-        $_POST['imagem'] = $newImage ?? ($_POST['current_imagem'] ?? ($championship['imagem'] ?? null));
-        $_POST['image'] = $_POST['imagem'] ?? ($_POST['current_image'] ?? 'assets/images/campeonato-placeholder.jpg');
+        $_POST['image'] = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']) ?? ($_POST['current_image'] ?? 'assets/img/default-event.svg');
         $_POST['rules_file'] = $this->upload('rules_file', ['pdf']) ?? ($_POST['current_rules_file'] ?? null);
-        $model->update((int) $id, $_POST, Auth::user()['id']);
-        if ($newImage) {
-            $this->deleteChampionshipImage($championship['imagem'] ?? null);
-        }
+        (new Championship())->update((int) $id, $_POST, Auth::user()['id']);
         flash('success', 'Campeonato atualizado.');
-        $this->redirect('/organizador');
-    }
-
-    public function sendToReview(string $id): void
-    {
-        $this->requireAuth('organizer');
-        $this->ensureOrganizerActive();
-        verify_csrf();
-        $sent = (new Championship())->sendToReview((int) $id, Auth::user()['id']);
-        if ($sent) {
-            foreach ((new User())->all('admin') as $admin) {
-                (new Notification())->create((int) $admin['id'], 'Campeonato para aprovacao', 'Um campeonato foi enviado para revisao administrativa.', '/admin/campeonatos-pendentes', 'championship_review');
-            }
-        }
-        flash($sent ? 'success' : 'error', $sent ? 'Campeonato enviado para aprovacao administrativa.' : 'Nao foi possivel enviar. Verifique campos obrigatorios ou status atual.');
         $this->redirect('/organizador');
     }
 
@@ -161,7 +82,7 @@ class OrganizerController extends Controller
         $this->requireAuth('organizer');
         $this->view('organizer/registrations', [
             'title' => 'Inscricoes recebidas',
-            'registrations' => (new Registration())->byOrganizer(Auth::user()['id'], $this->isAdmin()),
+            'registrations' => (new Registration())->byOrganizer(Auth::user()['id']),
         ]);
     }
 
@@ -169,15 +90,56 @@ class OrganizerController extends Controller
     {
         $this->requireAuth('organizer');
         verify_csrf();
-        (new Registration())->setStatus((int) $id, $_POST['status'], Auth::user()['id'], $this->isAdmin());
+        (new Registration())->setStatus((int) $id, $_POST['status'], Auth::user()['id']);
         flash('success', 'Status atualizado.');
         $this->redirect('/organizador/inscricoes');
+    }
+
+    public function paymentStatus(string $id): void
+    {
+        $this->requireAuth('organizer');
+        verify_csrf();
+        $action = $_POST['action'] ?? '';
+        $notes = trim((string) ($_POST['review_notes'] ?? ''));
+        $paymentModel = new RegistrationPayment();
+
+        if ($action === 'approve') {
+            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'paid', 'confirmada', $notes);
+        } elseif ($action === 'reject') {
+            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'rejected', 'pagamento_rejeitado', $notes);
+        } else {
+            $ok = false;
+        }
+
+        if ($ok) {
+            $registration = (new Registration())->findDetails((int) $id);
+            if ($registration) {
+                (new RegistrationEmailService())->paymentReviewedToAthlete($registration, $action === 'approve');
+            }
+            flash('success', 'Pagamento atualizado.');
+        } else {
+            flash('error', 'Nao foi possivel atualizar este pagamento.');
+        }
+
+        $this->redirect('/organizador/inscricoes');
+    }
+
+    public function receipt(string $id): void
+    {
+        $this->requireAuth('organizer');
+        $payment = (new RegistrationPayment())->findForOrganizer((int) $id, Auth::user()['id']);
+        if (!$payment || empty($payment['receipt_path'])) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Comprovante nao encontrado']);
+            return;
+        }
+        $this->downloadUpload($payment['receipt_path']);
     }
 
     public function report(string $type): void
     {
         $this->requireAuth('organizer');
-        $rows = (new Registration())->byOrganizer(Auth::user()['id'], $this->isAdmin());
+        $rows = (new Registration())->byOrganizer(Auth::user()['id']);
         header('Content-Type: text/csv; charset=utf-8');
         header('Content-Disposition: attachment; filename="relatorio-' . preg_replace('/[^a-z0-9_-]/i', '', $type) . '.csv"');
         $out = fopen('php://output', 'w');
@@ -198,113 +160,70 @@ class OrganizerController extends Controller
             flash('error', 'Arquivo invalido em ' . $field . '.');
             return null;
         }
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->file($_FILES[$field]['tmp_name']);
-        $validMime = match ($ext) {
-            'pdf' => $mime === 'application/pdf',
-            'jpg', 'jpeg' => in_array($mime, ['image/jpeg', 'image/pjpeg'], true),
-            'png' => $mime === 'image/png',
-            default => true,
-        };
-        if (!$validMime) {
-            flash('error', 'O conteudo do arquivo nao corresponde ao formato informado.');
-            return null;
-        }
         $name = uniqid($field . '_', true) . '.' . $ext;
         move_uploaded_file($_FILES[$field]['tmp_name'], BASE_PATH . '/uploads/' . $name);
         return 'uploads/' . $name;
     }
 
-    private function uploadChampionshipImage(string $field): ?string
+    private function validateChampionshipPayment(array $data): bool
     {
-        if (!isset($_FILES[$field]) || $_FILES[$field]['error'] === UPLOAD_ERR_NO_FILE) {
-            return null;
+        $email = trim((string) ($data['email_contato'] ?? ''));
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            flash('error', 'Informe um e-mail valido para receber as inscricoes.');
+            return false;
         }
 
-        if ($_FILES[$field]['error'] !== UPLOAD_ERR_OK) {
-            throw new \RuntimeException('Nao foi possivel enviar a imagem. Tente novamente.');
+        if (strlen(preg_replace('/\D/', '', (string) ($data['whatsapp_contato'] ?? ''))) < 10) {
+            flash('error', 'Informe um WhatsApp de contato valido.');
+            return false;
         }
 
-        if ((int) $_FILES[$field]['size'] > 5 * 1024 * 1024) {
-            throw new \RuntimeException('A imagem deve ter no maximo 5 MB.');
+        $requiresPayment = !empty($data['requires_payment']);
+        $fee = (float) ($data['registration_fee'] ?? 0);
+        if (!$requiresPayment && $fee <= 0) {
+            return true;
         }
 
-        $tmpName = $_FILES[$field]['tmp_name'];
-        if (!is_uploaded_file($tmpName)) {
-            throw new \RuntimeException('Upload de imagem invalido.');
+        foreach (['pix_key', 'pix_key_type', 'pix_holder_name'] as $field) {
+            if (trim((string) ($data[$field] ?? '')) === '') {
+                flash('error', 'Preencha os dados PIX para campeonatos pagos.');
+                return false;
+            }
         }
 
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->file($tmpName);
-        $allowed = [
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
-            'image/webp' => 'webp',
-        ];
-
-        if (!isset($allowed[$mime])) {
-            throw new \RuntimeException('Envie uma imagem JPG, PNG ou WEBP valida.');
+        if ($fee <= 0) {
+            flash('error', 'Informe um valor de inscricao maior que zero para campeonatos pagos.');
+            return false;
         }
 
-        $originalExtension = strtolower(pathinfo($_FILES[$field]['name'] ?? '', PATHINFO_EXTENSION));
-        if (!in_array($originalExtension, ['jpg', 'jpeg', 'png', 'webp'], true)) {
-            throw new \RuntimeException('A extensao da imagem deve ser JPG, JPEG, PNG ou WEBP.');
-        }
-
-        $directory = BASE_PATH . '/public/uploads/campeonatos';
-        if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
-            throw new \RuntimeException('Nao foi possivel preparar a pasta de uploads.');
-        }
-
-        $filename = bin2hex(random_bytes(16)) . '.' . $allowed[$mime];
-        $target = $directory . '/' . $filename;
-
-        if (!move_uploaded_file($tmpName, $target)) {
-            throw new \RuntimeException('Nao foi possivel salvar a imagem enviada.');
-        }
-
-        return 'uploads/campeonatos/' . $filename;
+        return true;
     }
 
-    private function deleteChampionshipImage(?string $path): void
+    private function normalizePaymentData(array &$data): void
     {
-        if (!$path || strpos($path, 'uploads/campeonatos/') !== 0) {
+        if (!empty($data['requires_payment'])) {
             return;
         }
 
-        $directory = realpath(BASE_PATH . '/public/uploads/campeonatos');
-        $file = realpath(BASE_PATH . '/public/' . $path);
-        if ($directory && $file && strpos($file, $directory) === 0 && is_file($file)) {
-            unlink($file);
+        $data['registration_fee'] = 0;
+        $data['pix_key'] = '';
+        $data['pix_key_type'] = '';
+        $data['pix_holder_name'] = '';
+        $data['pix_instructions'] = '';
+    }
+
+    private function downloadUpload(string $path): void
+    {
+        $base = realpath(BASE_PATH . '/uploads');
+        $file = realpath(BASE_PATH . '/' . $path);
+        if (!$base || !$file || !str_starts_with($file, $base) || !is_file($file)) {
+            http_response_code(404);
+            exit('Arquivo nao encontrado.');
         }
-    }
 
-    private function sanitizeWhatsapp(string $value): string
-    {
-        $digits = preg_replace('/\D+/', '', $value) ?? '';
-        if (strlen($digits) > 11 && substr($digits, 0, 2) === '55') {
-            $digits = substr($digits, 2);
-        }
-
-        return $digits;
-    }
-
-    private function isValidWhatsapp(string $value): bool
-    {
-        return (bool) preg_match('/^[1-9]{2}9?\d{8}$/', $value);
-    }
-
-    private function isAdmin(): bool
-    {
-        return (Auth::user()['role'] ?? '') === 'admin';
-    }
-
-    private function ensureOrganizerActive(): void
-    {
-        if (!$this->isAdmin() && (new User())->isSuspendedOrganizer(Auth::user()['id'])) {
-            http_response_code(403);
-            $this->view('errors/403', ['title' => 'Organizador suspenso']);
-            exit;
-        }
+        header('Content-Type: ' . (mime_content_type($file) ?: 'application/octet-stream'));
+        header('Content-Disposition: inline; filename="' . basename($file) . '"');
+        readfile($file);
+        exit;
     }
 }

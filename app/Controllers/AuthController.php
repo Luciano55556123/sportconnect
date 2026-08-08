@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
-use App\Core\Security;
 use App\Models\Sport;
 use App\Models\User;
 
@@ -18,17 +17,11 @@ class AuthController extends Controller
     public function login(): void
     {
         verify_csrf();
-        Security::rateLimit('login', 5, 300);
         $user = (new User())->findByEmail($_POST['email'] ?? '');
         if (!$user || !password_verify($_POST['password'] ?? '', $user['password'])) {
-            error_log('login_failed email_hash=' . hash('sha256', strtolower(trim($_POST['email'] ?? ''))) . ' ip=' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
             flash('error', 'Email ou senha invalidos.');
             $this->redirect('/login');
         }
-        if (password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
-            (new User())->updatePasswordHash((int) $user['id'], password_hash($_POST['password'], PASSWORD_DEFAULT));
-        }
-        error_log('login_success user=' . (int) $user['id']);
         Auth::login($user);
         $this->redirect($user['role'] === 'organizer' ? '/organizador' : ($user['role'] === 'admin' ? '/admin' : '/atleta'));
     }
@@ -41,11 +34,6 @@ class AuthController extends Controller
     public function register(): void
     {
         verify_csrf();
-        Security::rateLimit('register', 3, 600);
-        if (strlen((string) ($_POST['password'] ?? '')) < 8 || !filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL) || trim($_POST['name'] ?? '') === '') {
-            flash('error', 'Informe nome, email valido e senha com pelo menos 8 caracteres.');
-            $this->redirect('/cadastro');
-        }
         $userModel = new User();
         if ($userModel->findByEmail($_POST['email'] ?? '')) {
             flash('error', 'Este email ja esta cadastrado.');

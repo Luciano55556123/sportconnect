@@ -6,7 +6,6 @@ class User extends Model
 {
     public function findByEmail(string $email): ?array
     {
-        $email = strtolower(trim($email));
         $stmt = $this->db->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
         $stmt->execute([$email]);
         return $stmt->fetch() ?: null;
@@ -23,26 +22,19 @@ class User extends Model
     {
         $stmt = $this->db->prepare(
             'INSERT INTO users (name, email, password, role, phone, city, birth_date, preferred_price_max)
-             VALUES (:name, :email, :password, :role, :phone, :city, :birth_date, :preferred_price_max)
-             RETURNING id'
+             VALUES (:name, :email, :password, :role, :phone, :city, :birth_date, :preferred_price_max)'
         );
         $stmt->execute([
             'name' => $data['name'],
-            'email' => strtolower(trim($data['email'])),
+            'email' => $data['email'],
             'password' => password_hash($data['password'], PASSWORD_DEFAULT),
-            'role' => in_array($data['role'] ?? 'athlete', ['athlete'], true) ? $data['role'] : 'athlete',
+            'role' => 'athlete',
             'phone' => $data['phone'] ?? null,
             'city' => $data['city'] ?? null,
             'birth_date' => $data['birth_date'] ?: null,
             'preferred_price_max' => $data['preferred_price_max'] ?: null,
         ]);
-        return (int) $stmt->fetchColumn();
-    }
-
-    public function updatePasswordHash(int $id, string $hash): void
-    {
-        $stmt = $this->db->prepare('UPDATE users SET password = ? WHERE id = ?');
-        $stmt->execute([$hash, $id]);
+        return (int) $this->db->lastInsertId();
     }
 
     public function updateProfile(int $id, array $data): void
@@ -84,12 +76,5 @@ class User extends Model
             return $stmt->fetchAll();
         }
         return $this->db->query('SELECT * FROM users ORDER BY created_at DESC')->fetchAll();
-    }
-
-    public function isSuspendedOrganizer(int $userId): bool
-    {
-        $stmt = $this->db->prepare('SELECT COUNT(*) FROM users WHERE id = ? AND role = ? AND suspended_at IS NOT NULL');
-        $stmt->execute([$userId, 'organizer']);
-        return (int) $stmt->fetchColumn() > 0;
     }
 }

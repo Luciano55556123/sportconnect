@@ -2,8 +2,6 @@
 
 namespace App\Core;
 
-use App\Models\User;
-
 class Controller
 {
     protected array $config;
@@ -34,20 +32,26 @@ class Controller
             $this->redirect('/login');
         }
 
-        $freshUser = (new User())->find((int) Auth::user()['id']);
-        if (!$freshUser) {
-            Auth::logout();
-            session_start();
-            flash('error', 'Entre novamente para continuar.');
-            $this->redirect('/login');
-        }
-        Auth::refresh($freshUser);
-
-        if ($role !== null && Auth::user()['role'] !== $role && Auth::user()['role'] !== 'admin') {
-            error_log('access_denied required=' . $role . ' user=' . Auth::user()['id']);
+        if ($role !== null && !$this->userHasRole($role)) {
             http_response_code(403);
             $this->view('errors/403', ['title' => 'Acesso negado']);
             exit;
         }
+    }
+
+    private function userHasRole(string $requiredRole): bool
+    {
+        $role = Auth::user()['role'] ?? '';
+        if ($role === 'admin') {
+            return true;
+        }
+
+        $aliases = [
+            'athlete' => ['athlete', 'atleta'],
+            'organizer' => ['organizer', 'organizador'],
+            'admin' => ['admin'],
+        ];
+
+        return in_array($role, $aliases[$requiredRole] ?? [$requiredRole], true);
     }
 }

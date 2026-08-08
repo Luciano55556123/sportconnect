@@ -4,12 +4,8 @@ namespace App\Models;
 
 class Sport extends Model
 {
-    public function all(?int $limit = null): array
+    public function all(): array
     {
-        $sql = 'SELECT * FROM sports ORDER BY name';
-        if ($limit !== null) {
-            $sql .= ' LIMIT ' . max(1, min(100, $limit));
-        }
-        return $this->db->query($sql)->fetchAll();
+        return $this->db->query('SELECT * FROM sports ORDER BY name')->fetchAll();
     }
 }

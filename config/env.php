@@ -1,42 +1,33 @@
 <?php
 
-declare(strict_types=1);
+function carregarEnv(string $caminho): void
+{
+    if (!is_file($caminho)) {
+        return;
+    }
 
-$envPath = dirname(__DIR__) . '/.env';
+    $linhas = file($caminho, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-if (!is_file($envPath) || !is_readable($envPath)) {
-    return;
+    foreach ($linhas as $linha) {
+        $linha = trim($linha);
+
+        if ($linha === '' || str_starts_with($linha, '#')) {
+            continue;
+        }
+
+        [$chave, $valor] = array_pad(explode('=', $linha, 2), 2, '');
+
+        $chave = trim($chave);
+        $valor = trim($valor);
+        $valor = trim($valor, "\"'");
+
+        if ($chave !== '') {
+            $_ENV[$chave] = $valor;
+            putenv($chave . '=' . $valor);
+        }
+    }
 }
 
-$lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-foreach ($lines as $line) {
-    $line = trim($line);
-
-    if ($line === '' || str_starts_with($line, '#')) {
-        continue;
-    }
-
-    $separator = strpos($line, '=');
-    if ($separator === false) {
-        continue;
-    }
-
-    $key = trim(substr($line, 0, $separator));
-    $value = trim(substr($line, $separator + 1));
-
-    if ($key === '') {
-        continue;
-    }
-
-    if (
-        strlen($value) >= 2
-        && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))
-    ) {
-        $value = substr($value, 1, -1);
-    }
-
-    putenv($key . '=' . $value);
-    $_ENV[$key] = $value;
-    $_SERVER[$key] = $value;
-}
+$basePath = dirname(__DIR__);
+carregarEnv($basePath . '/.env');
+carregarEnv($basePath . '/.env/.env');

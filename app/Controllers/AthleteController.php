@@ -9,8 +9,10 @@ use App\Models\Notification;
 use App\Models\OrganizerRequest;
 use App\Models\Recommendation;
 use App\Models\Registration;
+use App\Models\RegistrationPayment;
 use App\Models\Sport;
 use App\Models\User;
+use App\Services\RegistrationEmailService;
 
 class AthleteController extends Controller
 {
@@ -58,6 +60,48 @@ class AthleteController extends Controller
         ]);
     }
 
+    public function uploadReceipt(string $id): void
+    {
+        $this->requireAuth('athlete');
+        verify_csrf();
+        $paymentModel = new RegistrationPayment();
+        $payment = $paymentModel->findForAthlete((int) $id, Auth::user()['id']);
+        if (!$payment) {
+            flash('error', 'Pagamento nao encontrado para esta inscricao.');
+            $this->redirect('/atleta/historico');
+        }
+
+        $path = $this->uploadReceiptFile('receipt_file');
+        if ($path === null) {
+            $this->redirect('/atleta/historico');
+        }
+
+        if ($paymentModel->submitReceipt((int) $id, Auth::user()['id'], $path)) {
+            $registration = (new Registration())->findDetails((int) $id);
+            if ($registration) {
+                (new RegistrationEmailService())->receiptToOrganizer($registration);
+                (new Notification())->create((int) $registration['organizer_id'], 'Comprovante recebido em ' . $registration['championship_name'] . '.');
+            }
+            flash('success', 'Comprovante recebido. Pagamento em analise.');
+        } else {
+            flash('error', 'Nao foi possivel enviar o comprovante.');
+        }
+
+        $this->redirect('/atleta/historico');
+    }
+
+    public function receipt(string $id): void
+    {
+        $this->requireAuth('athlete');
+        $payment = (new RegistrationPayment())->findForAthlete((int) $id, Auth::user()['id']);
+        if (!$payment || empty($payment['receipt_path'])) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Comprovante nao encontrado']);
+            return;
+        }
+        $this->downloadUpload($payment['receipt_path']);
+    }
+
     public function recommendations(): void
     {
         $this->requireAuth('athlete');
@@ -66,5 +110,55 @@ class AthleteController extends Controller
             'title' => 'Recomendacoes inteligentes',
             'recommendations' => (new Recommendation())->forUser($user),
         ]);
+    }
+
+    private function uploadReceiptFile(string $field): ?string
+    {
+        if (empty($_FILES[$field]['name'])) {
+            flash('error', 'Selecione um comprovante para enviar.');
+            return null;
+        }
+
+        if (($_FILES[$field]['size'] ?? 0) > 5 * 1024 * 1024) {
+            flash('error', 'O comprovante deve ter no maximo 5 MB.');
+            return null;
+        }
+
+        $allowed = [
+            'pdf' => 'application/pdf',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+        ];
+        $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
+        $mime = mime_content_type($_FILES[$field]['tmp_name']);
+
+        if (!isset($allowed[$ext]) || $allowed[$ext] !== $mime) {
+            flash('error', 'Formato de comprovante invalido.');
+            return null;
+        }
+
+        $name = uniqid('receipt_', true) . '.' . $ext;
+        if (!move_uploaded_file($_FILES[$field]['tmp_name'], BASE_PATH . '/uploads/' . $name)) {
+            flash('error', 'Nao foi possivel salvar o comprovante.');
+            return null;
+        }
+
+        return 'uploads/' . $name;
+    }
+
+    private function downloadUpload(string $path): void
+    {
+        $base = realpath(BASE_PATH . '/uploads');
+        $file = realpath(BASE_PATH . '/' . $path);
+        if (!$base || !$file || !str_starts_with($file, $base) || !is_file($file)) {
+            http_response_code(404);
+            exit('Arquivo nao encontrado.');
+        }
+
+        header('Content-Type: ' . (mime_content_type($file) ?: 'application/octet-stream'));
+        header('Content-Disposition: inline; filename="' . basename($file) . '"');
+        readfile($file);
+        exit;
     }
 }

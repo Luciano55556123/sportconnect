@@ -11,24 +11,11 @@ class HomeController extends Controller
     public function index(): void
     {
         $championship = new Championship();
-        $sportModel = new Sport();
         $this->view('home/index', [
             'title' => 'Campeonatos esportivos regionais',
-            'sports' => $sportModel->all(),
-            'categorySports' => $sportModel->all(24),
+            'sports' => (new Sport())->all(),
             'featured' => $championship->featured(),
-            'openRegistrations' => $championship->search(['registrations_open' => 1], 6),
             'mostViewed' => $championship->mostViewed(),
         ]);
-    }
-
-    public function privacy(): void
-    {
-        $this->view('home/privacy', ['title' => 'Politica de privacidade']);
-    }
-
-    public function terms(): void
-    {
-        $this->view('home/terms', ['title' => 'Termos de uso']);
     }
 }
