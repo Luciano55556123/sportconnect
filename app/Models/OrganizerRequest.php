@@ -100,6 +100,16 @@ class OrganizerRequest extends Model
         return $this->byStatus('pending');
     }
 
+    public function pendingCount(): int
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM organizer_requests WHERE status = 'pending'"
+        );
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
     public function all(): array
     {
         $stmt = $this->db->query(

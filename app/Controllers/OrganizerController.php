@@ -21,6 +21,7 @@ class OrganizerController extends Controller
             'title' => 'Painel do organizador',
             'stats' => (new Registration())->statsForOrganizer(Auth::user()['id']),
             'championships' => (new Championship())->byOrganizer(Auth::user()['id']),
+            'notifications' => (new Notification())->forUser(Auth::user()['id']),
         ]);
     }
 

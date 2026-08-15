@@ -23,6 +23,14 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
                 <?php if ($currentUser): ?>
                     <?php $panelPath = in_array($currentUser['role'], ['organizer', 'organizador'], true) ? 'organizador' : ($currentUser['role'] === 'admin' ? 'admin' : 'atleta'); ?>
                     <li class="nav-item"><a class="nav-link" href="<?= url('/' . $panelPath) ?>">Painel</a></li>
+                    <?php if ($currentUser['role'] === 'admin'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?= url('/admin/solicitacoes-organizador') ?>">
+                                Solicitacoes de organizador
+                                <?php if (($adminPendingOrganizerRequests ?? 0) > 0): ?><span class="badge text-bg-warning ms-1"><?= (int) $adminPendingOrganizerRequests ?></span><?php endif; ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <li class="nav-item"><a class="btn btn-sm btn-light" href="<?= url('/logout') ?>">Sair</a></li>
                 <?php else: ?>
                     <li class="nav-item"><a class="nav-link" href="<?= url('/login') ?>">Entrar</a></li>

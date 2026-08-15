@@ -2,6 +2,9 @@
 
 namespace App\Core;
 
+use App\Models\OrganizerRequest;
+use PDOException;
+
 class Controller
 {
     protected array $config;
@@ -16,6 +19,14 @@ class Controller
         extract($data, EXTR_SKIP);
         $config = $this->config;
         $currentUser = Auth::user();
+        $adminPendingOrganizerRequests = 0;
+        if ($currentUser && ($currentUser['role'] ?? '') === 'admin') {
+            try {
+                $adminPendingOrganizerRequests = (new OrganizerRequest())->pendingCount();
+            } catch (PDOException $exception) {
+                error_log('Erro ao contar solicitacoes de organizador pendentes: ' . $exception->getMessage());
+            }
+        }
         require BASE_PATH . '/app/Views/layouts/main.php';
     }
 

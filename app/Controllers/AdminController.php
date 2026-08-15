@@ -2,8 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Core\Auth;
 use App\Core\Controller;
 use App\Models\Championship;
+use App\Models\Notification;
 use App\Models\OrganizerRequest;
 use App\Models\Sport;
 use App\Models\User;
@@ -13,12 +15,15 @@ class AdminController extends Controller
     public function dashboard(): void
     {
         $this->requireAuth('admin');
+        $organizerRequestModel = new OrganizerRequest();
         $this->view('admin/dashboard', [
             'title' => 'Painel administrativo',
             'users' => (new User())->all(),
             'championships' => (new Championship())->search([], 500),
             'sports' => (new Sport())->all(),
-            'organizerRequests' => (new OrganizerRequest())->pending(),
+            'organizerRequests' => $organizerRequestModel->pending(),
+            'pendingOrganizerRequestsCount' => $organizerRequestModel->pendingCount(),
+            'notifications' => (new Notification())->forUser((int) Auth::user()['id']),
         ]);
     }
 

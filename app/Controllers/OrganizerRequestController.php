@@ -4,9 +4,11 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Models\Notification;
 use App\Models\OrganizerRequest;
 use App\Models\User;
 use PDOException;
+use Throwable;
 
 class OrganizerRequestController extends Controller
 {
@@ -76,6 +78,8 @@ class OrganizerRequestController extends Controller
             $this->redirect('/atleta');
         }
 
+        $this->notifyAdminsAboutNewRequest($user, $createdId);
+
         flash('success', 'Solicitacao enviada para analise.');
         $this->redirect('/atleta');
     }
@@ -85,8 +89,11 @@ class OrganizerRequestController extends Controller
         $this->requireAuth('admin');
         verify_csrf();
 
+        $requestModel = new OrganizerRequest();
+        $request = $requestModel->findWithUser((int) $id);
+
         try {
-            $approved = (new OrganizerRequest())->approve((int) $id, Auth::user()['id']);
+            $approved = $requestModel->approve((int) $id, Auth::user()['id']);
         } catch (PDOException $exception) {
             error_log('Erro ao aprovar solicitacao de organizador: ' . $exception->getMessage());
             flash('error', 'Nao foi possivel aprovar a solicitacao. Tente novamente.');
@@ -94,6 +101,15 @@ class OrganizerRequestController extends Controller
         }
 
         if ($approved) {
+            if ($request) {
+                $this->notifyApplicant(
+                    (int) $request['user_id'],
+                    'Sua solicitacao para se tornar organizador foi aprovada.',
+                    'Solicitacao aprovada',
+                    '/organizador',
+                    'organizer_request_approved'
+                );
+            }
             flash('success', 'Solicitacao aprovada. O usuario ja pode acessar o painel do organizador.');
         } else {
             flash('error', 'Solicitacao pendente nao encontrada.');
@@ -113,8 +129,11 @@ class OrganizerRequestController extends Controller
             $this->redirect('/admin/solicitacoes-organizador/' . $id);
         }
 
+        $requestModel = new OrganizerRequest();
+        $request = $requestModel->findWithUser((int) $id);
+
         try {
-            $rejected = (new OrganizerRequest())->reject((int) $id, $reason, Auth::user()['id']);
+            $rejected = $requestModel->reject((int) $id, $reason, Auth::user()['id']);
         } catch (PDOException $exception) {
             error_log('Erro ao rejeitar solicitacao de organizador: ' . $exception->getMessage());
             flash('error', 'Nao foi possivel rejeitar a solicitacao. Tente novamente.');
@@ -122,6 +141,19 @@ class OrganizerRequestController extends Controller
         }
 
         if ($rejected) {
+            if ($request) {
+                $message = 'Sua solicitacao para se tornar organizador foi rejeitada.';
+                if ($reason !== '') {
+                    $message .= ' Motivo: ' . $reason;
+                }
+                $this->notifyApplicant(
+                    (int) $request['user_id'],
+                    $message,
+                    'Solicitacao rejeitada',
+                    '/atleta',
+                    'organizer_request_rejected'
+                );
+            }
             flash('success', 'Solicitacao rejeitada.');
         } else {
             flash('error', 'Solicitacao pendente nao encontrada.');
@@ -175,5 +207,28 @@ class OrganizerRequestController extends Controller
         }
 
         return ['values' => $values, 'errors' => $errors];
+    }
+
+    private function notifyAdminsAboutNewRequest(array $user, int $requestId): void
+    {
+        try {
+            (new Notification())->createForAdmins(
+                ($user['name'] ?? 'Um usuario') . ' solicitou permissao para se tornar organizador.',
+                'Nova solicitacao de organizador',
+                '/admin/solicitacoes-organizador/' . $requestId,
+                'organizer_request'
+            );
+        } catch (Throwable $exception) {
+            error_log('Erro ao notificar admins sobre solicitacao de organizador: ' . $exception->getMessage());
+        }
+    }
+
+    private function notifyApplicant(int $userId, string $message, string $title, string $link, string $type): void
+    {
+        try {
+            (new Notification())->create($userId, $message, $title, $link, $type);
+        } catch (Throwable $exception) {
+            error_log('Erro ao notificar usuario sobre solicitacao de organizador: ' . $exception->getMessage());
+        }
     }
 }

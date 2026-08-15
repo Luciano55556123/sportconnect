@@ -77,4 +77,12 @@ class User extends Model
         }
         return $this->db->query('SELECT * FROM users ORDER BY created_at DESC')->fetchAll();
     }
+
+    public function admins(): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE role = 'admin' ORDER BY name");
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
 }
