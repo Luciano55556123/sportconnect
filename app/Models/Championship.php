@@ -88,10 +88,10 @@ class Championship extends Model
         $sql = 'INSERT INTO championships
             (organizer_id, sport_id, name, city, location, map_link, event_date, event_time, registration_fee,
              prize, max_participants, description, rules_file, category, modality, status, image,
-             whatsapp_contato, email_contato, requires_payment, pix_key, pix_key_type, pix_holder_name, pix_instructions)
+             whatsapp_contato, email_contato, requires_payment, pix_key, pix_key_type, pix_holder_name, pix_receiver_city, pix_instructions)
              VALUES (:organizer_id, :sport_id, :name, :city, :location, :map_link, :event_date, :event_time,
              :registration_fee, :prize, :max_participants, :description, :rules_file, :category, :modality, :status, :image,
-             :whatsapp_contato, :email_contato, :requires_payment, :pix_key, :pix_key_type, :pix_holder_name, :pix_instructions)';
+             :whatsapp_contato, :email_contato, :requires_payment, :pix_key, :pix_key_type, :pix_holder_name, :pix_receiver_city, :pix_instructions)';
         if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
             $sql .= ' RETURNING id';
         }
@@ -113,7 +113,7 @@ class Championship extends Model
             prize=:prize, max_participants=:max_participants, description=:description, rules_file=:rules_file,
             category=:category, modality=:modality, status=:status, image=:image, email_contato=:email_contato,
             whatsapp_contato=:whatsapp_contato, requires_payment=:requires_payment, pix_key=:pix_key, pix_key_type=:pix_key_type,
-            pix_holder_name=:pix_holder_name, pix_instructions=:pix_instructions
+            pix_holder_name=:pix_holder_name, pix_receiver_city=:pix_receiver_city, pix_instructions=:pix_instructions
             WHERE id=:id AND organizer_id=:organizer_id'
         );
         $stmt->execute($payload);
@@ -176,6 +176,7 @@ class Championship extends Model
             'pix_key' => ($data['pix_key'] ?? '') ?: null,
             'pix_key_type' => ($data['pix_key_type'] ?? '') ?: null,
             'pix_holder_name' => ($data['pix_holder_name'] ?? '') ?: null,
+            'pix_receiver_city' => ($data['pix_receiver_city'] ?? '') ?: null,
             'pix_instructions' => ($data['pix_instructions'] ?? '') ?: null,
         ];
     }

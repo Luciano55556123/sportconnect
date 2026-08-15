@@ -42,20 +42,29 @@
                                 <a class="btn btn-sm btn-outline-secondary mb-2" target="_blank" href="<?= url('/atleta/inscricoes/' . $r['id'] . '/comprovante') ?>">Visualizar comprovante</a>
                             <?php endif; ?>
                             <div class="collapse" id="pix-<?= (int) $r['id'] ?>">
-                                <div class="border rounded p-3 mt-2">
+                                <div class="pix-payment mt-2">
+                                    <h2>Finalize sua inscricao</h2>
                                     <p class="mb-1"><strong><?= e($r['championship_name']) ?></strong></p>
                                     <p class="mb-1">Status: <?= e($labels[$paymentStatus] ?? $paymentStatus) ?></p>
-                                    <p class="mb-1">Valor: R$ <?= number_format((float) ($r['payment_amount'] ?? $r['registration_fee']), 2, ',', '.') ?></p>
-                                    <p class="mb-1">Chave PIX: <code id="pix-key-<?= (int) $r['id'] ?>"><?= e($r['pix_key'] ?? '') ?></code></p>
+                                    <p class="pix-amount">Valor: R$ <?= number_format((float) ($r['payment_amount'] ?? $r['registration_fee']), 2, ',', '.') ?></p>
+                                    <?php if (!empty($r['pix_qr']) && !empty($r['pix_payload'])): ?>
+                                        <img class="pix-qr" src="<?= e($r['pix_qr']) ?>" alt="QR Code PIX">
+                                        <p class="text-muted mb-2">Escaneie o QR Code com o aplicativo do seu banco.</p>
+                                        <button class="btn btn-sm btn-outline-primary js-copy-pix mb-2" type="button" data-pix="<?= e($r['pix_payload']) ?>">Copiar codigo PIX</button>
+                                    <?php else: ?>
+                                        <div class="alert alert-warning mb-2">Nao foi possivel gerar o QR Code PIX. Fale com o organizador.</div>
+                                    <?php endif; ?>
+                                    <p class="mb-1">Ou utilize a chave PIX: <code><?= e($r['pix_key'] ?? '') ?></code></p>
                                     <p class="mb-1">Tipo: <?= e($r['pix_key_type'] ?? '') ?></p>
-                                    <p class="mb-1">Titular: <?= e($r['pix_holder_name'] ?? '') ?></p>
+                                    <p class="mb-1">Recebedor: <?= e($r['pix_holder_name'] ?? '') ?></p>
                                     <?php if (!empty($r['pix_instructions'])): ?><p class="mb-2"><?= e($r['pix_instructions']) ?></p><?php endif; ?>
-                                    <button class="btn btn-sm btn-outline-primary mb-2" type="button" onclick="navigator.clipboard.writeText(document.getElementById('pix-key-<?= (int) $r['id'] ?>').innerText)">Copiar chave PIX</button>
+                                    <h3>Ja realizou o pagamento?</h3>
                                     <form method="post" enctype="multipart/form-data" action="<?= url('/atleta/inscricoes/' . $r['id'] . '/comprovante') ?>" class="d-flex flex-column gap-2">
                                         <?= csrf_field() ?>
                                         <input class="form-control form-control-sm" type="file" name="receipt_file" accept=".jpg,.jpeg,.png,.pdf" required>
                                         <button class="btn btn-sm btn-primary">Enviar comprovante</button>
                                     </form>
+                                    <?php if (!empty($r['receipt_path'])): ?><p class="text-muted mt-2 mb-0">Comprovante enviado. Aguardando analise do organizador.</p><?php endif; ?>
                                 </div>
                             </div>
                         <?php endif; ?>

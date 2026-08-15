@@ -9,6 +9,8 @@ use App\Models\Notification;
 use App\Models\Registration;
 use App\Models\RegistrationPayment;
 use App\Models\Sport;
+use App\Services\PixService;
+use App\Services\QrCodeService;
 use App\Services\RegistrationEmailService;
 use PDOException;
 
@@ -35,6 +37,7 @@ class OrganizerController extends Controller
                 'email_contato' => Auth::user()['email'] ?? '',
                 'whatsapp_contato' => '',
             ],
+            'pixPreview' => null,
         ]);
     }
 
@@ -63,10 +66,12 @@ class OrganizerController extends Controller
     public function edit(string $id): void
     {
         $this->requireAuth('organizer');
+        $championship = (new Championship())->find((int) $id);
         $this->view('organizer/form', [
             'title' => 'Editar campeonato',
             'sports' => (new Sport())->all(),
-            'championship' => (new Championship())->find((int) $id),
+            'championship' => $championship,
+            'pixPreview' => $this->pixPreview($championship),
         ]);
     }
 
@@ -201,6 +206,7 @@ class OrganizerController extends Controller
             'pix_key' => 120,
             'pix_key_type' => 30,
             'pix_holder_name' => 160,
+            'pix_receiver_city' => 60,
         ];
         foreach ($limits as $field => $limit) {
             if ($this->textLength(trim((string) ($data[$field] ?? ''))) > $limit) {
@@ -215,11 +221,17 @@ class OrganizerController extends Controller
             return true;
         }
 
-        foreach (['pix_key', 'pix_key_type', 'pix_holder_name'] as $field) {
+        foreach (['pix_key', 'pix_key_type', 'pix_holder_name', 'pix_receiver_city'] as $field) {
             if (trim((string) ($data[$field] ?? '')) === '') {
                 flash('error', 'Preencha os dados PIX para campeonatos pagos.');
                 return false;
             }
+        }
+
+        $pixErrors = (new PixService())->validatePixData($data);
+        if ($pixErrors) {
+            flash('error', $pixErrors[0]);
+            return false;
         }
 
         if ($fee <= 0) {
@@ -260,7 +272,34 @@ class OrganizerController extends Controller
         $data['pix_key'] = '';
         $data['pix_key_type'] = '';
         $data['pix_holder_name'] = '';
+        $data['pix_receiver_city'] = '';
         $data['pix_instructions'] = '';
+    }
+
+    private function pixPreview(?array $championship): ?array
+    {
+        if (!$championship || (empty($championship['requires_payment']) && (float) ($championship['registration_fee'] ?? 0) <= 0)) {
+            return null;
+        }
+
+        try {
+            $payload = (new PixService())->payload([
+                'pix_key' => $championship['pix_key'] ?? '',
+                'pix_key_type' => $championship['pix_key_type'] ?? '',
+                'pix_holder_name' => $championship['pix_holder_name'] ?? '',
+                'pix_receiver_city' => $championship['pix_receiver_city'] ?? $championship['city'] ?? '',
+                'amount' => (float) ($championship['registration_fee'] ?? 0),
+                'txid' => 'CAMP' . (int) ($championship['id'] ?? 0),
+            ]);
+
+            return [
+                'payload' => $payload,
+                'qr' => (new QrCodeService())->dataUri($payload),
+            ];
+        } catch (\Throwable $exception) {
+            error_log('Erro ao gerar previa PIX: ' . $exception->getMessage());
+            return null;
+        }
     }
 
     private function downloadUpload(string $path): void

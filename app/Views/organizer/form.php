@@ -46,7 +46,8 @@
                     <div class="col-md-12 d-flex align-items-center">
                         <label class="form-check mb-0"><input class="form-check-input js-payment-toggle" type="checkbox" name="requires_payment" value="1" <?= !empty($championship['requires_payment']) || (float) ($championship['registration_fee'] ?? 0) > 0 ? 'checked' : '' ?>> Campeonato pago via PIX</label>
                     </div>
-                    <div class="col-md-4"><input class="form-control js-payment-field" type="number" step="0.01" min="0" name="registration_fee" value="<?= e($championship['registration_fee'] ?? '0') ?>" placeholder="Valor da inscricao em R$"></div>
+                    <div class="col-12 js-pix-area"><h3 class="h6 mb-0">Configuracao do pagamento PIX</h3></div>
+                    <div class="col-md-4 js-pix-area"><input class="form-control js-payment-field" type="number" step="0.01" min="0" name="registration_fee" value="<?= e($championship['registration_fee'] ?? '0') ?>" placeholder="Valor da inscricao em R$"></div>
                     <div class="col-md-4 js-pix-area">
                         <select class="form-select js-payment-field" name="pix_key_type">
                             <option value="">Tipo da chave PIX</option>
@@ -56,8 +57,18 @@
                         </select>
                     </div>
                     <div class="col-md-4 js-pix-area"><input class="form-control js-payment-field" name="pix_key" value="<?= e($championship['pix_key'] ?? '') ?>" placeholder="Chave PIX"></div>
-                    <div class="col-md-6 js-pix-area"><input class="form-control js-payment-field" name="pix_holder_name" value="<?= e($championship['pix_holder_name'] ?? '') ?>" placeholder="Nome do titular"></div>
-                    <div class="col-md-6 js-pix-area"><textarea class="form-control js-payment-field" rows="2" name="pix_instructions" placeholder="Instrucoes de pagamento"><?= e($championship['pix_instructions'] ?? '') ?></textarea></div>
+                    <div class="col-md-6 js-pix-area"><input class="form-control js-payment-field" name="pix_holder_name" value="<?= e($championship['pix_holder_name'] ?? '') ?>" placeholder="Nome do recebedor"></div>
+                    <div class="col-md-6 js-pix-area"><input class="form-control js-payment-field" name="pix_receiver_city" value="<?= e($championship['pix_receiver_city'] ?? $championship['city'] ?? '') ?>" placeholder="Cidade do recebedor"></div>
+                    <div class="col-md-7 js-pix-area"><textarea class="form-control js-payment-field" rows="4" name="pix_instructions" placeholder="Instrucoes de pagamento"><?= e($championship['pix_instructions'] ?? '') ?></textarea></div>
+                    <?php if (!empty($pixPreview)): ?>
+                        <div class="col-md-5 js-pix-area">
+                            <div class="pix-preview">
+                                <strong>Previa do QR Code PIX</strong>
+                                <img src="<?= e($pixPreview['qr']) ?>" alt="QR Code PIX">
+                                <button class="btn btn-sm btn-outline-primary js-copy-pix" type="button" data-pix="<?= e($pixPreview['payload']) ?>">Copiar codigo PIX</button>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

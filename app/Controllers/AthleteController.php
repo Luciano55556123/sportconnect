@@ -12,6 +12,8 @@ use App\Models\Registration;
 use App\Models\RegistrationPayment;
 use App\Models\Sport;
 use App\Models\User;
+use App\Services\PixService;
+use App\Services\QrCodeService;
 use App\Services\RegistrationEmailService;
 
 class AthleteController extends Controller
@@ -54,9 +56,11 @@ class AthleteController extends Controller
     public function history(): void
     {
         $this->requireAuth('athlete');
+        $registrations = (new Registration())->byUser(Auth::user()['id']);
+        $this->attachPixCodes($registrations);
         $this->view('athlete/history', [
             'title' => 'Historico',
-            'registrations' => (new Registration())->byUser(Auth::user()['id']),
+            'registrations' => $registrations,
         ]);
     }
 
@@ -145,6 +149,36 @@ class AthleteController extends Controller
         }
 
         return 'uploads/' . $name;
+    }
+
+    private function attachPixCodes(array &$registrations): void
+    {
+        $pix = new PixService();
+        $qr = new QrCodeService();
+
+        foreach ($registrations as &$registration) {
+            $paid = !empty($registration['requires_payment']) || (float) ($registration['registration_fee'] ?? 0) > 0;
+            if (!$paid || empty($registration['pix_key'])) {
+                continue;
+            }
+
+            try {
+                $payload = $pix->payload([
+                    'pix_key' => $registration['pix_key'],
+                    'pix_key_type' => $registration['pix_key_type'] ?? '',
+                    'pix_holder_name' => $registration['pix_holder_name'] ?? '',
+                    'pix_receiver_city' => $registration['pix_receiver_city'] ?? $registration['city'] ?? '',
+                    'amount' => (float) ($registration['payment_amount'] ?? $registration['registration_fee']),
+                    'txid' => 'REG' . (int) $registration['id'],
+                ]);
+
+                $registration['pix_payload'] = $payload;
+                $registration['pix_qr'] = $qr->dataUri($payload);
+            } catch (\Throwable $exception) {
+                error_log('Erro ao gerar QR Code PIX da inscricao ' . ($registration['id'] ?? '') . ': ' . $exception->getMessage());
+            }
+        }
+        unset($registration);
     }
 
     private function downloadUpload(string $path): void

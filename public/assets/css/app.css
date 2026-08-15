@@ -267,6 +267,42 @@ body {
     color: var(--muted);
 }
 
+.pix-payment, .pix-preview {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 1rem;
+}
+
+.pix-payment h2, .pix-payment h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.pix-payment h3 {
+    margin-top: 1rem;
+}
+
+.pix-amount {
+    font-weight: 800;
+    color: #0a7f4f;
+}
+
+.pix-qr, .pix-preview img {
+    display: block;
+    width: min(220px, 100%);
+    height: auto;
+    margin: .75rem auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: .5rem;
+}
+
+.pix-preview {
+    text-align: center;
+}
+
 .calendar-item {
     display: grid;
     grid-template-columns: 72px 1fr;

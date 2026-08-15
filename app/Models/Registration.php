@@ -35,7 +35,7 @@ class Registration extends Model
     {
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
-             c.pix_key, c.pix_key_type, c.pix_holder_name, c.pix_instructions, c.email_contato,
+             c.pix_key, c.pix_key_type, c.pix_holder_name, c.pix_receiver_city, c.pix_instructions, c.email_contato,
              c.modality, c.category AS championship_category, c.organizer_id, s.name AS sport_name,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
              p.rejection_reason AS review_notes
@@ -53,7 +53,7 @@ class Registration extends Model
     {
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.event_date, c.status AS championship_status,
-             c.registration_fee, c.requires_payment, c.pix_key, c.pix_key_type, c.pix_holder_name,
+             c.registration_fee, c.requires_payment, c.pix_key, c.pix_key_type, c.pix_holder_name, c.pix_receiver_city,
              c.pix_instructions, s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
              p.receipt_file AS receipt_path, p.rejection_reason AS review_notes
              FROM registrations r

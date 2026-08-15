@@ -32,4 +32,26 @@ document.addEventListener('DOMContentLoaded', () => {
         paymentToggle.addEventListener('change', syncPaymentFields);
         syncPaymentFields();
     }
+
+    document.querySelectorAll('.js-copy-pix').forEach((button) => {
+        button.addEventListener('click', async () => {
+            const code = button.dataset.pix || '';
+            if (!code) {
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(code);
+                button.textContent = 'Codigo PIX copiado';
+            } catch (error) {
+                const input = document.createElement('textarea');
+                input.value = code;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                input.remove();
+                button.textContent = 'Codigo PIX copiado';
+            }
+        });
+    });
 });
