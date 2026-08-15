@@ -28,6 +28,7 @@ return [
     ['POST', '/atleta/inscricoes/{id}/comprovante', [AthleteController::class, 'uploadReceipt']],
     ['GET', '/atleta/inscricoes/{id}/comprovante', [AthleteController::class, 'receipt']],
     ['GET', '/atleta/recomendacoes', [AthleteController::class, 'recommendations']],
+    ['GET', '/organizador/solicitar', [OrganizerRequestController::class, 'create']],
     ['POST', '/organizador/solicitar', [OrganizerRequestController::class, 'store']],
     ['GET', '/organizador', [OrganizerController::class, 'dashboard']],
     ['GET', '/organizador/campeonatos/novo', [OrganizerController::class, 'create']],

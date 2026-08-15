@@ -27,7 +27,7 @@ class AdminController extends Controller
         $this->requireAuth('admin');
         $this->view('admin/organizer_requests', [
             'title' => 'Solicitacoes de Organizador',
-            'requests' => (new OrganizerRequest())->pending(),
+            'requests' => (new OrganizerRequest())->all(),
         ]);
     }
 

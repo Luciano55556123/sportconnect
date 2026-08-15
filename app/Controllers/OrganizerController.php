@@ -10,6 +10,7 @@ use App\Models\Registration;
 use App\Models\RegistrationPayment;
 use App\Models\Sport;
 use App\Services\RegistrationEmailService;
+use PDOException;
 
 class OrganizerController extends Controller
 {
@@ -46,7 +47,13 @@ class OrganizerController extends Controller
         }
         $_POST['image'] = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']) ?? 'assets/img/default-event.svg';
         $_POST['rules_file'] = $this->upload('rules_file', ['pdf']);
-        $id = (new Championship())->create($_POST, Auth::user()['id']);
+        try {
+            $id = (new Championship())->create($_POST, Auth::user()['id']);
+        } catch (PDOException $exception) {
+            $this->logDatabaseError($exception, 'create championship');
+            flash('error', 'Nao foi possivel salvar o campeonato. Revise os dados informados e tente novamente.');
+            $this->redirect('/organizador/campeonatos/novo');
+        }
         (new Notification())->createForFavoriteSport((int) $_POST['sport_id'], 'Novo campeonato disponivel: ' . $_POST['name']);
         flash('success', 'Campeonato cadastrado e atletas interessados notificados.');
         $this->redirect('/campeonatos/' . $id);
@@ -72,7 +79,13 @@ class OrganizerController extends Controller
         }
         $_POST['image'] = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']) ?? ($_POST['current_image'] ?? 'assets/img/default-event.svg');
         $_POST['rules_file'] = $this->upload('rules_file', ['pdf']) ?? ($_POST['current_rules_file'] ?? null);
-        (new Championship())->update((int) $id, $_POST, Auth::user()['id']);
+        try {
+            (new Championship())->update((int) $id, $_POST, Auth::user()['id']);
+        } catch (PDOException $exception) {
+            $this->logDatabaseError($exception, 'update championship');
+            flash('error', 'Nao foi possivel atualizar o campeonato. Revise os dados informados e tente novamente.');
+            $this->redirect('/organizador/campeonatos/' . $id . '/editar');
+        }
         flash('success', 'Campeonato atualizado.');
         $this->redirect('/organizador');
     }
@@ -178,6 +191,23 @@ class OrganizerController extends Controller
             return false;
         }
 
+        $limits = [
+            'name' => 160,
+            'city' => 100,
+            'location' => 180,
+            'prize' => 180,
+            'category' => 100,
+            'pix_key' => 120,
+            'pix_key_type' => 30,
+            'pix_holder_name' => 160,
+        ];
+        foreach ($limits as $field => $limit) {
+            if ($this->textLength(trim((string) ($data[$field] ?? ''))) > $limit) {
+                flash('error', 'O campo ' . $field . ' excede o limite de ' . $limit . ' caracteres.');
+                return false;
+            }
+        }
+
         $requiresPayment = !empty($data['requires_payment']);
         $fee = (float) ($data['registration_fee'] ?? 0);
         if (!$requiresPayment && $fee <= 0) {
@@ -197,6 +227,26 @@ class OrganizerController extends Controller
         }
 
         return true;
+    }
+
+    private function logDatabaseError(PDOException $exception, string $context): void
+    {
+        $dir = BASE_PATH . '/storage/logs';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        $message = '[' . date('Y-m-d H:i:s') . '] ' . $context . ': SQLSTATE ' . $exception->getCode() . ' - ' . $exception->getMessage() . PHP_EOL;
+        error_log($message, 3, $dir . '/app.log');
+    }
+
+    private function textLength(string $value): int
+    {
+        if (function_exists('mb_strlen')) {
+            return mb_strlen($value);
+        }
+
+        return strlen($value);
     }
 
     private function normalizePaymentData(array &$data): void

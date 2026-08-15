@@ -16,14 +16,29 @@
         <div class="col-lg-8">
             <?php if (($user['role'] ?? '') !== 'organizer'): ?>
                 <div class="panel mb-4">
-                    <div class="section-heading mb-2"><h2>Minha Solicitacao de Organizador</h2><?php if (!$organizerRequest || $organizerRequest['status'] !== 'pending'): ?><form method="post" action="<?= url('/organizador/solicitar') ?>"><?= csrf_field() ?><button class="btn btn-primary">Solicitar perfil de Organizador</button></form><?php endif; ?></div>
+                    <?php
+                    $statusLabels = ['pending' => 'Pendente', 'approved' => 'Aprovada', 'rejected' => 'Rejeitada'];
+                    $status = $organizerRequest['status'] ?? '';
+                    $reviewDate = $organizerRequest['reviewed_at'] ?? $organizerRequest['approved_at'] ?? '';
+                    ?>
+                    <div class="section-heading mb-2">
+                        <h2>Minha solicitacao de organizador</h2>
+                        <?php if (!$organizerRequest || $status === 'rejected'): ?><a class="btn btn-primary" href="<?= url('/organizador/solicitar') ?>">Solicitar permissao para organizar</a><?php endif; ?>
+                    </div>
                     <?php if ($organizerRequest): ?>
+                        <?php if ($status === 'pending'): ?>
+                            <p class="note">Sua solicitacao esta em analise.</p>
+                        <?php elseif ($status === 'approved'): ?>
+                            <p class="note">Sua solicitacao foi aprovada. Voce ja possui acesso as ferramentas de organizador.</p>
+                        <?php elseif ($status === 'rejected'): ?>
+                            <p class="note">Sua solicitacao foi rejeitada.</p>
+                        <?php endif; ?>
                         <div class="table-responsive">
                             <table class="table align-middle mb-0">
                                 <tbody>
-                                    <tr><th>Status atual</th><td><?= e($organizerRequest['status']) ?></td></tr>
+                                    <tr><th>Status atual</th><td><?= e($statusLabels[$status] ?? $status) ?></td></tr>
                                     <tr><th>Data da solicitacao</th><td><?= e($organizerRequest['created_at']) ?></td></tr>
-                                    <?php if (!empty($organizerRequest['approved_at'])): ?><tr><th>Data da aprovacao</th><td><?= e($organizerRequest['approved_at']) ?></td></tr><?php endif; ?>
+                                    <?php if (!empty($reviewDate)): ?><tr><th>Data da analise</th><td><?= e($reviewDate) ?></td></tr><?php endif; ?>
                                     <?php if (!empty($organizerRequest['rejection_reason'])): ?><tr><th>Motivo da rejeicao</th><td><?= e($organizerRequest['rejection_reason']) ?></td></tr><?php endif; ?>
                                 </tbody>
                             </table>

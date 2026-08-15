@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
+define('BASE_PATH', dirname(__DIR__));
+
+require_once BASE_PATH . '/config/env.php';
+
+$debug = filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN);
+ini_set('display_errors', $debug ? '1' : '0');
+ini_set('display_startup_errors', $debug ? '1' : '0');
 error_reporting(E_ALL);
 
 session_start();
-
-define('BASE_PATH', dirname(__DIR__));
 
 $composerAutoload = BASE_PATH . '/vendor/autoload.php';
 if (is_file($composerAutoload)) {
