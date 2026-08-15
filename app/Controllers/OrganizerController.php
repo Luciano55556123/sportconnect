@@ -278,7 +278,7 @@ class OrganizerController extends Controller
 
     private function pixPreview(?array $championship): ?array
     {
-        if (!$championship || (empty($championship['requires_payment']) && (float) ($championship['registration_fee'] ?? 0) <= 0)) {
+        if (!$championship || empty($championship['requires_payment']) || (float) ($championship['registration_fee'] ?? 0) <= 0) {
             return null;
         }
 

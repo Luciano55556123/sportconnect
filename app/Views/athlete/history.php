@@ -21,7 +21,7 @@
             ];
             ?>
             <?php foreach ($registrations as $r): ?>
-                <?php $paid = !empty($r['requires_payment']) || (float) ($r['registration_fee'] ?? 0) > 0; ?>
+                <?php $paid = !empty($r['requires_payment']) && (float) ($r['registration_fee'] ?? 0) > 0; ?>
                 <tr>
                     <td><?= e($r['championship_name']) ?><br><small><?= e($r['sport_name']) ?></small></td>
                     <td><?= e(date('d/m/Y', strtotime($r['event_date']))) ?></td>

@@ -21,7 +21,7 @@
             ];
             ?>
             <?php foreach ($registrations as $r): ?>
-                <?php $paid = !empty($r['requires_payment']) || (float) ($r['registration_fee'] ?? 0) > 0; ?>
+                <?php $paid = !empty($r['requires_payment']) && (float) ($r['registration_fee'] ?? 0) > 0; ?>
                 <tr>
                     <td><?= e($r['championship_name']) ?><br><small>R$ <?= number_format((float) ($r['payment_amount'] ?? $r['registration_fee']), 2, ',', '.') ?></small></td>
                     <td><?= e($r['name']) ?><br><small><?= e($r['email']) ?> | <?= e($r['phone']) ?></small><br><small><?= e($r['team']) ?></small></td>

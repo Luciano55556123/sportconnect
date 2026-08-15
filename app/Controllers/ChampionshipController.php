@@ -12,6 +12,8 @@ use App\Models\Registration;
 use App\Models\RegistrationPayment;
 use App\Models\Sport;
 use App\Services\RegistrationEmailService;
+use App\Services\PixService;
+use Throwable;
 
 class ChampionshipController extends Controller
 {
@@ -46,15 +48,18 @@ class ChampionshipController extends Controller
     {
         $this->requireAuth('athlete');
         verify_csrf();
+        $userId = (int) Auth::user()['id'];
+        $championshipId = (int) $id;
+        $step = 'load championship';
         $championshipModel = new Championship();
-        $championship = $championshipModel->find((int) $id);
+        $championship = $championshipModel->find($championshipId);
         if (!$championship) {
             http_response_code(404);
             $this->view('errors/404', ['title' => 'Campeonato nao encontrado']);
             return;
         }
 
-        if ((new Registration())->existsForUser((int) $id, Auth::user()['id'])) {
+        if ((new Registration())->existsForUser($championshipId, $userId)) {
             flash('error', 'Voce ja esta inscrito neste campeonato.');
             $this->redirect('/campeonatos/' . $id);
         }
@@ -66,16 +71,22 @@ class ChampionshipController extends Controller
         }
 
         $proof = $this->upload('proof_file', ['pdf', 'jpg', 'jpeg', 'png']);
-        $isPaid = !empty($championship['requires_payment']) || (float) ($championship['registration_fee'] ?? 0) > 0;
+        $isPaid = $this->championshipRequiresPayment($championship);
+        if ($isPaid && !$this->championshipHasPixConfiguration($championship)) {
+            flash('error', 'Este campeonato ainda nao possui os dados PIX configurados. Entre em contato com o organizador.');
+            $this->redirect('/campeonatos/' . $id);
+        }
+
         $db = Database::connection();
         $registrationModel = new Registration();
         $paymentModel = new RegistrationPayment();
 
         $db->beginTransaction();
         try {
+            $step = 'create registration';
             $registrationId = $registrationModel->create([
-            'championship_id' => (int) $id,
-            'user_id' => Auth::user()['id'],
+            'championship_id' => $championshipId,
+            'user_id' => $userId,
             'name' => trim((string) ($_POST['name'] ?? '')),
             'phone' => trim((string) ($_POST['phone'] ?? '')),
             'email' => $email,
@@ -88,24 +99,38 @@ class ChampionshipController extends Controller
             'status' => $isPaid ? 'aguardando_pagamento' : 'pendente',
         ]);
             if ($isPaid) {
+                $step = 'create registration payment';
                 $paymentModel->createPending($registrationId, (float) $championship['registration_fee']);
             }
             $db->commit();
-        } catch (\Throwable $exception) {
-            $db->rollBack();
-            throw $exception;
+        } catch (Throwable $exception) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            $this->logRegistrationError($exception, $championshipId, $userId, $step);
+            flash('error', 'Nao foi possivel realizar sua inscricao. Tente novamente.');
+            $this->redirect('/campeonatos/' . $id);
         }
 
-        (new Notification())->create((int) $championship['organizer_id'], 'Nova inscricao recebida em ' . $championship['name'] . '.');
-        $registration = $registrationModel->findDetails($registrationId);
-        if ($registration) {
-            $emails = new RegistrationEmailService();
-            $emails->newRegistrationToOrganizer($registration);
-            $emails->confirmationToAthlete($registration);
+        try {
+            (new Notification())->create((int) $championship['organizer_id'], 'Nova inscricao recebida em ' . $championship['name'] . '.');
+        } catch (Throwable $exception) {
+            $this->logRegistrationError($exception, $championshipId, $userId, 'notify organizer');
+        }
+
+        try {
+            $registration = $registrationModel->findDetails($registrationId);
+            if ($registration) {
+                $emails = new RegistrationEmailService();
+                $emails->newRegistrationToOrganizer($registration);
+                $emails->confirmationToAthlete($registration);
+            }
+        } catch (Throwable $exception) {
+            $this->logRegistrationError($exception, $championshipId, $userId, 'send registration emails');
         }
 
         flash('success', $isPaid ? 'Inscricao realizada. Aguardando pagamento.' : 'Inscricao enviada. Status: pendente.');
-        $this->redirect($isPaid ? '/atleta/historico' : '/campeonatos/' . $id);
+        $this->redirect('/atleta/historico');
     }
 
     public function favorite(string $id): void
@@ -151,5 +176,42 @@ class ChampionshipController extends Controller
         $target = BASE_PATH . '/uploads/' . $name;
         move_uploaded_file($_FILES[$field]['tmp_name'], $target);
         return 'uploads/' . $name;
+    }
+
+    private function championshipRequiresPayment(array $championship): bool
+    {
+        return !empty($championship['requires_payment']) && (float) ($championship['registration_fee'] ?? 0) > 0;
+    }
+
+    private function championshipHasPixConfiguration(array $championship): bool
+    {
+        $data = [
+            'pix_key_type' => $championship['pix_key_type'] ?? '',
+            'pix_key' => $championship['pix_key'] ?? '',
+            'pix_holder_name' => $championship['pix_holder_name'] ?? '',
+            'pix_receiver_city' => $championship['pix_receiver_city'] ?? $championship['city'] ?? '',
+            'registration_fee' => $championship['registration_fee'] ?? 0,
+        ];
+
+        return (new PixService())->validatePixData($data) === [];
+    }
+
+    private function logRegistrationError(Throwable $exception, int $championshipId, int $userId, string $step): void
+    {
+        $dir = BASE_PATH . '/storage/logs';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+
+        $message = '[' . date('Y-m-d H:i:s') . '] registration failed'
+            . ' championship_id=' . $championshipId
+            . ' user_id=' . $userId
+            . ' step=' . $step
+            . ' exception=' . get_class($exception)
+            . ' code=' . $exception->getCode()
+            . ' message=' . $exception->getMessage()
+            . PHP_EOL;
+
+        error_log($message, 3, $dir . '/app.log');
     }
 }

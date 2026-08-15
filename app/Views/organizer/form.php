@@ -44,7 +44,7 @@
                         <input class="form-control" name="whatsapp_contato" value="<?= e($championship['whatsapp_contato'] ?? $championship['organizer_phone'] ?? '') ?>" required placeholder="WhatsApp de contato">
                     </div>
                     <div class="col-md-12 d-flex align-items-center">
-                        <label class="form-check mb-0"><input class="form-check-input js-payment-toggle" type="checkbox" name="requires_payment" value="1" <?= !empty($championship['requires_payment']) || (float) ($championship['registration_fee'] ?? 0) > 0 ? 'checked' : '' ?>> Campeonato pago via PIX</label>
+                        <label class="form-check mb-0"><input class="form-check-input js-payment-toggle" type="checkbox" name="requires_payment" value="1" <?= !empty($championship['requires_payment']) ? 'checked' : '' ?>> Campeonato pago via PIX</label>
                     </div>
                     <div class="col-12 js-pix-area"><h3 class="h6 mb-0">Configuracao do pagamento PIX</h3></div>
                     <div class="col-md-4 js-pix-area"><input class="form-control js-payment-field" type="number" step="0.01" min="0" name="registration_fee" value="<?= e($championship['registration_fee'] ?? '0') ?>" placeholder="Valor da inscricao em R$"></div>

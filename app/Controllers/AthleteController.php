@@ -157,7 +157,7 @@ class AthleteController extends Controller
         $qr = new QrCodeService();
 
         foreach ($registrations as &$registration) {
-            $paid = !empty($registration['requires_payment']) || (float) ($registration['registration_fee'] ?? 0) > 0;
+            $paid = !empty($registration['requires_payment']) && (float) ($registration['registration_fee'] ?? 0) > 0;
             if (!$paid || empty($registration['pix_key'])) {
                 continue;
             }

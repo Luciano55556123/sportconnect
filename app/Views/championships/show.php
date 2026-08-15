@@ -22,7 +22,7 @@
             <div class="col-lg-5">
                 <div class="side-panel">
                     <div class="d-flex justify-content-between align-items-center"><span>Inscricao</span><strong>R$ <?= number_format((float) $championship['registration_fee'], 2, ',', '.') ?></strong></div>
-                    <?php if (!empty($championship['requires_payment']) || (float) ($championship['registration_fee'] ?? 0) > 0): ?>
+                    <?php if (!empty($championship['requires_payment']) && (float) ($championship['registration_fee'] ?? 0) > 0): ?>
                         <div class="alert alert-warning mt-3 mb-0">
                             Pagamento via PIX apos a inscricao. Status inicial: aguardando pagamento.
                         </div>

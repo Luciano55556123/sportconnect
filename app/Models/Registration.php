@@ -4,6 +4,8 @@ namespace App\Models;
 
 class Registration extends Model
 {
+    private ?array $championshipColumns = null;
+
     public function create(array $data): int
     {
         $sql = 'INSERT INTO registrations
@@ -33,9 +35,12 @@ class Registration extends Model
 
     public function findDetails(int $id): ?array
     {
+        $pixReceiverCitySelect = $this->championshipHasColumn('pix_receiver_city')
+            ? 'c.pix_receiver_city'
+            : 'c.city AS pix_receiver_city';
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
-             c.pix_key, c.pix_key_type, c.pix_holder_name, c.pix_receiver_city, c.pix_instructions, c.email_contato,
+             c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ', c.pix_instructions, c.email_contato,
              c.modality, c.category AS championship_category, c.organizer_id, s.name AS sport_name,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
              p.rejection_reason AS review_notes
@@ -51,9 +56,12 @@ class Registration extends Model
 
     public function byUser(int $userId): array
     {
+        $pixReceiverCitySelect = $this->championshipHasColumn('pix_receiver_city')
+            ? 'c.pix_receiver_city'
+            : 'c.city AS pix_receiver_city';
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.event_date, c.status AS championship_status,
-             c.registration_fee, c.requires_payment, c.pix_key, c.pix_key_type, c.pix_holder_name, c.pix_receiver_city,
+             c.registration_fee, c.requires_payment, c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ',
              c.pix_instructions, s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
              p.receipt_file AS receipt_path, p.rejection_reason AS review_notes
              FROM registrations r
@@ -111,5 +119,42 @@ class Registration extends Model
         );
         $stmt->execute([$organizerId]);
         return $stmt->fetch() ?: [];
+    }
+
+    private function championshipHasColumn(string $column): bool
+    {
+        return in_array($column, $this->championshipColumns(), true);
+    }
+
+    private function championshipColumns(): array
+    {
+        if ($this->championshipColumns !== null) {
+            return $this->championshipColumns;
+        }
+
+        $this->championshipColumns = [];
+
+        if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+            $stmt = $this->db->prepare(
+                "SELECT column_name
+                 FROM information_schema.columns
+                 WHERE table_name = 'championships'
+                 AND table_schema = ANY (current_schemas(false))"
+            );
+            $stmt->execute();
+            $this->championshipColumns = array_column($stmt->fetchAll(), 'column_name');
+        }
+
+        if ($this->championshipColumns === []) {
+            $stmt = $this->db->prepare(
+                "SELECT column_name
+                 FROM information_schema.columns
+                 WHERE table_name = 'championships'"
+            );
+            $stmt->execute();
+            $this->championshipColumns = array_column($stmt->fetchAll(), 'column_name');
+        }
+
+        return $this->championshipColumns;
     }
 }
