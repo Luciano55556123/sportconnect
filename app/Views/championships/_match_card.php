@@ -5,24 +5,45 @@ $homeScore = $matchScore($match, 'home');
 $awayScore = $matchScore($match, 'away');
 $matchDate = !empty($match['match_date']) ? date('d/m/Y', strtotime($match['match_date'])) : 'Data a definir';
 $matchTime = !empty($match['match_time']) ? substr((string) $match['match_time'], 0, 5) : '';
+$status = (string) ($match['status'] ?? 'pendente');
+$statusClass = match ($status) {
+    'finalizada', 'completed', 'encerrada' => 'is-done',
+    'em_andamento', 'in_progress' => 'is-live',
+    'agendada', 'scheduled', 'pendente' => 'is-scheduled',
+    default => 'is-neutral',
+};
 ?>
-<article class="match-card-pro">
-    <div class="match-meta">
-        <span><?= e($match['phase'] ?? 'Partida') ?></span>
-        <?php if (!empty($match['group_name'])): ?><span>Grupo <?= e($match['group_name']) ?></span><?php endif; ?>
-        <?php if (!empty($match['round_number'])): ?><span>Rodada <?= (int) $match['round_number'] ?></span><?php endif; ?>
+<article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span><?= e($match['phase'] ?? 'Partida') ?></span>
+            <?php if (!empty($match['round_number'])): ?><strong>Rodada <?= (int) $match['round_number'] ?></strong><?php endif; ?>
+        </div>
+        <span class="sc-match-status <?= e($statusClass) ?>"><?= e($status) ?></span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="<?= e($homeName . ' ' . $homeScore . ' x ' . $awayScore . ' ' . $awayName) ?>">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong><?= e($homeName) ?></strong>
+        </div>
+        <div class="sc-score">
+            <b><?= e($homeScore) ?></b>
+            <span>x</span>
+            <b><?= e($awayScore) ?></b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong><?= e($awayName) ?></strong>
+        </div>
     </div>
-    <div class="scoreboard">
-        <div class="score-team"><strong><?= e($homeName) ?></strong></div>
-        <div class="score-box"><b><?= e($homeScore) ?></b><span>x</span><b><?= e($awayScore) ?></b></div>
-        <div class="score-team text-end"><strong><?= e($awayName) ?></strong></div>
-    </div>
-    <div class="match-footer">
-        <span><i class="fa-solid fa-calendar"></i><?= e($matchDate) ?> <?= e($matchTime) ?></span>
-        <span><i class="fa-solid fa-location-dot"></i><?= e($match['venue'] ?? 'Local a definir') ?><?= !empty($match['court_or_field']) ? ' - ' . e($match['court_or_field']) : '' ?></span>
-        <span class="badge text-bg-light"><?= e($match['status'] ?? 'pendente') ?></span>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i><?= e($matchDate) ?></span>
+        <?php if ($matchTime !== ''): ?><span><i class="fa-solid fa-clock" aria-hidden="true"></i><?= e($matchTime) ?></span><?php endif; ?>
+        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i><?= e($match['venue'] ?? 'Local a definir') ?><?= !empty($match['court_or_field']) ? ' - ' . e($match['court_or_field']) : '' ?></span>
         <?php if (!empty($isOrganizerManage)): ?>
-            <a class="btn btn-sm btn-primary" href="<?= url('/organizador/campeonatos/' . $championship['id'] . '/partidas/' . $match['id'] . '/gerenciar') ?>">Gerenciar partida</a>
+            <a class="btn btn-sm btn-primary sc-match-action" href="<?= url('/organizador/campeonatos/' . $championship['id'] . '/partidas/' . $match['id'] . '/gerenciar') ?>">Gerenciar partida</a>
         <?php endif; ?>
-    </div>
+    </footer>
 </article>
