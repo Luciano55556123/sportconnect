@@ -312,6 +312,77 @@ body {
     text-align: center;
 }
 
+.competition-section h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: .85rem;
+}
+
+.competition-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: .75rem;
+}
+
+.competition-summary > div, .team-grid article, .competition-row {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: .85rem;
+}
+
+.competition-summary strong {
+    display: block;
+    font-size: 1.55rem;
+    color: var(--brand);
+}
+
+.competition-summary span, .team-grid span, .team-grid small, .competition-row span, .competition-row small {
+    display: block;
+    color: var(--muted);
+}
+
+.competition-summary.compact strong {
+    font-size: 1.25rem;
+}
+
+.competition-list, .team-grid {
+    display: grid;
+    gap: .75rem;
+}
+
+.team-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.competition-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: .75rem;
+}
+
+.score-pill {
+    min-width: 74px;
+    text-align: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: .35rem .6rem;
+    font-weight: 900;
+    background: var(--field);
+}
+
+@media (max-width: 640px) {
+    .competition-row {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .score-pill {
+        width: max-content;
+    }
+}
+
 .calendar-item {
     display: grid;
     grid-template-columns: 72px 1fr;

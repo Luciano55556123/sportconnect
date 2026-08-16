@@ -14,7 +14,15 @@
                     <table class="table">
                         <tbody>
                             <?php foreach ($championships as $c): ?>
-                                <tr><td><?= e($c['name']) ?><br><small><?= e($c['sport_name']) ?></small></td><td><?= e($c['status']) ?></td><td><?= (int) $c['registrations_count'] ?> inscritos</td><td><a class="btn btn-sm btn-outline-primary" href="<?= url('/organizador/campeonatos/' . $c['id'] . '/editar') ?>">Editar</a></td></tr>
+                                <tr>
+                                    <td><?= e($c['name']) ?><br><small><?= e($c['sport_name']) ?></small></td>
+                                    <td><?= e($c['status']) ?></td>
+                                    <td><?= (int) $c['registrations_count'] ?> inscritos</td>
+                                    <td class="text-nowrap">
+                                        <a class="btn btn-sm btn-outline-primary" href="<?= url('/organizador/campeonatos/' . $c['id'] . '/gerenciar') ?>">Gerenciar</a>
+                                        <a class="btn btn-sm btn-outline-secondary" href="<?= url('/organizador/campeonatos/' . $c['id'] . '/editar') ?>">Editar</a>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                             <?php if (!$championships): ?><tr><td class="text-muted">Nenhum campeonato cadastrado.</td></tr><?php endif; ?>
                         </tbody>

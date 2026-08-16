@@ -14,10 +14,22 @@ class Championship extends Model
                 WHERE 1 = 1';
         $params = [];
 
-        foreach (['city', 'status', 'modality'] as $field) {
+        foreach (['city', 'modality'] as $field) {
             if (!empty($filters[$field])) {
                 $sql .= " AND c.$field = ?";
                 $params[] = $filters[$field];
+            }
+        }
+        if (!empty($filters['status'])) {
+            if (is_array($filters['status'])) {
+                $statuses = array_values(array_filter($filters['status'], static fn($status) => $status !== ''));
+                if ($statuses) {
+                    $sql .= ' AND c.status IN (' . implode(',', array_fill(0, count($statuses), '?')) . ')';
+                    array_push($params, ...$statuses);
+                }
+            } else {
+                $sql .= ' AND c.status = ?';
+                $params[] = $filters['status'];
             }
         }
         if (!empty($filters['q'])) {
@@ -50,7 +62,7 @@ class Championship extends Model
 
     public function featured(): array
     {
-        return $this->search(['status' => 'ativo'], 6);
+        return $this->search(['status' => $this->visibleStatuses()], 6);
     }
 
     public function mostViewed(): array
@@ -133,11 +145,15 @@ class Championship extends Model
 
     public function calendar(): array
     {
-        return $this->db->query(
+        $statuses = $this->visibleStatuses();
+        $stmt = $this->db->prepare(
             'SELECT c.id, c.name, c.city, c.event_date, s.name AS sport_name
              FROM championships c JOIN sports s ON s.id = c.sport_id
-             WHERE c.status = \'ativo\' ORDER BY c.event_date ASC'
-        )->fetchAll();
+             WHERE c.status IN (' . implode(',', array_fill(0, count($statuses), '?')) . ')
+             ORDER BY c.event_date ASC'
+        );
+        $stmt->execute($statuses);
+        return $stmt->fetchAll();
     }
 
     public function reviews(int $championshipId): array
@@ -179,5 +195,39 @@ class Championship extends Model
             'pix_receiver_city' => ($data['pix_receiver_city'] ?? '') ?: null,
             'pix_instructions' => ($data['pix_instructions'] ?? '') ?: null,
         ];
+    }
+
+    private function visibleStatuses(): array
+    {
+        $desired = ['ativo', 'registration_open', 'in_progress', 'em_andamento'];
+
+        if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) !== 'pgsql') {
+            return $desired;
+        }
+
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT e.enumlabel
+                 FROM pg_type t
+                 JOIN pg_enum e ON e.enumtypid = t.oid
+                 JOIN pg_attribute a ON a.atttypid = t.oid
+                 JOIN pg_class c ON c.oid = a.attrelid
+                 JOIN pg_namespace n ON n.oid = c.relnamespace
+                 WHERE n.nspname = 'public'
+                 AND c.relname = 'championships'
+                 AND a.attname = 'status'
+                 ORDER BY e.enumsortorder"
+            );
+            $stmt->execute();
+            $allowed = array_column($stmt->fetchAll(), 'enumlabel');
+            if ($allowed) {
+                $visible = array_values(array_intersect($desired, $allowed));
+                return $visible ?: ['ativo'];
+            }
+        } catch (\Throwable $exception) {
+            error_log('Erro ao detectar status validos de campeonatos: ' . $exception->getMessage());
+        }
+
+        return ['ativo', 'registration_open'];
     }
 }

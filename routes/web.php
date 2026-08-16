@@ -33,6 +33,7 @@ return [
     ['GET', '/organizador', [OrganizerController::class, 'dashboard']],
     ['GET', '/organizador/campeonatos/novo', [OrganizerController::class, 'create']],
     ['POST', '/organizador/campeonatos', [OrganizerController::class, 'store']],
+    ['GET', '/organizador/campeonatos/{id}/gerenciar', [OrganizerController::class, 'manage']],
     ['GET', '/organizador/campeonatos/{id}/editar', [OrganizerController::class, 'edit']],
     ['POST', '/organizador/campeonatos/{id}', [OrganizerController::class, 'update']],
     ['GET', '/organizador/inscricoes', [OrganizerController::class, 'registrations']],

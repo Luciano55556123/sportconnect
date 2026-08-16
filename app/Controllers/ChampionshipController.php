@@ -6,6 +6,7 @@ use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Models\Championship;
+use App\Models\CompetitionManagement;
 use App\Models\Favorite;
 use App\Models\Notification;
 use App\Models\Registration;
@@ -37,10 +38,13 @@ class ChampionshipController extends Controller
             return;
         }
         $model->incrementViews((int) $id);
+        $competition = new CompetitionManagement();
         $this->view('championships/show', [
             'title' => $championship['name'],
             'championship' => $championship,
             'reviews' => $model->reviews((int) $id),
+            'competitionData' => $competition->overview((int) $id),
+            'competitionCounts' => $competition->counts((int) $id),
         ]);
     }
 

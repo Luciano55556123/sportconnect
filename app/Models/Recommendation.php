@@ -6,7 +6,9 @@ class Recommendation extends Model
 {
     public function forUser(array $user): array
     {
-        $championships = (new Championship())->search(['status' => 'ativo'], 100);
+        $championships = (new Championship())->search([
+            'status' => ['ativo', 'registration_open'],
+        ], 100);
         $favoriteSports = (new User())->favoriteSportIds((int) $user['id']);
         $history = (new Registration())->byUser((int) $user['id']);
         $favoriteEvents = (new Favorite())->byUser((int) $user['id']);

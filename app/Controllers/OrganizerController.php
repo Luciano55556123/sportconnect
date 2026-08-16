@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Models\Championship;
+use App\Models\CompetitionManagement;
 use App\Models\Notification;
 use App\Models\Registration;
 use App\Models\RegistrationPayment;
@@ -72,6 +73,35 @@ class OrganizerController extends Controller
             'sports' => (new Sport())->all(),
             'championship' => $championship,
             'pixPreview' => $this->pixPreview($championship),
+        ]);
+    }
+
+    public function manage(string $id): void
+    {
+        $this->requireAuth('organizer');
+        $championship = (new Championship())->find((int) $id);
+
+        if (!$championship) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Campeonato nao encontrado']);
+            return;
+        }
+
+        $user = Auth::user();
+        $isOwner = (int) ($championship['organizer_id'] ?? 0) === (int) ($user['id'] ?? 0);
+        $isAdmin = ($user['role'] ?? '') === 'admin';
+        if (!$isOwner && !$isAdmin) {
+            http_response_code(403);
+            $this->view('errors/403', ['title' => 'Acesso negado']);
+            return;
+        }
+
+        $competition = new CompetitionManagement();
+        $this->view('organizer/competition_manage', [
+            'title' => 'Gestao do campeonato',
+            'championship' => $championship,
+            'competitionData' => $competition->overview((int) $id),
+            'competitionCounts' => $competition->counts((int) $id),
         ]);
     }
 

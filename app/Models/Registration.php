@@ -108,8 +108,8 @@ class Registration extends Model
         $stmt = $this->db->prepare(
             'SELECT
              COUNT(DISTINCT c.id) AS total_championships,
-             SUM(CASE WHEN c.status = \'ativo\' THEN 1 ELSE 0 END) AS active_events,
-             SUM(CASE WHEN c.status = \'encerrado\' THEN 1 ELSE 0 END) AS closed_events,
+             COUNT(DISTINCT CASE WHEN c.status IN (\'ativo\', \'registration_open\') THEN c.id END) AS active_events,
+             COUNT(DISTINCT CASE WHEN c.status = \'encerrado\' THEN c.id END) AS closed_events,
              COUNT(r.id) AS total_registrations,
              SUM(CASE WHEN r.status IN (\'aprovado\', \'confirmada\') THEN 1 ELSE 0 END) AS confirmed,
              COALESCE(SUM(CASE WHEN r.status IN (\'aprovado\', \'confirmada\') THEN c.registration_fee ELSE 0 END), 0) AS revenue

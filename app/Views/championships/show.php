@@ -16,6 +16,8 @@
                 <?php if ($championship['map_link']): ?><a class="btn btn-outline-secondary mt-3" target="_blank" href="<?= e($championship['map_link']) ?>"><i class="fa-solid fa-map-location-dot"></i> Abrir mapa</a><?php endif; ?>
                 <?php if ($championship['rules_file']): ?><a class="btn btn-outline-secondary mt-3" href="<?= url($championship['rules_file']) ?>"><i class="fa-solid fa-file-pdf"></i> Regulamento</a><?php endif; ?>
                 <hr>
+                <?php require BASE_PATH . '/app/Views/championships/_competition.php'; ?>
+                <hr>
                 <h2>Comentarios e avaliacoes</h2>
                 <?php foreach ($reviews as $review): ?><div class="comment"><strong><?= e($review['name']) ?></strong><span><?= str_repeat('★', (int) $review['rating']) ?></span><p><?= e($review['comment']) ?></p></div><?php endforeach; ?>
             </div>
