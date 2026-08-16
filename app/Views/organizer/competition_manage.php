@@ -25,7 +25,7 @@ $matchesTotal = (int) (($competitionData['summary']['counts']['matches'] ?? 0));
         </div>
         <div class="sc-manage-actions" aria-label="Acoes do campeonato">
             <a class="btn btn-warning" href="<?= url('/organizador/campeonatos/' . $championship['id'] . '/editar') ?>"><i class="fa-solid fa-pen"></i> Editar campeonato</a>
-            <a class="btn btn-light" href="#comp-matches" data-bs-toggle="pill" data-bs-target="#comp-matches"><i class="fa-solid fa-calendar-days"></i> Gerenciar partidas</a>
+            <button class="btn btn-light" type="button" data-tab-target="matches"><i class="fa-solid fa-calendar-days"></i> Gerenciar partidas</button>
             <a class="btn btn-light" href="<?= url('/organizador/inscricoes') ?>"><i class="fa-solid fa-id-card"></i> Ver inscricoes</a>
             <a class="btn btn-outline-light" href="<?= url('/campeonatos/' . $championship['id']) ?>"><i class="fa-solid fa-eye"></i> Pagina publica</a>
             <button class="btn btn-outline-light" type="button" onclick="navigator.share ? navigator.share({title: document.title, url: '<?= url('/campeonatos/' . $championship['id']) ?>'}) : navigator.clipboard.writeText('<?= url('/campeonatos/' . $championship['id']) ?>')"><i class="fa-solid fa-share-nodes"></i> Compartilhar</button>

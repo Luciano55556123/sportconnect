@@ -19,6 +19,7 @@ $matchSide = static fn(array $row, string $side): string => (string) (($row[$sid
 $matchScore = static fn(array $row, string $side): string => is_numeric($row[$side . '_score'] ?? null) ? (string) (int) $row[$side . '_score'] : '-';
 $topScorers = array_values(array_filter($statistics, static fn(array $row): bool => (int) ($row['goals'] ?? 0) > 0));
 $cards = array_values(array_filter($statistics, static fn(array $row): bool => ((int) ($row['yellow_cards'] ?? 0) + (int) ($row['red_cards'] ?? 0)) > 0));
+$goalEvents = array_values(array_filter($events, static fn(array $row): bool => str_contains((string) ($row['event_type'] ?? ''), 'gol') || str_contains((string) ($row['event_type'] ?? ''), 'penalti')));
 $nextMatches = array_values(array_filter($matches, static fn(array $row): bool => !in_array((string) ($row['status'] ?? ''), ['finalizada', 'completed', 'encerrada'], true)));
 $recentMatches = array_slice(array_reverse($matches), 0, 4);
 $groupedRounds = [];
@@ -58,19 +59,20 @@ $statCards = [
             </div>
         </section>
 
-        <nav class="sc-tabs" aria-label="Secoes do campeonato">
-            <button class="active" data-bs-toggle="pill" data-bs-target="#comp-overview" type="button"><i class="fa-solid fa-chart-line"></i>Visao geral</button>
-            <button data-bs-toggle="pill" data-bs-target="#comp-teams" type="button"><i class="fa-solid fa-shield-halved"></i>Equipes</button>
-            <button data-bs-toggle="pill" data-bs-target="#comp-matches" type="button"><i class="fa-solid fa-calendar-days"></i>Partidas</button>
-            <button data-bs-toggle="pill" data-bs-target="#comp-standings" type="button"><i class="fa-solid fa-ranking-star"></i>Classificacao</button>
-            <button data-bs-toggle="pill" data-bs-target="#comp-bracket" type="button"><i class="fa-solid fa-sitemap"></i>Chaveamento</button>
-            <button data-bs-toggle="pill" data-bs-target="#comp-stats" type="button"><i class="fa-solid fa-chart-simple"></i>Estatisticas</button>
-            <button data-bs-toggle="pill" data-bs-target="#comp-events" type="button"><i class="fa-solid fa-bolt"></i>Eventos</button>
-            <button data-bs-toggle="pill" data-bs-target="#comp-history" type="button"><i class="fa-solid fa-clock-rotate-left"></i>Historico</button>
+        <nav class="sc-tabs" role="tablist" aria-label="Secoes do campeonato">
+            <button class="active" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab-target="overview" type="button"><i class="fa-solid fa-chart-line"></i>Visao geral</button>
+            <button id="tab-teams" role="tab" aria-controls="panel-teams" aria-selected="false" data-tab-target="teams" type="button"><i class="fa-solid fa-shield-halved"></i>Equipes</button>
+            <button id="tab-matches" role="tab" aria-controls="panel-matches" aria-selected="false" data-tab-target="matches" type="button"><i class="fa-solid fa-calendar-days"></i>Partidas</button>
+            <button id="tab-standings" role="tab" aria-controls="panel-standings" aria-selected="false" data-tab-target="standings" type="button"><i class="fa-solid fa-ranking-star"></i>Classificacao</button>
+            <button id="tab-bracket" role="tab" aria-controls="panel-bracket" aria-selected="false" data-tab-target="bracket" type="button"><i class="fa-solid fa-sitemap"></i>Rodadas</button>
+            <button id="tab-stats" role="tab" aria-controls="panel-stats" aria-selected="false" data-tab-target="stats" type="button"><i class="fa-solid fa-chart-simple"></i>Estatisticas</button>
+            <button id="tab-events" role="tab" aria-controls="panel-events" aria-selected="false" data-tab-target="events" type="button"><i class="fa-solid fa-bolt"></i>Eventos</button>
+            <button id="tab-goals" role="tab" aria-controls="panel-goals" aria-selected="false" data-tab-target="goals" type="button"><i class="fa-solid fa-futbol"></i>Gols</button>
+            <button id="tab-history" role="tab" aria-controls="panel-history" aria-selected="false" data-tab-target="history" type="button"><i class="fa-solid fa-clock-rotate-left"></i>Historico</button>
         </nav>
 
-        <div class="tab-content sc-tab-content">
-            <section class="tab-pane fade show active" id="comp-overview">
+        <div class="sc-tab-content">
+            <section class="sc-tab-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview">
                 <div class="sc-dashboard-grid">
                     <article class="sc-panel sc-panel-wide">
                         <div class="sc-panel-head"><div><span class="sc-eyebrow">Agenda</span><h3>Proximas e ultimas partidas</h3></div><span><?= count($matches) ?> jogos</span></div>
@@ -103,30 +105,32 @@ $statCards = [
                 </div>
             </section>
 
-            <section class="tab-pane fade" id="comp-teams">
+            <section class="sc-tab-panel" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" data-tab-panel="teams" hidden>
                 <div class="sc-team-grid">
                     <?php foreach ($teams as $team): ?>
                         <?php require BASE_PATH . '/app/Views/championships/_team_card.php'; ?>
                     <?php endforeach; ?>
+                    <?php if (!$teams): ?><article class="sc-empty-state"><i class="fa-solid fa-shield-halved"></i><strong>Nenhum dado disponivel nesta secao.</strong></article><?php endif; ?>
                 </div>
             </section>
 
-            <section class="tab-pane fade" id="comp-matches">
+            <section class="sc-tab-panel" id="panel-matches" role="tabpanel" aria-labelledby="tab-matches" data-tab-panel="matches" hidden>
                 <div class="sc-match-list">
                     <?php foreach ($matches as $match): ?>
                         <?php require BASE_PATH . '/app/Views/championships/_match_card.php'; ?>
                     <?php endforeach; ?>
+                    <?php if (!$matches): ?><article class="sc-empty-state"><i class="fa-solid fa-calendar-days"></i><strong>Nenhum dado disponivel nesta secao.</strong></article><?php endif; ?>
                 </div>
             </section>
 
-            <section class="tab-pane fade" id="comp-standings">
+            <section class="sc-tab-panel" id="panel-standings" role="tabpanel" aria-labelledby="tab-standings" data-tab-panel="standings" hidden>
                 <article class="sc-panel">
                     <div class="sc-panel-head"><div><span class="sc-eyebrow">Tabela</span><h3>Classificacao</h3></div></div>
-                    <?php require BASE_PATH . '/app/Views/championships/_standings_table.php'; ?>
+                    <?php if ($standings): ?><?php require BASE_PATH . '/app/Views/championships/_standings_table.php'; ?><?php else: ?><article class="sc-empty-state"><i class="fa-solid fa-ranking-star"></i><strong>Nenhum dado disponivel nesta secao.</strong></article><?php endif; ?>
                 </article>
             </section>
 
-            <section class="tab-pane fade" id="comp-bracket">
+            <section class="sc-tab-panel" id="panel-bracket" role="tabpanel" aria-labelledby="tab-bracket" data-tab-panel="bracket" hidden>
                 <?php if (count($groupedRounds) > 1): ?>
                     <div class="sc-bracket">
                         <?php foreach ($groupedRounds as $round => $roundMatches): ?>
@@ -147,14 +151,14 @@ $statCards = [
                 <?php endif; ?>
             </section>
 
-            <section class="tab-pane fade" id="comp-stats">
+            <section class="sc-tab-panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" data-tab-panel="stats" hidden>
                 <div class="sc-dashboard-grid">
-                    <article class="sc-panel"><div class="sc-panel-head"><h3>Artilheiro</h3></div><?php foreach (array_slice($topScorers, 0, 8) as $stat): ?><div class="sc-rank-row"><div><strong><?= e($stat['athlete_name'] ?? '') ?></strong><small><?= e($stat['team_name'] ?? '') ?></small></div><b><?= (int) ($stat['goals'] ?? 0) ?> gols</b></div><?php endforeach; ?></article>
+                    <article class="sc-panel"><div class="sc-panel-head"><h3>Artilheiro</h3></div><?php foreach (array_slice($topScorers, 0, 8) as $stat): ?><div class="sc-rank-row"><div><strong><?= e($stat['athlete_name'] ?? '') ?></strong><small><?= e($stat['team_name'] ?? '') ?></small></div><b><?= (int) ($stat['goals'] ?? 0) ?> gols</b></div><?php endforeach; ?><?php if (!$topScorers): ?><p class="text-muted mb-0">Nenhum dado disponivel nesta secao.</p><?php endif; ?></article>
                     <article class="sc-panel"><div class="sc-panel-head"><h3>Cartoes</h3></div><?php foreach (array_slice($cards, 0, 8) as $stat): ?><div class="sc-rank-row"><div><strong><?= e($stat['athlete_name'] ?? '') ?></strong><small><?= e($stat['team_name'] ?? '') ?></small></div><b><?= (int) ($stat['yellow_cards'] ?? 0) ?>A / <?= (int) ($stat['red_cards'] ?? 0) ?>V</b></div><?php endforeach; ?><?php if (!$cards): ?><p class="text-muted mb-0">Nenhum cartao registrado.</p><?php endif; ?></article>
                 </div>
             </section>
 
-            <section class="tab-pane fade" id="comp-events">
+            <section class="sc-tab-panel" id="panel-events" role="tabpanel" aria-labelledby="tab-events" data-tab-panel="events" hidden>
                 <div class="sc-filter-row" aria-label="Filtros visuais de eventos"><span>Todos</span><span>Gols</span><span>Cartoes</span><span>Observacoes</span></div>
                 <div class="sc-timeline">
                     <?php foreach ($events as $event): ?>
@@ -165,10 +169,24 @@ $statCards = [
                             <div><strong><?= e($eventType) ?></strong><p><?= e($event['athlete_name'] ?? '') ?> <?= !empty($event['team_name']) ? '- ' . e($event['team_name']) : '' ?></p><?php if (!empty($event['description'])): ?><small><?= e($event['description']) ?></small><?php endif; ?></div>
                         </article>
                     <?php endforeach; ?>
+                    <?php if (!$events): ?><article class="sc-empty-state"><i class="fa-solid fa-bolt"></i><strong>Nenhum dado disponivel nesta secao.</strong></article><?php endif; ?>
                 </div>
             </section>
 
-            <section class="tab-pane fade" id="comp-history">
+            <section class="sc-tab-panel" id="panel-goals" role="tabpanel" aria-labelledby="tab-goals" data-tab-panel="goals" hidden>
+                <div class="sc-timeline">
+                    <?php foreach ($goalEvents as $event): ?>
+                        <article class="sc-timeline-item">
+                            <span class="sc-time"><?= (int) ($event['minute'] ?? 0) ?>'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong><?= e($event['event_type'] ?? 'Gol') ?></strong><p><?= e($event['athlete_name'] ?? '') ?> <?= !empty($event['team_name']) ? '- ' . e($event['team_name']) : '' ?></p><?php if (!empty($event['description'])): ?><small><?= e($event['description']) ?></small><?php endif; ?></div>
+                        </article>
+                    <?php endforeach; ?>
+                    <?php if (!$goalEvents): ?><article class="sc-empty-state"><i class="fa-solid fa-futbol"></i><strong>Nenhum dado disponivel nesta secao.</strong></article><?php endif; ?>
+                </div>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-history" role="tabpanel" aria-labelledby="tab-history" data-tab-panel="history" hidden>
                 <div class="sc-dashboard-grid">
                     <article class="sc-panel"><div class="sc-panel-head"><h3>Relatorios</h3></div><?php foreach ($reports as $report): ?><p class="sc-log"><strong><?= e($report['referee_name'] ?? 'Relatorio') ?></strong><span><?= e($report['summary'] ?? '') ?></span></p><?php endforeach; ?><?php if (!$reports): ?><p class="text-muted mb-0">Nenhum relatorio registrado.</p><?php endif; ?></article>
                     <article class="sc-panel"><div class="sc-panel-head"><h3>Operacoes</h3></div><p class="sc-log"><strong>Sets registrados</strong><span><?= count($sets) ?> registros</span></p><p class="sc-log"><strong>Reagendamentos</strong><span><?= count($reschedules) ?> registros</span></p><p class="sc-log"><strong>Partidas concluidas</strong><span><?= (int) ($counts['completed_matches'] ?? 0) ?> registros</span></p></article>

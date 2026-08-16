@@ -267,6 +267,14 @@
     margin-top: .25rem;
 }
 
+.sc-tab-panel[hidden] {
+    display: none;
+}
+
+.sc-tab-panel.active {
+    display: block;
+}
+
 .sc-dashboard-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

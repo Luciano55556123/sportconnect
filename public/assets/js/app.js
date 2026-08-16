@@ -79,4 +79,96 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    document.querySelectorAll('.sc-board').forEach((board) => {
+        const tabs = Array.from(board.querySelectorAll('[data-tab-target]'));
+        const panels = Array.from(board.querySelectorAll('[data-tab-panel]'));
+        const hashAliases = {
+            'visao-geral': 'overview',
+            'equipes': 'teams',
+            'partidas': 'matches',
+            'classificacao': 'standings',
+            'rodadas': 'bracket',
+            'chaveamento': 'bracket',
+            'estatisticas': 'stats',
+            'eventos': 'events',
+            'gols': 'goals',
+            'historico': 'history'
+        };
+        if (!tabs.length || !panels.length) {
+            return;
+        }
+
+        const activateTab = (target, updateHash = true) => {
+            const panel = panels.find((item) => item.getAttribute('data-tab-panel') === target);
+            if (!panel) {
+                return false;
+            }
+
+            tabs.forEach((tab) => {
+                const active = tab.getAttribute('data-tab-target') === target;
+                tab.classList.toggle('active', active);
+                tab.setAttribute('aria-selected', active ? 'true' : 'false');
+                tab.setAttribute('tabindex', active ? '0' : '-1');
+            });
+
+            panels.forEach((item) => {
+                const active = item === panel;
+                item.classList.toggle('active', active);
+                item.hidden = !active;
+            });
+
+            if (updateHash) {
+                history.replaceState(null, '', `#${target}`);
+            }
+
+            return true;
+        };
+
+        tabs.forEach((tab, index) => {
+            tab.setAttribute('tabindex', tab.classList.contains('active') ? '0' : '-1');
+            tab.addEventListener('click', () => {
+                activateTab(tab.getAttribute('data-tab-target') || '');
+            });
+            tab.addEventListener('keydown', (event) => {
+                if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) {
+                    return;
+                }
+                event.preventDefault();
+                let nextIndex = index;
+                if (event.key === 'ArrowRight') {
+                    nextIndex = (index + 1) % tabs.length;
+                } else if (event.key === 'ArrowLeft') {
+                    nextIndex = (index - 1 + tabs.length) % tabs.length;
+                } else if (event.key === 'Home') {
+                    nextIndex = 0;
+                } else if (event.key === 'End') {
+                    nextIndex = tabs.length - 1;
+                }
+                tabs[nextIndex].focus();
+                activateTab(tabs[nextIndex].getAttribute('data-tab-target') || '');
+            });
+        });
+
+        const hashValue = window.location.hash.replace('#', '');
+        const hashTarget = hashAliases[hashValue] || hashValue;
+        if (hashTarget) {
+            activateTab(hashTarget, false);
+        }
+    });
+
+    document.querySelectorAll('[data-tab-target]').forEach((externalTrigger) => {
+        if (externalTrigger.closest('.sc-board')) {
+            return;
+        }
+        externalTrigger.addEventListener('click', () => {
+            const target = externalTrigger.getAttribute('data-tab-target') || '';
+            const escapedTarget = window.CSS && CSS.escape ? CSS.escape(target) : target.replace(/"/g, '\\"');
+            const tab = document.querySelector(`.sc-board [data-tab-target="${escapedTarget}"]`);
+            if (tab instanceof HTMLElement) {
+                tab.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+                tab.click();
+            }
+        });
+    });
 });
