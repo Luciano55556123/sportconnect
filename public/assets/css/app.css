@@ -290,13 +290,15 @@ body {
 
 .pix-qr, .pix-preview img {
     display: block;
-    width: min(220px, 100%);
+    width: min(350px, 100%);
+    max-width: 100%;
     height: auto;
+    aspect-ratio: 1 / 1;
     margin: .75rem auto;
-    border: 1px solid var(--line);
-    border-radius: 8px;
     background: #fff;
-    padding: .5rem;
+    border: 0;
+    border-radius: 0;
+    object-fit: contain;
 }
 
 .pix-code-field {

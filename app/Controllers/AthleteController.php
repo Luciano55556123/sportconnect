@@ -177,8 +177,16 @@ class AthleteController extends Controller
                     continue;
                 }
 
-                $registration['pix_payload'] = $payload;
-                $registration['pix_qr'] = $qr->dataUri($payload);
+                $displayPayload = $payload;
+                $qrPayload = $payload;
+
+                if (!hash_equals($displayPayload, $qrPayload)) {
+                    error_log('Payload PIX divergente entre exibicao e QR Code na inscricao ' . ($registration['id'] ?? ''));
+                    continue;
+                }
+
+                $registration['pix_payload'] = $displayPayload;
+                $registration['pix_qr'] = $qr->dataUri($qrPayload);
             } catch (\Throwable $exception) {
                 error_log('Erro ao gerar QR Code PIX da inscricao ' . ($registration['id'] ?? '') . ': ' . $exception->getMessage());
             }
