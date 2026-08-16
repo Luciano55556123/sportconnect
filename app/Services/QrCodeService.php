@@ -131,14 +131,17 @@ class QrCodeService
 
     private function reedSolomonRemainder(array $data, int $degree): array
     {
-        $generator = [1];
+        $generator = array_fill(0, $degree, 0);
+        $generator[$degree - 1] = 1;
+        $root = 1;
         for ($i = 0; $i < $degree; $i++) {
-            $next = array_fill(0, count($generator) + 1, 0);
-            foreach ($generator as $j => $coef) {
-                $next[$j] ^= $this->gfMultiply($coef, 1);
-                $next[$j + 1] ^= $this->gfMultiply($coef, $this->gfPow(2, $i));
+            for ($j = 0; $j < $degree; $j++) {
+                $generator[$j] = $this->gfMultiply($generator[$j], $root);
+                if ($j + 1 < $degree) {
+                    $generator[$j] ^= $generator[$j + 1];
+                }
             }
-            $generator = $next;
+            $root = $this->gfMultiply($root, 2);
         }
 
         $result = array_fill(0, $degree, 0);
@@ -147,7 +150,7 @@ class QrCodeService
             array_shift($result);
             $result[] = 0;
             for ($i = 0; $i < $degree; $i++) {
-                $result[$i] ^= $this->gfMultiply($generator[$i + 1], $factor);
+                $result[$i] ^= $this->gfMultiply($generator[$i], $factor);
             }
         }
 

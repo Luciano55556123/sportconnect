@@ -35,22 +35,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.js-copy-pix').forEach((button) => {
         button.addEventListener('click', async () => {
-            const code = button.dataset.pix || '';
+            const originalText = button.dataset.originalText || button.textContent;
+            button.dataset.originalText = originalText;
+            const code = (button.getAttribute('data-pix-code') || '').trim();
             if (!code) {
+                button.textContent = 'Nao foi possivel gerar o codigo PIX.';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-outline-danger');
                 return;
             }
 
+            const showFeedback = (message, success) => {
+                button.textContent = message;
+                button.classList.toggle('btn-outline-primary', success);
+                button.classList.toggle('btn-outline-danger', !success);
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.add('btn-outline-primary');
+                    button.classList.remove('btn-outline-danger');
+                }, 2500);
+            };
+
             try {
-                await navigator.clipboard.writeText(code);
-                button.textContent = 'Codigo PIX copiado';
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(code);
+                } else {
+                    const input = document.createElement('textarea');
+                    input.value = code;
+                    input.setAttribute('readonly', '');
+                    input.style.position = 'fixed';
+                    input.style.left = '-9999px';
+                    document.body.appendChild(input);
+                    input.select();
+                    const copied = document.execCommand('copy');
+                    input.remove();
+                    if (!copied) {
+                        throw new Error('Fallback copy failed');
+                    }
+                }
+                showFeedback('PIX copiado!', true);
             } catch (error) {
-                const input = document.createElement('textarea');
-                input.value = code;
-                document.body.appendChild(input);
-                input.select();
-                document.execCommand('copy');
-                input.remove();
-                button.textContent = 'Codigo PIX copiado';
+                showFeedback('Nao foi possivel copiar.', false);
             }
         });
     });

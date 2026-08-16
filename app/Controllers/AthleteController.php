@@ -172,6 +172,11 @@ class AthleteController extends Controller
                     'txid' => 'REG' . (int) $registration['id'],
                 ]);
 
+                if (!$this->isValidPixPayload($payload)) {
+                    error_log('Payload PIX invalido para inscricao ' . ($registration['id'] ?? '') . ': ' . $payload);
+                    continue;
+                }
+
                 $registration['pix_payload'] = $payload;
                 $registration['pix_qr'] = $qr->dataUri($payload);
             } catch (\Throwable $exception) {
@@ -179,6 +184,11 @@ class AthleteController extends Controller
             }
         }
         unset($registration);
+    }
+
+    private function isValidPixPayload(string $payload): bool
+    {
+        return $payload !== '' && preg_match('/^000201.*6304[0-9A-F]{4}$/', $payload) === 1;
     }
 
     private function downloadUpload(string $path): void

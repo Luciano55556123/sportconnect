@@ -299,6 +299,13 @@ body {
     padding: .5rem;
 }
 
+.pix-code-field {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: .82rem;
+    resize: vertical;
+    word-break: break-all;
+}
+
 .pix-preview {
     text-align: center;
 }

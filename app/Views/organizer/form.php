@@ -65,7 +65,7 @@
                             <div class="pix-preview">
                                 <strong>Previa do QR Code PIX</strong>
                                 <img src="<?= e($pixPreview['qr']) ?>" alt="QR Code PIX">
-                                <button class="btn btn-sm btn-outline-primary js-copy-pix" type="button" data-pix="<?= e($pixPreview['payload']) ?>">Copiar codigo PIX</button>
+                                <button class="btn btn-sm btn-outline-primary js-copy-pix" type="button" data-pix-code="<?= e($pixPreview['payload']) ?>">Copiar codigo PIX</button>
                             </div>
                         </div>
                     <?php endif; ?>

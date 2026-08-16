@@ -50,7 +50,9 @@
                                     <?php if (!empty($r['pix_qr']) && !empty($r['pix_payload'])): ?>
                                         <img class="pix-qr" src="<?= e($r['pix_qr']) ?>" alt="QR Code PIX">
                                         <p class="text-muted mb-2">Escaneie o QR Code com o aplicativo do seu banco.</p>
-                                        <button class="btn btn-sm btn-outline-primary js-copy-pix mb-2" type="button" data-pix="<?= e($r['pix_payload']) ?>">Copiar codigo PIX</button>
+                                        <button class="btn btn-sm btn-outline-primary js-copy-pix mb-2" type="button" data-pix-code="<?= e($r['pix_payload']) ?>">Copiar codigo PIX</button>
+                                        <label class="form-label mt-2">PIX Copia e Cola</label>
+                                        <textarea class="form-control pix-code-field" rows="4" readonly><?= e($r['pix_payload']) ?></textarea>
                                     <?php else: ?>
                                         <div class="alert alert-warning mb-2">Nao foi possivel gerar o QR Code PIX. Fale com o organizador.</div>
                                     <?php endif; ?>
