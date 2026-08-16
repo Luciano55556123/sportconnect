@@ -9,8 +9,8 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
     <title><?= e($title ?? $config['name']) ?> | <?= e($config['name']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-    <link href="<?= asset('css/app.css') ?>" rel="stylesheet">
-    <link href="<?= asset('css/competition.css') ?>" rel="stylesheet">
+    <link href="<?= versioned_asset('css/app.css') ?>" rel="stylesheet">
+    <link href="<?= versioned_asset('css/competition.css') ?>" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
@@ -60,8 +60,8 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
         <div class="d-flex gap-3"><a href="<?= url('/campeonatos') ?>">Pesquisar</a><a href="<?= url('/calendario') ?>">Calendario</a><a href="<?= url('/cadastro') ?>">Participar</a></div>
     </div>
 </footer>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="<?= asset('js/app.js') ?>"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="<?= versioned_asset('js/app.js') ?>"></script>
 </body>
 </html>

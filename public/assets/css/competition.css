@@ -267,11 +267,11 @@
     margin-top: .25rem;
 }
 
-.sc-tab-panel[hidden] {
+.sc-tab-panel {
     display: none;
 }
 
-.sc-tab-panel.active {
+.sc-tab-panel.is-active, .sc-tab-panel.active:not([hidden]) {
     display: block;
 }
 

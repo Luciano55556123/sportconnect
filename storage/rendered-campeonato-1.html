@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Teste | SportConnect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+    <link href="https://sportconnect.fwh.is/assets/css/app.css?v=1786841321" rel="stylesheet">
+    <link href="https://sportconnect.fwh.is/assets/css/competition.css?v=1786845676" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="https://sportconnect.fwh.is/"><i class="fa-solid fa-trophy me-2"></i>SportConnect</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav ms-auto gap-lg-2">
+                <li class="nav-item"><a class="nav-link" href="https://sportconnect.fwh.is/campeonatos">Campeonatos</a></li>
+                <li class="nav-item"><a class="nav-link" href="https://sportconnect.fwh.is/calendario">Calendario</a></li>
+                
+Warning: Undefined variable $currentUser in C:\Users\User\Desktop\TCC CAMPEONATO\app\Views\layouts\main.php on line 24
+                    <li class="nav-item"><a class="nav-link" href="https://sportconnect.fwh.is/login">Entrar</a></li>
+                    <li class="nav-item"><a class="btn btn-sm btn-warning" href="https://sportconnect.fwh.is/cadastro">Criar conta</a></li>
+                            </ul>
+        </div>
+    </div>
+</nav>
+
+<main>
+                                <section class="sc-public-hero">
+    <div class="container">
+        <div class="sc-public-hero-grid">
+            <div class="sc-public-copy">
+                <span class="sc-status-chip">registration_open</span>
+                <h1>Campeonato Regional de Futsal</h1>
+                <p>Torneio regional com fase de grupos e eliminatorias.</p>
+                <div class="sc-hero-meta">
+                    <span><i class="fa-solid fa-trophy"></i>Futsal</span>
+                    <span><i class="fa-solid fa-layer-group"></i>masculino</span>
+                    <span><i class="fa-solid fa-calendar"></i>22/08/2026</span>
+                    <span><i class="fa-solid fa-location-dot"></i>Ginasio Municipal</span>
+                    <span><i class="fa-solid fa-user-tie"></i>Carlos Organizador</span>
+                </div>
+                <div class="sc-public-actions">
+                    <button class="btn btn-warning btn-lg" data-bs-toggle="collapse" data-bs-target="#registerForm"><i class="fa-solid fa-user-plus"></i> Participar</button>
+                    <a class="btn btn-outline-light btn-lg" target="_blank" href="https://maps.google.com">Abrir mapa</a>                                    </div>
+            </div>
+            <aside class="sc-public-media">
+                <img src="https://sportconnect.fwh.is/assets/img/default-event.svg" alt="Imagem do campeonato Campeonato Regional de Futsal">
+                <div class="sc-public-price">
+                    <span>Inscricao</span>
+                    <strong>R$ 70,00</strong>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<section class="container py-4">
+    <div class="row g-4">
+        <div class="col-xl-8">
+            
+    <section class="sc-board" aria-label="Andamento do campeonato">
+        <div class="sc-stat-grid">
+                            <article class="sc-stat-card">
+    <div class="sc-stat-icon" aria-hidden="true"><i class="fa-solid fa-people-group"></i></div>
+    <div>
+        <strong>8</strong>
+        <span>Equipes</span>
+    </div>
+</article>
+                            <article class="sc-stat-card">
+    <div class="sc-stat-icon" aria-hidden="true"><i class="fa-solid fa-person-running"></i></div>
+    <div>
+        <strong>40</strong>
+        <span>Atletas</span>
+    </div>
+</article>
+                            <article class="sc-stat-card">
+    <div class="sc-stat-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></div>
+    <div>
+        <strong>15</strong>
+        <span>Partidas</span>
+    </div>
+</article>
+                            <article class="sc-stat-card">
+    <div class="sc-stat-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></div>
+    <div>
+        <strong>12</strong>
+        <span>Concluidas</span>
+    </div>
+</article>
+                            <article class="sc-stat-card">
+    <div class="sc-stat-icon" aria-hidden="true"><i class="fa-solid fa-futbol"></i></div>
+    <div>
+        <strong>9</strong>
+        <span>Gols</span>
+    </div>
+</article>
+                            <article class="sc-stat-card">
+    <div class="sc-stat-icon" aria-hidden="true"><i class="fa-solid fa-id-card"></i></div>
+    <div>
+        <strong>2</strong>
+        <span>Inscricoes</span>
+    </div>
+</article>
+                    </div>
+
+        <section class="sc-progress-panel">
+            <div>
+                <span class="sc-eyebrow">Progresso do campeonato</span>
+                <h2>12 de 15 partidas concluidas</h2>
+                <p>3 pendencias ou partidas futuras acompanhadas pelo painel.</p>
+            </div>
+            <div class="sc-progress-meter">
+                <strong>80%</strong>
+                <div class="sc-progress-track" aria-label="Progresso 80%">
+                    <span style="--progress: 80%"></span>
+                </div>
+            </div>
+        </section>
+
+        <nav class="sc-tabs" role="tablist" aria-label="Secoes do campeonato">
+            <button class="active" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab-target="overview" type="button"><i class="fa-solid fa-chart-line"></i>Visao geral</button>
+            <button id="tab-teams" role="tab" aria-controls="panel-teams" aria-selected="false" data-tab-target="teams" type="button"><i class="fa-solid fa-shield-halved"></i>Equipes</button>
+            <button id="tab-matches" role="tab" aria-controls="panel-matches" aria-selected="false" data-tab-target="matches" type="button"><i class="fa-solid fa-calendar-days"></i>Partidas</button>
+            <button id="tab-standings" role="tab" aria-controls="panel-standings" aria-selected="false" data-tab-target="standings" type="button"><i class="fa-solid fa-ranking-star"></i>Classificacao</button>
+            <button id="tab-bracket" role="tab" aria-controls="panel-bracket" aria-selected="false" data-tab-target="bracket" type="button"><i class="fa-solid fa-sitemap"></i>Rodadas</button>
+            <button id="tab-stats" role="tab" aria-controls="panel-stats" aria-selected="false" data-tab-target="stats" type="button"><i class="fa-solid fa-chart-simple"></i>Estatisticas</button>
+            <button id="tab-events" role="tab" aria-controls="panel-events" aria-selected="false" data-tab-target="events" type="button"><i class="fa-solid fa-bolt"></i>Eventos</button>
+            <button id="tab-goals" role="tab" aria-controls="panel-goals" aria-selected="false" data-tab-target="goals" type="button"><i class="fa-solid fa-futbol"></i>Gols</button>
+            <button id="tab-history" role="tab" aria-controls="panel-history" aria-selected="false" data-tab-target="history" type="button"><i class="fa-solid fa-clock-rotate-left"></i>Historico</button>
+        </nav>
+
+        <div class="sc-tab-content">
+            <section class="sc-tab-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview">
+                <div class="sc-dashboard-grid">
+                    <article class="sc-panel sc-panel-wide">
+                        <div class="sc-panel-head"><div><span class="sc-eyebrow">Agenda</span><h3>Proximas e ultimas partidas</h3></div><span>15 jogos</span></div>
+                        <div class="sc-match-list">
+                                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Uniao Futsal 3 x 2 Porto Arena">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Uniao Futsal</strong>
+        </div>
+        <div class="sc-score">
+            <b>3</b>
+            <span>x</span>
+            <b>2</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Porto Arena</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>22/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Iguacu FC 1 x 1 Mallet Esporte">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Iguacu FC</strong>
+        </div>
+        <div class="sc-score">
+            <b>1</b>
+            <span>x</span>
+            <b>1</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Mallet Esporte</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>22/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Vila Verde 2 x 0 Sao Cristovao">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Vila Verde</strong>
+        </div>
+        <div class="sc-score">
+            <b>2</b>
+            <span>x</span>
+            <b>0</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Sao Cristovao</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>23/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>18:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Panteras FC 4 x 3 Elite da Serra">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Panteras FC</strong>
+        </div>
+        <div class="sc-score">
+            <b>4</b>
+            <span>x</span>
+            <b>3</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Elite da Serra</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>23/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 2</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Uniao Futsal 2 x 2 Iguacu FC">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Uniao Futsal</strong>
+        </div>
+        <div class="sc-score">
+            <b>2</b>
+            <span>x</span>
+            <b>2</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Iguacu FC</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>24/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                                    </div>
+                    </article>
+
+                    <article class="sc-panel">
+                        <div class="sc-panel-head"><div><span class="sc-eyebrow">Destaque</span><h3>Artilharia</h3></div></div>
+                        <div class="sc-rank-list">
+                                                            <div class="sc-rank-row"><span>1</span><div><strong>Joao Silva</strong><small>Uniao Futsal</small></div><b>2</b></div>
+                                                            <div class="sc-rank-row"><span>2</span><div><strong>Otavio Ferraz</strong><small>Vila Verde</small></div><b>2</b></div>
+                                                            <div class="sc-rank-row"><span>3</span><div><strong>Daniel Barros</strong><small>Vila Verde</small></div><b>1</b></div>
+                                                            <div class="sc-rank-row"><span>4</span><div><strong>Diego Lopes</strong><small>Porto Arena</small></div><b>1</b></div>
+                                                            <div class="sc-rank-row"><span>5</span><div><strong>Paulo Vieira</strong><small>Panteras FC</small></div><b>1</b></div>
+                                                                                </div>
+                    </article>
+
+                    <article class="sc-panel">
+                        <div class="sc-panel-head"><div><span class="sc-eyebrow">Situacao</span><h3>Atividades recentes</h3></div></div>
+                        <div class="sc-activity-list">
+                                                            <p><strong>gol</strong><span>12' - Joao Silva</span></p>
+                                                            <p><strong>cartao_amarelo</strong><span>28' - Carlos Souza</span></p>
+                                                            <p><strong>gol</strong><span>36' - Diego Lopes</span></p>
+                                                            <p><strong>penalti_convertido</strong><span>45' - Pedro Lima</span></p>
+                                                            <p><strong>gol</strong><span>8' - Otavio Ferraz</span></p>
+                                                                                </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" data-tab-panel="teams" hidden>
+                <div class="sc-team-grid">
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Elite da Serra</strong>
+        <span>Cruz Machado</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Iguacu FC</strong>
+        <span>Uniao da Vitoria</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Mallet Esporte</strong>
+        <span>Mallet</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Panteras FC</strong>
+        <span>Porto Uniao</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Porto Arena</strong>
+        <span>Porto Uniao</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Sao Cristovao</strong>
+        <span>Uniao da Vitoria</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Uniao Futsal</strong>
+        <span>Uniao da Vitoria</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                            <article class="sc-team-card">
+    <div class="sc-team-shield">
+                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            </div>
+    <div class="sc-team-info">
+        <strong>Vila Verde</strong>
+        <span>Paula Freitas</span>
+        <small>5 atletas cadastrados</small>
+    </div>
+    <span class="sc-status-chip">aprovado</span>
+</article>
+                                                        </div>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-matches" role="tabpanel" aria-labelledby="tab-matches" data-tab-panel="matches" hidden>
+                <div class="sc-match-list">
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Uniao Futsal 3 x 2 Porto Arena">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Uniao Futsal</strong>
+        </div>
+        <div class="sc-score">
+            <b>3</b>
+            <span>x</span>
+            <b>2</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Porto Arena</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>22/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Iguacu FC 1 x 1 Mallet Esporte">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Iguacu FC</strong>
+        </div>
+        <div class="sc-score">
+            <b>1</b>
+            <span>x</span>
+            <b>1</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Mallet Esporte</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>22/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Vila Verde 2 x 0 Sao Cristovao">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Vila Verde</strong>
+        </div>
+        <div class="sc-score">
+            <b>2</b>
+            <span>x</span>
+            <b>0</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Sao Cristovao</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>23/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>18:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 1</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Panteras FC 4 x 3 Elite da Serra">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Panteras FC</strong>
+        </div>
+        <div class="sc-score">
+            <b>4</b>
+            <span>x</span>
+            <b>3</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Elite da Serra</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>23/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 2</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Uniao Futsal 2 x 2 Iguacu FC">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Uniao Futsal</strong>
+        </div>
+        <div class="sc-score">
+            <b>2</b>
+            <span>x</span>
+            <b>2</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Iguacu FC</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>24/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 2</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Porto Arena 1 x 3 Mallet Esporte">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Porto Arena</strong>
+        </div>
+        <div class="sc-score">
+            <b>1</b>
+            <span>x</span>
+            <b>3</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Mallet Esporte</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>24/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 2</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Vila Verde 2 x 1 Panteras FC">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Vila Verde</strong>
+        </div>
+        <div class="sc-score">
+            <b>2</b>
+            <span>x</span>
+            <b>1</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Panteras FC</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>25/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Grupos</span>
+            <strong>Rodada 2</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Sao Cristovao 3 x 3 Elite da Serra">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Sao Cristovao</strong>
+        </div>
+        <div class="sc-score">
+            <b>3</b>
+            <span>x</span>
+            <b>3</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Elite da Serra</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>25/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Quartas</span>
+            <strong>Rodada 3</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Uniao Futsal 2 x 1 Elite da Serra">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Uniao Futsal</strong>
+        </div>
+        <div class="sc-score">
+            <b>2</b>
+            <span>x</span>
+            <b>1</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Elite da Serra</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>27/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Quartas</span>
+            <strong>Rodada 3</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Vila Verde 1 x 2 Mallet Esporte">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Vila Verde</strong>
+        </div>
+        <div class="sc-score">
+            <b>1</b>
+            <span>x</span>
+            <b>2</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Mallet Esporte</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>27/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Quartas</span>
+            <strong>Rodada 3</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Panteras FC 3 x 1 Iguacu FC">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Panteras FC</strong>
+        </div>
+        <div class="sc-score">
+            <b>3</b>
+            <span>x</span>
+            <b>1</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Iguacu FC</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>28/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Quartas</span>
+            <strong>Rodada 3</strong>        </div>
+        <span class="sc-match-status is-scheduled">agendada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Sao Cristovao - x - Porto Arena">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Sao Cristovao</strong>
+        </div>
+        <div class="sc-score">
+            <b>-</b>
+            <span>x</span>
+            <b>-</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Porto Arena</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>28/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Semifinal</span>
+            <strong>Rodada 4</strong>        </div>
+        <span class="sc-match-status is-scheduled">agendada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Uniao Futsal - x - Mallet Esporte">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Uniao Futsal</strong>
+        </div>
+        <div class="sc-score">
+            <b>-</b>
+            <span>x</span>
+            <b>-</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>Mallet Esporte</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>30/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>19:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Semifinal</span>
+            <strong>Rodada 4</strong>        </div>
+        <span class="sc-match-status is-scheduled">agendada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="Panteras FC - x - A definir">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>Panteras FC</strong>
+        </div>
+        <div class="sc-score">
+            <b>-</b>
+            <span>x</span>
+            <b>-</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>A definir</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>30/08/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:30</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                            <article class="sc-match-card">
+    <header class="sc-match-head">
+        <div>
+            <span>Final</span>
+            <strong>Rodada 5</strong>        </div>
+        <span class="sc-match-status is-done">finalizada</span>
+    </header>
+
+    <div class="sc-scoreboard" aria-label="A definir 3 x 2 A definir">
+        <div class="sc-score-team">
+            <span>Mandante</span>
+            <strong>A definir</strong>
+        </div>
+        <div class="sc-score">
+            <b>3</b>
+            <span>x</span>
+            <b>2</b>
+        </div>
+        <div class="sc-score-team sc-score-team-away">
+            <span>Visitante</span>
+            <strong>A definir</strong>
+        </div>
+    </div>
+
+    <footer class="sc-match-foot">
+        <span><i class="fa-solid fa-calendar-days" aria-hidden="true"></i>01/09/2026</span>
+        <span><i class="fa-solid fa-clock" aria-hidden="true"></i>20:00</span>        <span><i class="fa-solid fa-location-dot" aria-hidden="true"></i>Ginasio Municipal - Quadra 1</span>
+            </footer>
+</article>
+                                                        </div>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-standings" role="tabpanel" aria-labelledby="tab-standings" data-tab-panel="standings" hidden>
+                <article class="sc-panel">
+                    <div class="sc-panel-head"><div><span class="sc-eyebrow">Tabela</span><h3>Classificacao</h3></div></div>
+                    <div class="sc-table-wrap" role="region" aria-label="Tabela de classificacao" tabindex="0">
+    <table class="table sc-standings-table align-middle">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Equipe</th>
+                <th>J</th>
+                <th>V</th>
+                <th>E</th>
+                <th>D</th>
+                <th>GP</th>
+                <th>GC</th>
+                <th>SG</th>
+                <th>PTS</th>
+            </tr>
+        </thead>
+        <tbody>
+                                            <tr class="is-qualified">
+                    <td><span class="sc-position">1</span></td>
+                    <td>
+                        <strong>Mallet Esporte</strong>
+                        <small>Grupo A</small>                    </td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>4</td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td><strong>4</strong></td>
+                </tr>
+                                            <tr class="is-qualified">
+                    <td><span class="sc-position">2</span></td>
+                    <td>
+                        <strong>Uniao Futsal</strong>
+                        <small>Grupo A</small>                    </td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>5</td>
+                    <td>4</td>
+                    <td>1</td>
+                    <td><strong>4</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">3</span></td>
+                    <td>
+                        <strong>Iguacu FC</strong>
+                        <small>Grupo A</small>                    </td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>3</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td><strong>2</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">4</span></td>
+                    <td>
+                        <strong>Porto Arena</strong>
+                        <small>Grupo A</small>                    </td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td>3</td>
+                    <td>6</td>
+                    <td>-3</td>
+                    <td><strong>0</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">5</span></td>
+                    <td>
+                        <strong>Vila Verde</strong>
+                        <small>Grupo B</small>                    </td>
+                    <td>2</td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>4</td>
+                    <td>1</td>
+                    <td>3</td>
+                    <td><strong>6</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">6</span></td>
+                    <td>
+                        <strong>Panteras FC</strong>
+                        <small>Grupo B</small>                    </td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>5</td>
+                    <td>5</td>
+                    <td>0</td>
+                    <td><strong>3</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">7</span></td>
+                    <td>
+                        <strong>Elite da Serra</strong>
+                        <small>Grupo B</small>                    </td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>6</td>
+                    <td>7</td>
+                    <td>-1</td>
+                    <td><strong>1</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">8</span></td>
+                    <td>
+                        <strong>Sao Cristovao</strong>
+                        <small>Grupo B</small>                    </td>
+                    <td>2</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>3</td>
+                    <td>5</td>
+                    <td>-2</td>
+                    <td><strong>1</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">9</span></td>
+                    <td>
+                        <strong>Panteras FC</strong>
+                                            </td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>3</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td><strong>3</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">10</span></td>
+                    <td>
+                        <strong>Mallet Esporte</strong>
+                                            </td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td><strong>3</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">11</span></td>
+                    <td>
+                        <strong>Uniao Futsal</strong>
+                                            </td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>2</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td><strong>3</strong></td>
+                </tr>
+                                            <tr class="">
+                    <td><span class="sc-position">12</span></td>
+                    <td>
+                        <strong>Elite da Serra</strong>
+                                            </td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>-1</td>
+                    <td><strong>0</strong></td>
+                </tr>
+                                            <tr class="is-risk">
+                    <td><span class="sc-position">13</span></td>
+                    <td>
+                        <strong>Vila Verde</strong>
+                                            </td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>2</td>
+                    <td>-1</td>
+                    <td><strong>0</strong></td>
+                </tr>
+                                            <tr class="is-risk">
+                    <td><span class="sc-position">14</span></td>
+                    <td>
+                        <strong>Iguacu FC</strong>
+                                            </td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td>3</td>
+                    <td>-2</td>
+                    <td><strong>0</strong></td>
+                </tr>
+                    </tbody>
+    </table>
+</div>
+                </article>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-bracket" role="tabpanel" aria-labelledby="tab-bracket" data-tab-panel="bracket" hidden>
+                                    <div class="sc-bracket">
+                                                    <section class="sc-round">
+                                <h3>Rodada 1</h3>
+                                                                    <div class="sc-round-match">
+                                        <span>Uniao Futsal</span>
+                                        <strong>3 x 2</strong>
+                                        <span>Porto Arena</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Iguacu FC</span>
+                                        <strong>1 x 1</strong>
+                                        <span>Mallet Esporte</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Vila Verde</span>
+                                        <strong>2 x 0</strong>
+                                        <span>Sao Cristovao</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Panteras FC</span>
+                                        <strong>4 x 3</strong>
+                                        <span>Elite da Serra</span>
+                                    </div>
+                                                            </section>
+                                                    <section class="sc-round">
+                                <h3>Rodada 2</h3>
+                                                                    <div class="sc-round-match">
+                                        <span>Uniao Futsal</span>
+                                        <strong>2 x 2</strong>
+                                        <span>Iguacu FC</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Porto Arena</span>
+                                        <strong>1 x 3</strong>
+                                        <span>Mallet Esporte</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Vila Verde</span>
+                                        <strong>2 x 1</strong>
+                                        <span>Panteras FC</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Sao Cristovao</span>
+                                        <strong>3 x 3</strong>
+                                        <span>Elite da Serra</span>
+                                    </div>
+                                                            </section>
+                                                    <section class="sc-round">
+                                <h3>Rodada 3</h3>
+                                                                    <div class="sc-round-match">
+                                        <span>Uniao Futsal</span>
+                                        <strong>2 x 1</strong>
+                                        <span>Elite da Serra</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Vila Verde</span>
+                                        <strong>1 x 2</strong>
+                                        <span>Mallet Esporte</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Panteras FC</span>
+                                        <strong>3 x 1</strong>
+                                        <span>Iguacu FC</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Sao Cristovao</span>
+                                        <strong>- x -</strong>
+                                        <span>Porto Arena</span>
+                                    </div>
+                                                            </section>
+                                                    <section class="sc-round">
+                                <h3>Rodada 4</h3>
+                                                                    <div class="sc-round-match">
+                                        <span>Uniao Futsal</span>
+                                        <strong>- x -</strong>
+                                        <span>Mallet Esporte</span>
+                                    </div>
+                                                                    <div class="sc-round-match">
+                                        <span>Panteras FC</span>
+                                        <strong>- x -</strong>
+                                        <span>A definir</span>
+                                    </div>
+                                                            </section>
+                                                    <section class="sc-round">
+                                <h3>Rodada 5</h3>
+                                                                    <div class="sc-round-match">
+                                        <span>A definir</span>
+                                        <strong>3 x 2</strong>
+                                        <span>A definir</span>
+                                    </div>
+                                                            </section>
+                                            </div>
+                            </section>
+
+            <section class="sc-tab-panel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats" data-tab-panel="stats" hidden>
+                <div class="sc-dashboard-grid">
+                    <article class="sc-panel"><div class="sc-panel-head"><h3>Artilheiro</h3></div><div class="sc-rank-row"><div><strong>Joao Silva</strong><small>Uniao Futsal</small></div><b>2 gols</b></div><div class="sc-rank-row"><div><strong>Otavio Ferraz</strong><small>Vila Verde</small></div><b>2 gols</b></div><div class="sc-rank-row"><div><strong>Daniel Barros</strong><small>Vila Verde</small></div><b>1 gols</b></div><div class="sc-rank-row"><div><strong>Diego Lopes</strong><small>Porto Arena</small></div><b>1 gols</b></div><div class="sc-rank-row"><div><strong>Paulo Vieira</strong><small>Panteras FC</small></div><b>1 gols</b></div><div class="sc-rank-row"><div><strong>Pedro Lima</strong><small>Uniao Futsal</small></div><b>1 gols</b></div><div class="sc-rank-row"><div><strong>Rafael Pires</strong><small>Mallet Esporte</small></div><b>1 gols</b></div></article>
+                    <article class="sc-panel"><div class="sc-panel-head"><h3>Cartoes</h3></div><div class="sc-rank-row"><div><strong>Diego Lopes</strong><small>Porto Arena</small></div><b>0A / 1V</b></div><div class="sc-rank-row"><div><strong>Carlos Souza</strong><small>Porto Arena</small></div><b>1A / 0V</b></div><div class="sc-rank-row"><div><strong>Marcio Teixeira</strong><small>Panteras FC</small></div><b>1A / 0V</b></div><div class="sc-rank-row"><div><strong>Nicolas Prado</strong><small>Elite da Serra</small></div><b>0A / 1V</b></div></article>
+                </div>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-events" role="tabpanel" aria-labelledby="tab-events" data-tab-panel="events" hidden>
+                <div class="sc-filter-row" aria-label="Filtros visuais de eventos"><span>Todos</span><span>Gols</span><span>Cartoes</span><span>Observacoes</span></div>
+                <div class="sc-timeline">
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">12'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Joao Silva - Uniao Futsal</p><small>Gol normal</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">28'</span>
+                            <i class="fa-solid fa-square" aria-hidden="true"></i>
+                            <div><strong>cartao_amarelo</strong><p>Carlos Souza - Porto Arena</p><small>Reclamacao</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">36'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Diego Lopes - Porto Arena</p><small>Finalizacao no canto</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">45'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>penalti_convertido</strong><p>Pedro Lima - Uniao Futsal</p><small>Penalti convertido</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">8'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Otavio Ferraz - Vila Verde</p><small>Contra-ataque</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">31'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Daniel Barros - Vila Verde</p><small>Jogada ensaiada</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">6'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Paulo Vieira - Panteras FC</p><small>Pivo girou</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">39'</span>
+                            <i class="fa-solid fa-square" aria-hidden="true"></i>
+                            <div><strong>cartao_vermelho</strong><p>Nicolas Prado - Elite da Serra</p><small>Falta dura</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">18'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Otavio Ferraz - Vila Verde</p><small>Gol normal</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">22'</span>
+                            <i class="fa-solid fa-square" aria-hidden="true"></i>
+                            <div><strong>cartao_amarelo</strong><p>Marcio Teixeira - Panteras FC</p><small>Entrada atrasada</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">14'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Joao Silva - Uniao Futsal</p><small>Abriu o placar</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">33'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Rafael Pires - Mallet Esporte</p><small>Gol da classificacao</small></div>
+                        </article>
+                                                                    <article class="sc-timeline-item">
+                            <span class="sc-time">15'</span>
+                            <i class="fa-solid fa-square" aria-hidden="true"></i>
+                            <div><strong>cartao_vermelho</strong><p>Diego Lopes </p><small>brigas mal conduta</small></div>
+                        </article>
+                                                        </div>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-goals" role="tabpanel" aria-labelledby="tab-goals" data-tab-panel="goals" hidden>
+                <div class="sc-timeline">
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">12'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Joao Silva - Uniao Futsal</p><small>Gol normal</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">36'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Diego Lopes - Porto Arena</p><small>Finalizacao no canto</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">45'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>penalti_convertido</strong><p>Pedro Lima - Uniao Futsal</p><small>Penalti convertido</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">8'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Otavio Ferraz - Vila Verde</p><small>Contra-ataque</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">31'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Daniel Barros - Vila Verde</p><small>Jogada ensaiada</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">6'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Paulo Vieira - Panteras FC</p><small>Pivo girou</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">18'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Otavio Ferraz - Vila Verde</p><small>Gol normal</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">14'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Joao Silva - Uniao Futsal</p><small>Abriu o placar</small></div>
+                        </article>
+                                            <article class="sc-timeline-item">
+                            <span class="sc-time">33'</span>
+                            <i class="fa-solid fa-futbol" aria-hidden="true"></i>
+                            <div><strong>gol</strong><p>Rafael Pires - Mallet Esporte</p><small>Gol da classificacao</small></div>
+                        </article>
+                                                        </div>
+            </section>
+
+            <section class="sc-tab-panel" id="panel-history" role="tabpanel" aria-labelledby="tab-history" data-tab-panel="history" hidden>
+                <div class="sc-dashboard-grid">
+                    <article class="sc-panel"><div class="sc-panel-head"><h3>Relatorios</h3></div><p class="sc-log"><strong>guarana</strong><span>briga do leonardo</span></p></article>
+                    <article class="sc-panel"><div class="sc-panel-head"><h3>Operacoes</h3></div><p class="sc-log"><strong>Sets registrados</strong><span>0 registros</span></p><p class="sc-log"><strong>Reagendamentos</strong><span>0 registros</span></p><p class="sc-log"><strong>Partidas concluidas</strong><span>12 registros</span></p></article>
+                </div>
+            </section>
+        </div>
+    </section>
+            <section class="sc-panel mt-4">
+                <div class="sc-panel-head"><div><span class="sc-eyebrow">Comunidade</span><h2>Comentarios e avaliacoes</h2></div></div>
+                                <p class="text-muted mb-0">Nenhuma avaliacao publicada.</p>            </section>
+        </div>
+
+        <aside class="col-xl-4">
+            <div class="sc-side-cta">
+                <div class="sc-side-price"><span>Valor da inscricao</span><strong>R$ 70,00</strong></div>
+                <div class="sc-side-info">
+                    <span><i class="fa-solid fa-users"></i>2 / 16 inscritos</span>
+                    <span><i class="fa-solid fa-city"></i>Uniao da Vitoria</span>
+                    <span><i class="fa-brands fa-whatsapp"></i>42988887777</span>
+                </div>
+                                <form method="post" action="https://sportconnect.fwh.is/campeonatos/1/favoritar"><input type="hidden" name="_csrf" value="d65eb078ffb094570f3ac2c463bb41ebec8330e83e374afaa57af239d980ad1b"><button class="btn btn-outline-danger w-100"><i class="fa-solid fa-heart"></i> Favoritar</button></form>
+                <a class="btn btn-success w-100" target="_blank" href="https://wa.me/5542988887777"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                <button class="btn btn-outline-primary w-100" onclick="navigator.share ? navigator.share({title: document.title, url: location.href}) : navigator.clipboard.writeText(location.href)"><i class="fa-solid fa-share-nodes"></i> Compartilhar</button>
+                <div class="collapse mt-3" id="registerForm">
+                    <form method="post" enctype="multipart/form-data" action="https://sportconnect.fwh.is/campeonatos/1/inscrever" class="stack-form">
+                        <input type="hidden" name="_csrf" value="d65eb078ffb094570f3ac2c463bb41ebec8330e83e374afaa57af239d980ad1b">                        <input class="form-control" name="name" required placeholder="Nome">
+                        <input class="form-control" name="phone" required placeholder="Telefone">
+                        <input class="form-control" type="email" name="email" required placeholder="Email">
+                        <input class="form-control" name="team" placeholder="Equipe">
+                        <input class="form-control" name="category" placeholder="Categoria">
+                        <input class="form-control" name="city" required placeholder="Cidade">
+                        <input class="form-control" name="cpf" placeholder="CPF opcional">
+                        <textarea class="form-control" name="notes" placeholder="Observacoes"></textarea>
+                        <label class="form-label">Documento opcional</label>
+                        <input class="form-control" type="file" name="proof_file" accept=".pdf,.jpg,.jpeg,.png">
+                        <button class="btn btn-primary">Enviar inscricao</button>
+                    </form>
+                </div>
+                <hr>
+                <form method="post" action="https://sportconnect.fwh.is/campeonatos/1/avaliar" class="stack-form">
+                    <input type="hidden" name="_csrf" value="d65eb078ffb094570f3ac2c463bb41ebec8330e83e374afaa57af239d980ad1b">                    <label class="form-label">Avaliar campeonato</label>
+                    <select class="form-select" name="rating"><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option></select>
+                    <textarea class="form-control" name="comment" placeholder="Comentario"></textarea>
+                    <button class="btn btn-outline-primary">Avaliar</button>
+                </form>
+            </div>
+        </aside>
+    </div>
+</section>
+</main>
+
+<footer class="footer mt-5 py-4">
+    <div class="container d-flex flex-column flex-md-row justify-content-between gap-3">
+        <div><strong>SportConnect</strong><br><span>Plataforma regional para atletas, equipes e organizadores.</span></div>
+        <div class="d-flex gap-3"><a href="https://sportconnect.fwh.is/campeonatos">Pesquisar</a><a href="https://sportconnect.fwh.is/calendario">Calendario</a><a href="https://sportconnect.fwh.is/cadastro">Participar</a></div>
+    </div>
+</footer>
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="https://sportconnect.fwh.is/assets/js/app.js?v=1786845668"></script>
+</body>
+</html>

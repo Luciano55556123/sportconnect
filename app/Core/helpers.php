@@ -23,6 +23,15 @@ function asset(string $path): string
     return url('assets/' . ltrim($path, '/'));
 }
 
+function versioned_asset(string $path): string
+{
+    $relative = ltrim($path, '/');
+    $file = BASE_PATH . '/public/assets/' . $relative;
+    $version = is_file($file) ? (string) filemtime($file) : (string) time();
+
+    return asset($relative) . '?v=' . $version;
+}
+
 function csrf_token(): string
 {
     if (empty($_SESSION['csrf'])) {
