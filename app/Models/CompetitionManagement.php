@@ -4,6 +4,8 @@ namespace App\Models;
 
 class CompetitionManagement extends Model
 {
+    private array $tableExistsCache = [];
+
     public function overview(int $championshipId): array
     {
         return [
@@ -16,6 +18,7 @@ class CompetitionManagement extends Model
             'sets' => $this->sets($championshipId),
             'reports' => $this->reports($championshipId),
             'reschedules' => $this->reschedules($championshipId),
+            'summary' => $this->summary($championshipId),
         ];
     }
 
@@ -37,11 +40,25 @@ class CompetitionManagement extends Model
             'athletes' => $this->countByChampionship('athletes', $championshipId),
             'matches' => $this->countByChampionship('matches', $championshipId),
             'events' => $this->countByMatches('match_events', $championshipId),
+            'goals' => $this->countEventsByType($championshipId, ['gol', 'penalti_convertido']),
+            'cards' => $this->countEventsByType($championshipId, ['cartao_amarelo', 'cartao_vermelho']),
             'sets' => $this->countByMatches('match_sets', $championshipId),
             'standings' => $this->countByChampionship('standings', $championshipId),
             'statistics' => $this->countByChampionship('athlete_statistics', $championshipId),
             'reports' => $this->countByMatches('match_reports', $championshipId),
             'reschedules' => $this->countByMatches('match_reschedules', $championshipId),
+            'completed_matches' => $this->countCompletedMatches($championshipId),
+        ];
+    }
+
+    public function summary(int $championshipId): array
+    {
+        $counts = $this->counts($championshipId);
+        $matches = max(1, (int) ($counts['matches'] ?? 0));
+
+        return [
+            'progress' => (int) round(((int) ($counts['completed_matches'] ?? 0) / $matches) * 100),
+            'counts' => $counts,
         ];
     }
 
@@ -52,12 +69,129 @@ class CompetitionManagement extends Model
         }
 
         $stmt = $this->db->prepare(
-            'SELECT id, name, shield, city, responsible_name, responsible_phone, status
-             FROM teams
-             WHERE championship_id = ?
-             ORDER BY name ASC'
+            'SELECT t.id, t.name, t.shield, t.city, t.responsible_name, t.responsible_phone, t.status,
+                    COUNT(a.id) AS athletes_count
+             FROM teams t
+             LEFT JOIN athletes a ON a.team_id = t.id
+             WHERE t.championship_id = ?
+             GROUP BY t.id, t.name, t.shield, t.city, t.responsible_name, t.responsible_phone, t.status
+             ORDER BY t.name ASC'
         );
         $stmt->execute([$championshipId]);
+        return $stmt->fetchAll();
+    }
+
+    public function matchDetails(int $championshipId, int $matchId): ?array
+    {
+        if (!$this->tableExists('matches')) {
+            return null;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT m.*, ht.name AS home_team, at.name AS away_team,
+                    ha.name AS home_athlete, aa.name AS away_athlete,
+                    wt.name AS winner_team, wa.name AS winner_athlete
+             FROM matches m
+             LEFT JOIN teams ht ON ht.id = m.home_team_id
+             LEFT JOIN teams at ON at.id = m.away_team_id
+             LEFT JOIN athletes ha ON ha.id = m.home_athlete_id
+             LEFT JOIN athletes aa ON aa.id = m.away_athlete_id
+             LEFT JOIN teams wt ON wt.id = m.winner_team_id
+             LEFT JOIN athletes wa ON wa.id = m.winner_athlete_id
+             WHERE m.championship_id = ?
+             AND m.id = ?'
+        );
+        $stmt->execute([$championshipId, $matchId]);
+        return $stmt->fetch() ?: null;
+    }
+
+    public function matchOverview(int $championshipId, int $matchId): array
+    {
+        return [
+            'match' => $this->matchDetails($championshipId, $matchId),
+            'events' => $this->eventsForMatch($championshipId, $matchId),
+            'sets' => $this->setsForMatch($championshipId, $matchId),
+            'lineups' => $this->lineupsForMatch($championshipId, $matchId),
+            'reports' => $this->reportsForMatch($championshipId, $matchId),
+            'athletes' => $this->athletes($championshipId),
+        ];
+    }
+
+    public function eventsForMatch(int $championshipId, int $matchId): array
+    {
+        if (!$this->tableExists('match_events') || !$this->tableExists('matches')) {
+            return [];
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT e.*, t.name AS team_name, a.name AS athlete_name
+             FROM match_events e
+             JOIN matches m ON m.id = e.match_id
+             LEFT JOIN teams t ON t.id = e.team_id
+             LEFT JOIN athletes a ON a.id = e.athlete_id
+             WHERE m.championship_id = ?
+             AND e.match_id = ?
+             ORDER BY e.minute ASC NULLS LAST, e.id ASC'
+        );
+        $stmt->execute([$championshipId, $matchId]);
+        return $stmt->fetchAll();
+    }
+
+    public function setsForMatch(int $championshipId, int $matchId): array
+    {
+        if (!$this->tableExists('match_sets') || !$this->tableExists('matches')) {
+            return [];
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT ms.*, wt.name AS winner_team, wa.name AS winner_athlete
+             FROM match_sets ms
+             JOIN matches m ON m.id = ms.match_id
+             LEFT JOIN teams wt ON wt.id = ms.winner_team_id
+             LEFT JOIN athletes wa ON wa.id = ms.winner_athlete_id
+             WHERE m.championship_id = ?
+             AND ms.match_id = ?
+             ORDER BY ms.set_number ASC'
+        );
+        $stmt->execute([$championshipId, $matchId]);
+        return $stmt->fetchAll();
+    }
+
+    public function lineupsForMatch(int $championshipId, int $matchId): array
+    {
+        if (!$this->tableExists('match_lineups') || !$this->tableExists('matches')) {
+            return [];
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT ml.*, t.name AS team_name, a.name AS athlete_name
+             FROM match_lineups ml
+             JOIN matches m ON m.id = ml.match_id
+             LEFT JOIN teams t ON t.id = ml.team_id
+             LEFT JOIN athletes a ON a.id = ml.athlete_id
+             WHERE m.championship_id = ?
+             AND ml.match_id = ?
+             ORDER BY t.name ASC NULLS LAST, ml.is_starter DESC, a.name ASC'
+        );
+        $stmt->execute([$championshipId, $matchId]);
+        return $stmt->fetchAll();
+    }
+
+    public function reportsForMatch(int $championshipId, int $matchId): array
+    {
+        if (!$this->tableExists('match_reports') || !$this->tableExists('matches')) {
+            return [];
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT mr.*
+             FROM match_reports mr
+             JOIN matches m ON m.id = mr.match_id
+             WHERE m.championship_id = ?
+             AND mr.match_id = ?
+             ORDER BY mr.created_at DESC'
+        );
+        $stmt->execute([$championshipId, $matchId]);
         return $stmt->fetchAll();
     }
 
@@ -245,8 +379,45 @@ class CompetitionManagement extends Model
         return (int) $stmt->fetchColumn();
     }
 
+    private function countCompletedMatches(int $championshipId): int
+    {
+        if (!$this->tableExists('matches')) {
+            return 0;
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*)
+             FROM matches
+             WHERE championship_id = ?
+             AND status IN ('finalizada', 'completed', 'encerrada')"
+        );
+        $stmt->execute([$championshipId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    private function countEventsByType(int $championshipId, array $types): int
+    {
+        if (!$types || !$this->tableExists('match_events') || !$this->tableExists('matches')) {
+            return 0;
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT COUNT(*)
+             FROM match_events e
+             JOIN matches m ON m.id = e.match_id
+             WHERE m.championship_id = ?
+             AND e.event_type IN (' . implode(',', array_fill(0, count($types), '?')) . ')'
+        );
+        $stmt->execute(array_merge([$championshipId], $types));
+        return (int) $stmt->fetchColumn();
+    }
+
     private function tableExists(string $table): bool
     {
+        if (array_key_exists($table, $this->tableExistsCache)) {
+            return $this->tableExistsCache[$table];
+        }
+
         $stmt = $this->db->prepare(
             "SELECT EXISTS (
                 SELECT 1
@@ -255,6 +426,7 @@ class CompetitionManagement extends Model
             )"
         );
         $stmt->execute([$table]);
-        return (bool) $stmt->fetchColumn();
+        $this->tableExistsCache[$table] = (bool) $stmt->fetchColumn();
+        return $this->tableExistsCache[$table];
     }
 }

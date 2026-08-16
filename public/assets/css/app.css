@@ -312,32 +312,139 @@ body {
     text-align: center;
 }
 
-.competition-section h3 {
-    font-size: 1.05rem;
-    font-weight: 800;
-    margin-bottom: .85rem;
+.manage-hero, .match-manage-hero {
+    background: linear-gradient(135deg, #0f2747, #1267d8);
+    color: #fff;
+    padding: 2.5rem 0;
 }
 
-.competition-summary {
+.manage-hero-inner, .match-manage-score {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.manage-hero h1 {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    font-weight: 900;
+}
+
+.manage-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+
+.manage-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    color: rgba(255, 255, 255, .86);
+}
+
+.manage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.manage-progress {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.manage-progress strong {
+    display: block;
+    font-size: 1.5rem;
+}
+
+.manage-progress span {
+    color: rgba(255, 255, 255, .8);
+}
+
+.competition-board {
+    display: grid;
+    gap: 1rem;
+}
+
+.competition-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.15rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.competition-hero h2, .competition-section h3 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin: .35rem 0;
+}
+
+.competition-hero p {
+    color: var(--muted);
+    margin: 0;
+}
+
+.competition-progress {
+    min-width: 112px;
+    text-align: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: .75rem;
+    background: var(--field);
+}
+
+.competition-progress strong {
+    display: block;
+    font-size: 1.8rem;
+    color: var(--brand);
+}
+
+.competition-progress span {
+    color: var(--muted);
+}
+
+.competition-progress-bar {
+    height: .55rem;
+}
+
+.competition-kpis, .competition-summary {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: .75rem;
 }
 
-.competition-summary > div, .team-grid article, .competition-row {
+.competition-kpis > div, .competition-summary > div, .team-grid article, .competition-row {
     border: 1px solid var(--line);
     border-radius: 8px;
     background: #fff;
     padding: .85rem;
 }
 
-.competition-summary strong {
+.competition-kpis > div {
+    display: grid;
+    gap: .25rem;
+}
+
+.competition-kpis i {
+    color: var(--brand);
+}
+
+.competition-summary strong, .competition-kpis strong {
     display: block;
     font-size: 1.55rem;
     color: var(--brand);
 }
 
-.competition-summary span, .team-grid span, .team-grid small, .competition-row span, .competition-row small {
+.competition-summary span, .competition-kpis span, .team-grid span, .team-grid small, .competition-row span, .competition-row small {
     display: block;
     color: var(--muted);
 }
@@ -351,8 +458,74 @@ body {
     gap: .75rem;
 }
 
+.competition-tabs {
+    gap: .5rem;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: .25rem;
+}
+
+.competition-tabs .nav-link {
+    white-space: nowrap;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    background: #fff;
+}
+
+.competition-tabs .nav-link.active {
+    background: var(--brand);
+    border-color: var(--brand);
+}
+
+.competition-tab-content {
+    margin-top: .25rem;
+}
+
 .team-grid {
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.team-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: .85rem;
+}
+
+.team-card-pro {
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    align-items: center;
+    gap: .75rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: .9rem;
+}
+
+.team-card-pro strong, .team-card-pro span, .team-card-pro small {
+    display: block;
+}
+
+.team-card-pro span, .team-card-pro small {
+    color: var(--muted);
+}
+
+.team-shield {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--field);
+    color: var(--brand);
+    font-size: 1.4rem;
+    overflow: hidden;
+}
+
+.team-shield img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .competition-row {
@@ -372,6 +545,197 @@ body {
     background: var(--field);
 }
 
+.match-card-list {
+    display: grid;
+    gap: .85rem;
+}
+
+.match-card-pro {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 1rem;
+}
+
+.match-meta, .match-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem;
+    align-items: center;
+    color: var(--muted);
+    font-size: .9rem;
+}
+
+.match-meta span {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: .18rem .55rem;
+    background: var(--field);
+}
+
+.scoreboard {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin: .85rem 0;
+}
+
+.score-team strong {
+    font-size: 1.05rem;
+}
+
+.score-box {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 8px;
+    background: #0f2747;
+    color: #fff;
+    padding: .45rem .8rem;
+    min-width: 104px;
+    justify-content: center;
+}
+
+.score-box b {
+    font-size: 1.55rem;
+}
+
+.standings-table .table-team {
+    display: block;
+    font-weight: 800;
+}
+
+.standings-table small {
+    color: var(--muted);
+}
+
+.standings-table .zone-qualified {
+    box-shadow: inset 4px 0 0 #13a66f;
+}
+
+.rounds-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.round-column {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 1rem;
+}
+
+.round-column h3 {
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.round-match {
+    display: grid;
+    gap: .25rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--field);
+    padding: .75rem;
+    margin-top: .65rem;
+}
+
+.round-match strong {
+    color: var(--brand);
+}
+
+.highlight-list, .timeline {
+    display: grid;
+    gap: .75rem;
+}
+
+.highlight-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: .75rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: .75rem;
+    background: var(--field);
+}
+
+.highlight-row span {
+    display: block;
+    color: var(--muted);
+}
+
+.timeline-item {
+    display: grid;
+    grid-template-columns: 58px 1fr;
+    gap: .75rem;
+}
+
+.timeline-time {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    font-weight: 900;
+}
+
+.timeline-item > div {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    padding: .75rem;
+}
+
+.timeline-item p {
+    color: var(--muted);
+    margin: .15rem 0;
+}
+
+.match-team-large span, .score-editor small {
+    display: block;
+    color: rgba(255, 255, 255, .75);
+}
+
+.match-team-large strong {
+    font-size: clamp(1.2rem, 4vw, 2rem);
+}
+
+.score-editor {
+    min-width: 180px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: .5rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 8px;
+    padding: .75rem 1rem;
+}
+
+.score-editor b {
+    font-size: clamp(2rem, 7vw, 4rem);
+}
+
+.score-editor small {
+    grid-column: 1 / -1;
+}
+
+.match-tool-panel h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.event-actions {
+    display: flex;
+    gap: .5rem;
+    margin-top: .5rem;
+}
+
 @media (max-width: 640px) {
     .competition-row {
         grid-template-columns: 1fr;
@@ -380,6 +744,19 @@ body {
 
     .score-pill {
         width: max-content;
+    }
+
+    .manage-hero-inner, .match-manage-score, .competition-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .manage-progress, .scoreboard, .team-card-pro {
+        grid-template-columns: 1fr;
+    }
+
+    .score-team.text-end {
+        text-align: left !important;
     }
 }
 

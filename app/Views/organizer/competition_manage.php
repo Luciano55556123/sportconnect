@@ -1,12 +1,28 @@
-<section class="page-band">
-    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-        <div>
-            <h1>Gestao do campeonato</h1>
-            <p><?= e($championship['name'] ?? '') ?></p>
+<?php
+$isOrganizerManage = true;
+$progress = (int) (($competitionData['summary']['progress'] ?? 0));
+?>
+<section class="manage-hero">
+    <div class="container">
+        <div class="manage-hero-inner">
+            <div>
+                <span class="badge text-bg-warning mb-2"><?= e($championship['status'] ?? '') ?></span>
+                <h1><?= e($championship['name'] ?? '') ?></h1>
+                <div class="manage-meta">
+                    <span><i class="fa-solid fa-trophy"></i><?= e($championship['sport_name'] ?? '') ?></span>
+                    <span><i class="fa-solid fa-layer-group"></i><?= e($championship['modality'] ?? '') ?></span>
+                    <span><i class="fa-solid fa-calendar"></i><?= !empty($championship['event_date']) ? e(date('d/m/Y', strtotime($championship['event_date']))) : 'Data a definir' ?></span>
+                    <span><i class="fa-solid fa-location-dot"></i><?= e($championship['location'] ?? '') ?></span>
+                </div>
+            </div>
+            <div class="manage-actions">
+                <a class="btn btn-light" href="<?= url('/campeonatos/' . $championship['id']) ?>">Pagina publica</a>
+                <a class="btn btn-warning" href="<?= url('/organizador/campeonatos/' . $championship['id'] . '/editar') ?>">Editar campeonato</a>
+            </div>
         </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-primary" href="<?= url('/campeonatos/' . $championship['id']) ?>">Ver pagina</a>
-            <a class="btn btn-warning" href="<?= url('/organizador/campeonatos/' . $championship['id'] . '/editar') ?>">Editar campeonato</a>
+        <div class="manage-progress">
+            <div><strong><?= $progress ?>%</strong><span>progresso do campeonato</span></div>
+            <div class="progress"><div class="progress-bar" style="width: <?= $progress ?>%"></div></div>
         </div>
     </div>
 </section>

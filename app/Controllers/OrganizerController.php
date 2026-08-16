@@ -97,11 +97,47 @@ class OrganizerController extends Controller
         }
 
         $competition = new CompetitionManagement();
+        $competitionData = $competition->overview((int) $id);
         $this->view('organizer/competition_manage', [
             'title' => 'Gestao do campeonato',
             'championship' => $championship,
-            'competitionData' => $competition->overview((int) $id),
-            'competitionCounts' => $competition->counts((int) $id),
+            'competitionData' => $competitionData,
+            'competitionCounts' => $competitionData['summary']['counts'] ?? [],
+        ]);
+    }
+
+    public function matchManage(string $championshipId, string $matchId): void
+    {
+        $this->requireAuth('organizer');
+        $championship = (new Championship())->find((int) $championshipId);
+
+        if (!$championship) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Campeonato nao encontrado']);
+            return;
+        }
+
+        $user = Auth::user();
+        $isOwner = (int) ($championship['organizer_id'] ?? 0) === (int) ($user['id'] ?? 0);
+        $isAdmin = ($user['role'] ?? '') === 'admin';
+        if (!$isOwner && !$isAdmin) {
+            http_response_code(403);
+            $this->view('errors/403', ['title' => 'Acesso negado']);
+            return;
+        }
+
+        $competition = new CompetitionManagement();
+        $matchData = $competition->matchOverview((int) $championshipId, (int) $matchId);
+        if (empty($matchData['match'])) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Partida nao encontrada']);
+            return;
+        }
+
+        $this->view('organizer/match_manage', [
+            'title' => 'Gerenciar partida',
+            'championship' => $championship,
+            'matchData' => $matchData,
         ]);
     }
 

@@ -39,12 +39,13 @@ class ChampionshipController extends Controller
         }
         $model->incrementViews((int) $id);
         $competition = new CompetitionManagement();
+        $competitionData = $competition->overview((int) $id);
         $this->view('championships/show', [
             'title' => $championship['name'],
             'championship' => $championship,
             'reviews' => $model->reviews((int) $id),
-            'competitionData' => $competition->overview((int) $id),
-            'competitionCounts' => $competition->counts((int) $id),
+            'competitionData' => $competitionData,
+            'competitionCounts' => $competitionData['summary']['counts'] ?? [],
         ]);
     }
 
