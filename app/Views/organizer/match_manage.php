@@ -48,9 +48,9 @@ $awayScore = is_numeric($match['away_score'] ?? null) ? (int) $match['away_score
         <aside class="sc-action-panel">
             <h2>Acoes rapidas</h2>
             <div class="sc-action-grid">
-                <button type="button" disabled><i class="fa-solid fa-futbol"></i><span>Adicionar gol</span></button>
-                <button type="button" disabled><i class="fa-solid fa-square"></i><span>Cartao amarelo</span></button>
-                <button type="button" disabled><i class="fa-solid fa-square-full"></i><span>Cartao vermelho</span></button>
+                <button type="button" disabled><i class="fa-solid fa-volleyball"></i><span>Registrar ponto</span></button>
+                <button type="button" disabled><i class="fa-solid fa-bolt"></i><span>Registrar ace</span></button>
+                <button type="button" disabled><i class="fa-solid fa-hand"></i><span>Registrar bloqueio</span></button>
                 <button type="button" disabled><i class="fa-solid fa-rotate"></i><span>Atualizar placar</span></button>
                 <button type="button" disabled><i class="fa-solid fa-flag-checkered"></i><span>Finalizar partida</span></button>
                 <button type="button" disabled><i class="fa-solid fa-note-sticky"></i><span>Adicionar observacao</span></button>
@@ -69,7 +69,7 @@ $awayScore = is_numeric($match['away_score'] ?? null) ? (int) $match['away_score
                 <div class="sc-panel-head"><div><span class="sc-eyebrow">Timeline</span><h2>Linha do tempo da partida</h2></div><span><?= count($events) ?> eventos</span></div>
                 <div class="sc-timeline">
                     <?php foreach ($events as $event): ?>
-                        <?php $eventType = (string) ($event['event_type'] ?? 'Evento'); $eventIcon = str_contains($eventType, 'cartao') ? 'fa-solid fa-square' : (str_contains($eventType, 'gol') || str_contains($eventType, 'penalti') ? 'fa-solid fa-futbol' : 'fa-solid fa-circle-info'); ?>
+                        <?php $eventType = (string) ($event['event_type'] ?? 'Evento'); $eventIcon = str_contains($eventType, 'cartao') ? 'fa-solid fa-square' : (in_array($eventType, ['gol', 'penalti_convertido', 'ponto', 'ataque', 'ace', 'bloqueio'], true) ? 'fa-solid fa-volleyball' : 'fa-solid fa-circle-info'); ?>
                         <article class="sc-timeline-item">
                             <span class="sc-time"><?= (int) ($event['minute'] ?? 0) ?>'</span>
                             <i class="<?= e($eventIcon) ?>" aria-hidden="true"></i>

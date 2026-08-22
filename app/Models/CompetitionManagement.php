@@ -40,7 +40,7 @@ class CompetitionManagement extends Model
             'athletes' => $this->countByChampionship('athletes', $championshipId),
             'matches' => $this->countByChampionship('matches', $championshipId),
             'events' => $this->countByMatches('match_events', $championshipId),
-            'goals' => $this->countEventsByType($championshipId, ['gol', 'penalti_convertido']),
+            'goals' => $this->countEventsByType($championshipId, ['gol', 'penalti_convertido', 'ponto', 'ataque', 'ace', 'bloqueio']),
             'cards' => $this->countEventsByType($championshipId, ['cartao_amarelo', 'cartao_vermelho']),
             'sets' => $this->countByMatches('match_sets', $championshipId),
             'standings' => $this->countByChampionship('standings', $championshipId),
@@ -131,7 +131,7 @@ class CompetitionManagement extends Model
              LEFT JOIN athletes a ON a.id = e.athlete_id
              WHERE m.championship_id = ?
              AND e.match_id = ?
-             ORDER BY e.minute ASC NULLS LAST, e.id ASC'
+             ORDER BY (e.minute IS NULL), e.minute ASC, e.id ASC'
         );
         $stmt->execute([$championshipId, $matchId]);
         return $stmt->fetchAll();
@@ -171,7 +171,7 @@ class CompetitionManagement extends Model
              LEFT JOIN athletes a ON a.id = ml.athlete_id
              WHERE m.championship_id = ?
              AND ml.match_id = ?
-             ORDER BY t.name ASC NULLS LAST, ml.is_starter DESC, a.name ASC'
+             ORDER BY (t.name IS NULL), t.name ASC, ml.is_starter DESC, a.name ASC'
         );
         $stmt->execute([$championshipId, $matchId]);
         return $stmt->fetchAll();
@@ -206,7 +206,7 @@ class CompetitionManagement extends Model
              FROM athletes a
              LEFT JOIN teams t ON t.id = a.team_id
              WHERE a.championship_id = ?
-             ORDER BY t.name ASC NULLS LAST, a.name ASC'
+             ORDER BY (t.name IS NULL), t.name ASC, a.name ASC'
         );
         $stmt->execute([$championshipId]);
         return $stmt->fetchAll();
@@ -227,7 +227,7 @@ class CompetitionManagement extends Model
              LEFT JOIN athletes ha ON ha.id = m.home_athlete_id
              LEFT JOIN athletes aa ON aa.id = m.away_athlete_id
              WHERE m.championship_id = ?
-             ORDER BY m.match_date ASC NULLS LAST, m.match_time ASC NULLS LAST, m.round_number ASC NULLS LAST, m.id ASC'
+             ORDER BY (m.match_date IS NULL), m.match_date ASC, (m.match_time IS NULL), m.match_time ASC, (m.round_number IS NULL), m.round_number ASC, m.id ASC'
         );
         $stmt->execute([$championshipId]);
         return $stmt->fetchAll();
@@ -245,7 +245,7 @@ class CompetitionManagement extends Model
              LEFT JOIN teams t ON t.id = s.team_id
              LEFT JOIN athletes a ON a.id = s.athlete_id
              WHERE s.championship_id = ?
-             ORDER BY s.group_name ASC NULLS LAST, s.points DESC, s.score_difference DESC, s.score_for DESC'
+             ORDER BY (s.group_name IS NULL), s.group_name ASC, s.points DESC, s.score_difference DESC, s.score_for DESC'
         );
         $stmt->execute([$championshipId]);
         return $stmt->fetchAll();
@@ -268,7 +268,7 @@ class CompetitionManagement extends Model
              LEFT JOIN teams t ON t.id = e.team_id
              LEFT JOIN athletes a ON a.id = e.athlete_id
              WHERE m.championship_id = ?
-             ORDER BY m.match_date ASC NULLS LAST, m.match_time ASC NULLS LAST, e.minute ASC NULLS LAST, e.id ASC'
+             ORDER BY (m.match_date IS NULL), m.match_date ASC, (m.match_time IS NULL), m.match_time ASC, (e.minute IS NULL), e.minute ASC, e.id ASC'
         );
         $stmt->execute([$championshipId]);
         return $stmt->fetchAll();
@@ -308,7 +308,7 @@ class CompetitionManagement extends Model
              LEFT JOIN teams wt ON wt.id = ms.winner_team_id
              LEFT JOIN athletes wa ON wa.id = ms.winner_athlete_id
              WHERE m.championship_id = ?
-             ORDER BY m.match_date ASC NULLS LAST, m.match_time ASC NULLS LAST, ms.set_number ASC'
+             ORDER BY (m.match_date IS NULL), m.match_date ASC, (m.match_time IS NULL), m.match_time ASC, ms.set_number ASC'
         );
         $stmt->execute([$championshipId]);
         return $stmt->fetchAll();
@@ -418,14 +418,24 @@ class CompetitionManagement extends Model
             return $this->tableExistsCache[$table];
         }
 
-        $stmt = $this->db->prepare(
-            "SELECT EXISTS (
-                SELECT 1
-                FROM information_schema.tables
-                WHERE table_schema = 'public' AND table_name = ?
-            )"
-        );
-        $stmt->execute([$table]);
+        if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+            $stmt = $this->db->prepare(
+                "SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.tables
+                    WHERE table_schema = 'public' AND table_name = ?
+                )"
+            );
+            $stmt->execute([$table]);
+        } else {
+            $stmt = $this->db->prepare(
+                "SELECT COUNT(*)
+                 FROM information_schema.tables
+                 WHERE table_schema = DATABASE() AND table_name = ?"
+            );
+            $stmt->execute([$table]);
+        }
+
         $this->tableExistsCache[$table] = (bool) $stmt->fetchColumn();
         return $this->tableExistsCache[$table];
     }
