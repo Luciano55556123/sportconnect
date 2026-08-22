@@ -10,7 +10,7 @@
         <h2>Moderacao</h2>
         <p>O administrador pode rejeitar, suspender ou cancelar solicitacoes e campeonatos quando houver informacao incorreta, fraude, cobranca indevida ou uso inadequado.</p>
         <h2>Limitacoes</h2>
-        <p>Pagamentos sao manuais nesta etapa. O SportConnect nao processa transacoes bancarias automaticamente.</p>
+        <p>Pagamentos sao manuais nesta etapa. O Ponto Competitivo nao processa transacoes bancarias automaticamente.</p>
         <h2>Revisao juridica</h2>
         <p>Este texto e uma base tecnica e deve ser revisado juridicamente antes da abertura publica.</p>
     </div>

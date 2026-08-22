@@ -1,9 +1,9 @@
 <section class="page-band">
-    <div class="container"><span class="eyebrow">Dados pessoais</span><h1>Politica de privacidade</h1><p>Versao inicial para operacao do SportConnect.</p></div>
+    <div class="container"><span class="eyebrow">Dados pessoais</span><h1>Politica de privacidade</h1><p>Versao inicial para operacao do Ponto Competitivo.</p></div>
 </section>
 <section class="container py-4">
     <div class="panel">
-        <p>O SportConnect coleta dados necessarios para cadastro, inscricao em campeonatos, comunicacao interna e seguranca da plataforma.</p>
+        <p>O Ponto Competitivo coleta dados necessarios para cadastro, inscricao em campeonatos, comunicacao interna e seguranca da plataforma.</p>
         <h2>Dados tratados</h2>
         <p>Nome, email, telefone, cidade, preferencias esportivas, inscricoes, documentos enviados, comprovantes e registros tecnicos como IP podem ser usados para operar o sistema.</p>
         <h2>Acesso</h2>

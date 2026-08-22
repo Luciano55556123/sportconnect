@@ -39,7 +39,7 @@ class MailService
         }
 
         $fromAddress = (string) (getenv('MAIL_FROM_ADDRESS') ?: getenv('MAIL_USERNAME'));
-        $fromName = (string) (getenv('MAIL_FROM_NAME') ?: 'SportConnect');
+        $fromName = (string) (getenv('MAIL_FROM_NAME') ?: 'Ponto Competitivo');
         if (!filter_var($fromAddress, FILTER_VALIDATE_EMAIL)) {
             $this->log('Remetente invalido para e-mail.');
             return false;
@@ -65,7 +65,7 @@ class MailService
             return false;
         }
 
-        $fromName = $this->sanitizeHeader((string) (getenv('MAIL_FROM_NAME') ?: 'SportConnect'));
+        $fromName = $this->sanitizeHeader((string) (getenv('MAIL_FROM_NAME') ?: 'Ponto Competitivo'));
         $headers = [
             'MIME-Version: 1.0',
             'Content-Type: text/html; charset=UTF-8',

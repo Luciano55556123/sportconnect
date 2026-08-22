@@ -15,7 +15,7 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="<?= url('/') ?>"><i class="fa-solid fa-trophy me-2"></i>SportConnect</a>
+        <a class="navbar-brand fw-bold" href="<?= url('/') ?>"><i class="fa-solid fa-trophy me-2"></i>Ponto Competitivo</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="nav">
             <ul class="navbar-nav ms-auto gap-lg-2">
@@ -56,7 +56,7 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
 
 <footer class="footer mt-5 py-4">
     <div class="container d-flex flex-column flex-md-row justify-content-between gap-3">
-        <div><strong>SportConnect</strong><br><span>Plataforma regional para atletas, equipes e organizadores.</span></div>
+        <div><strong>Ponto Competitivo</strong><br><span>Plataforma regional para atletas, equipes e organizadores.</span></div>
         <div class="d-flex gap-3"><a href="<?= url('/campeonatos') ?>">Pesquisar</a><a href="<?= url('/calendario') ?>">Calendario</a><a href="<?= url('/cadastro') ?>">Participar</a></div>
     </div>
 </footer>

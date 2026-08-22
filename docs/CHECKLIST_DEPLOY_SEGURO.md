@@ -1,4 +1,4 @@
-# Checklist de deploy seguro do SportConnect
+# Checklist de deploy seguro do Ponto Competitivo
 
 ## Antes do deploy
 

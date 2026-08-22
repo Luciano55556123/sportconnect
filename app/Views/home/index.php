@@ -3,7 +3,7 @@
         <div class="row align-items-center g-4">
             <div class="col-lg-7">
                 <span class="badge text-bg-warning mb-3">Campeonatos regionais em um so lugar</span>
-                <h1>SportConnect</h1>
+                <h1>Ponto Competitivo</h1>
                 <p class="lead">Encontre eventos esportivos, inscreva sua equipe e receba recomendacoes inteligentes conforme seu perfil.</p>
                 <form class="search-bar" action="<?= url('/campeonatos') ?>" method="get">
                     <input class="form-control form-control-lg" name="q" placeholder="Buscar por nome, cidade ou organizador">

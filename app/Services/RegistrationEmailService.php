@@ -17,7 +17,7 @@ class RegistrationEmailService
 
         $subject = 'Nova inscricao - ' . $this->headerText($registration['championship_name'] ?? '');
         $this->mail->send($to, $subject, $this->layout([
-            'Uma nova inscricao foi realizada atraves da plataforma SportConnect.',
+            'Uma nova inscricao foi realizada atraves da plataforma Ponto Competitivo.',
             'Atleta: ' . ($registration['name'] ?? ''),
             'E-mail: ' . ($registration['email'] ?? ''),
             'Telefone/WhatsApp: ' . ($registration['phone'] ?? ''),
@@ -49,10 +49,10 @@ class RegistrationEmailService
             $lines[] = 'Valor: R$ ' . number_format((float) ($registration['registration_fee'] ?? 0), 2, ',', '.');
             $lines[] = 'Chave PIX: ' . ($registration['pix_key'] ?? '');
             $lines[] = 'Titular: ' . ($registration['pix_holder_name'] ?? '');
-            $lines[] = 'Apos o pagamento, envie o comprovante atraves da plataforma SportConnect.';
+            $lines[] = 'Apos o pagamento, envie o comprovante atraves da plataforma Ponto Competitivo.';
             $lines[] = 'Status atual: Aguardando pagamento.';
         } else {
-            $lines[] = 'Voce pode acompanhar o status da inscricao atraves da plataforma SportConnect.';
+            $lines[] = 'Voce pode acompanhar o status da inscricao atraves da plataforma Ponto Competitivo.';
             $lines[] = 'Status atual: Aguardando aprovacao.';
         }
 
@@ -87,7 +87,7 @@ class RegistrationEmailService
         $subject = $approved ? 'Pagamento aprovado - Inscricao confirmada' : 'Nao foi possivel confirmar o pagamento';
         $lines = $approved
             ? ['Seu pagamento foi aprovado.', 'Sua inscricao esta confirmada em ' . ($registration['championship_name'] ?? '') . '.']
-            : ['Nao foi possivel confirmar o pagamento enviado.', 'Acesse a plataforma SportConnect para verificar o status e as observacoes do organizador.'];
+            : ['Nao foi possivel confirmar o pagamento enviado.', 'Acesse a plataforma Ponto Competitivo para verificar o status e as observacoes do organizador.'];
 
         if (!empty($registration['review_notes'])) {
             $lines[] = 'Observacao: ' . $registration['review_notes'];

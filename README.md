@@ -1,4 +1,4 @@
-# SportConnect
+# Ponto Competitivo
 
 Sistema web MVC em PHP 8+, MySQL, Bootstrap 5 e JavaScript para divulgacao e gerenciamento de campeonatos esportivos regionais.
 

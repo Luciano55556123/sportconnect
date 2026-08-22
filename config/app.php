@@ -3,7 +3,7 @@
 require_once __DIR__ . '/env.php';
 
 return [
-    'name' => 'SportConnect',
+    'name' => 'Ponto Competitivo',
     'base_url' => getenv('APP_URL') ?: 'http://127.0.0.1:8081',
 
     'database' => [

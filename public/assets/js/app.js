@@ -2,7 +2,7 @@ const runSafely = (name, callback) => {
     try {
         callback();
     } catch (error) {
-        console.error(`SportConnect: falha ao iniciar ${name}`, error);
+        console.error(`Ponto Competitivo: falha ao iniciar ${name}`, error);
     }
 };
 

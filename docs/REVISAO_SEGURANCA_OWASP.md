@@ -1,4 +1,4 @@
-# Revisao de seguranca OWASP do SportConnect
+# Revisao de seguranca OWASP do Ponto Competitivo
 
 Esta revisao usa OWASP ASVS como referencia de engenharia. Ela nao representa certificacao.
 

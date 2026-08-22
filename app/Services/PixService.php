@@ -10,7 +10,7 @@ class PixService
         $amount = number_format((float) ($data['amount'] ?? 0), 2, '.', '');
         $name = $this->emvText((string) ($data['pix_holder_name'] ?? ''), 25);
         $city = $this->emvText((string) ($data['pix_receiver_city'] ?? $data['city'] ?? ''), 15);
-        $txid = $this->emvText((string) ($data['txid'] ?? 'SPORTCONNECT'), 25, true);
+        $txid = $this->emvText((string) ($data['txid'] ?? 'PONTOCOMPETITIVO'), 25, true);
 
         $merchantAccount = $this->field('00', 'br.gov.bcb.pix')
             . $this->field('01', $key);
@@ -121,6 +121,6 @@ class PixService
         $text = strtoupper(trim(preg_replace($pattern, '', $text) ?? ''));
         $text = preg_replace('/\s+/', ' ', $text) ?? '';
 
-        return substr($text, 0, $limit) ?: 'SPORTCONNECT';
+        return substr($text, 0, $limit) ?: 'PONTOCOMPETITIVO';
     }
 }

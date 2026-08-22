@@ -1,4 +1,4 @@
-# Fluxo Real da Plataforma SportConnect
+# Fluxo Real da Plataforma Ponto Competitivo
 
 ## Atleta
 
