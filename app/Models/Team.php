@@ -31,7 +31,8 @@ class Team extends Model
             $stmt = $this->db->prepare(
                 'UPDATE teams
                  SET name = :name, city = :city, responsible_name = :responsible_name,
-                     responsible_phone = :responsible_phone, status = :status, updated_at = CURRENT_TIMESTAMP
+                     responsible_phone = :responsible_phone, shield = :shield,
+                     status = :status, updated_at = CURRENT_TIMESTAMP
                  WHERE id = :id AND championship_id = :championship_id
                  RETURNING id'
             );
@@ -40,8 +41,8 @@ class Team extends Model
         }
 
         $stmt = $this->db->prepare(
-            'INSERT INTO teams (championship_id, name, city, responsible_name, responsible_phone, status)
-             VALUES (:championship_id, :name, :city, :responsible_name, :responsible_phone, :status)
+            'INSERT INTO teams (championship_id, name, city, responsible_name, responsible_phone, shield, status)
+             VALUES (:championship_id, :name, :city, :responsible_name, :responsible_phone, :shield, :status)
              RETURNING id'
         );
         $stmt->execute($this->payload($data, $championshipId));
@@ -60,12 +61,18 @@ class Team extends Model
 
     private function payload(array $data, int $championshipId): array
     {
+        $name = trim($data['name'] ?? '');
+        if ($name === '') {
+            throw new \InvalidArgumentException('Informe o nome da equipe.');
+        }
+
         return [
             'championship_id' => $championshipId,
-            'name' => trim($data['name'] ?? ''),
+            'name' => $name,
             'city' => trim($data['city'] ?? '') ?: null,
             'responsible_name' => trim($data['responsible_name'] ?? '') ?: null,
             'responsible_phone' => trim($data['responsible_phone'] ?? '') ?: null,
+            'shield' => trim($data['shield'] ?? '') ?: null,
             'status' => in_array($data['status'] ?? '', ['pendente', 'aprovado', 'rejeitado', 'cancelado'], true) ? $data['status'] : 'aprovado',
         ];
     }

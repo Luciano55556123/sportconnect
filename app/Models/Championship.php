@@ -143,6 +143,68 @@ class Championship extends Model
         return $stmt->fetchAll();
     }
 
+    public function canManage(int $id, int $userId, bool $isAdmin = false): bool
+    {
+        if ($isAdmin) {
+            return (bool) $this->find($id);
+        }
+
+        $stmt = $this->db->prepare('SELECT 1 FROM championships WHERE id = ? AND organizer_id = ? LIMIT 1');
+        $stmt->execute([$id, $userId]);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    public function updateCompetitionInfo(int $id, array $data, int $userId, bool $isAdmin = false): void
+    {
+        $where = $isAdmin ? 'id = :id' : 'id = :id AND organizer_id = :organizer_id';
+        $payload = [
+            'id' => $id,
+            'organizer_id' => $userId,
+            'competition_format' => trim((string) ($data['competition_format'] ?? '')) ?: null,
+            'end_date' => ($data['end_date'] ?? '') !== '' ? $data['end_date'] : null,
+            'registration_deadline' => ($data['registration_deadline'] ?? '') !== '' ? $data['registration_deadline'] : null,
+            'registrations_open' => !empty($data['registrations_open']) ? 1 : 0,
+            'address' => trim((string) ($data['address'] ?? '')) ?: null,
+            'neighborhood' => trim((string) ($data['neighborhood'] ?? '')) ?: null,
+            'state' => strtoupper(substr(trim((string) ($data['state'] ?? '')), 0, 2)) ?: null,
+            'zip_code' => trim((string) ($data['zip_code'] ?? '')) ?: null,
+            'reference_point' => trim((string) ($data['reference_point'] ?? '')) ?: null,
+            'court_or_field' => trim((string) ($data['court_or_field'] ?? '')) ?: null,
+            'rules' => trim((string) ($data['rules'] ?? '')) ?: null,
+            'tiebreak_rules' => trim((string) ($data['tiebreak_rules'] ?? '')) ?: null,
+            'qualification_rules' => trim((string) ($data['qualification_rules'] ?? '')) ?: null,
+            'elimination_rules' => trim((string) ($data['elimination_rules'] ?? '')) ?: null,
+            'required_documents' => trim((string) ($data['required_documents'] ?? '')) ?: null,
+            'cancellation_policy' => trim((string) ($data['cancellation_policy'] ?? '')) ?: null,
+        ];
+
+        $stmt = $this->db->prepare(
+            'UPDATE championships SET
+                competition_format = :competition_format,
+                end_date = :end_date,
+                registration_deadline = :registration_deadline,
+                registrations_open = :registrations_open,
+                address = :address,
+                neighborhood = :neighborhood,
+                state = :state,
+                zip_code = :zip_code,
+                reference_point = :reference_point,
+                court_or_field = :court_or_field,
+                rules = :rules,
+                tiebreak_rules = :tiebreak_rules,
+                qualification_rules = :qualification_rules,
+                elimination_rules = :elimination_rules,
+                required_documents = :required_documents,
+                cancellation_policy = :cancellation_policy
+             WHERE ' . $where
+        );
+
+        if ($isAdmin) {
+            unset($payload['organizer_id']);
+        }
+        $stmt->execute($payload);
+    }
+
     public function calendar(): array
     {
         $statuses = $this->visibleStatuses();

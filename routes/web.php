@@ -4,7 +4,9 @@ use App\Controllers\AdminController;
 use App\Controllers\AthleteController;
 use App\Controllers\AuthController;
 use App\Controllers\ChampionshipController;
+use App\Controllers\CompetitionManagementController;
 use App\Controllers\HomeController;
+use App\Controllers\MatchController;
 use App\Controllers\OrganizerController;
 use App\Controllers\OrganizerRequestController;
 
@@ -12,6 +14,9 @@ return [
     ['GET', '/', [HomeController::class, 'index']],
     ['GET', '/campeonatos', [ChampionshipController::class, 'index']],
     ['GET', '/campeonatos/{id}', [ChampionshipController::class, 'show']],
+    ['GET', '/campeonatos/{championshipId}/partidas/{matchId}', [MatchController::class, 'show']],
+    ['GET', '/campeonatos/{championshipId}/equipes/{teamId}', [MatchController::class, 'team']],
+    ['GET', '/campeonatos/{championshipId}/atletas/{athleteId}', [MatchController::class, 'athlete']],
     ['POST', '/campeonatos/{id}/inscrever', [ChampionshipController::class, 'register']],
     ['POST', '/campeonatos/{id}/favoritar', [ChampionshipController::class, 'favorite']],
     ['POST', '/campeonatos/{id}/avaliar', [ChampionshipController::class, 'review']],
@@ -33,8 +38,22 @@ return [
     ['GET', '/organizador', [OrganizerController::class, 'dashboard']],
     ['GET', '/organizador/campeonatos/novo', [OrganizerController::class, 'create']],
     ['POST', '/organizador/campeonatos', [OrganizerController::class, 'store']],
-    ['GET', '/organizador/campeonatos/{id}/gerenciar', [OrganizerController::class, 'manage']],
-    ['GET', '/organizador/campeonatos/{championshipId}/partidas/{matchId}/gerenciar', [OrganizerController::class, 'matchManage']],
+    ['GET', '/organizador/campeonatos/{id}/gerenciar', [CompetitionManagementController::class, 'manage']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/informacoes', [CompetitionManagementController::class, 'updateInfo']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/equipes', [CompetitionManagementController::class, 'saveTeam']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/equipes/{teamId}/excluir', [CompetitionManagementController::class, 'deleteTeam']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/atletas', [CompetitionManagementController::class, 'saveAthlete']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/atletas/{athleteId}/excluir', [CompetitionManagementController::class, 'deleteAthlete']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/jogos', [CompetitionManagementController::class, 'saveMatch']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/jogos/{matchId}/excluir', [CompetitionManagementController::class, 'deleteMatch']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/resultados/{matchId}', [CompetitionManagementController::class, 'recordResult']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/eventos', [CompetitionManagementController::class, 'saveEvent']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/eventos/{eventId}/excluir', [CompetitionManagementController::class, 'deleteEvent']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/sets', [CompetitionManagementController::class, 'saveSet']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/partidas/{matchId}/sumula', [CompetitionManagementController::class, 'saveMatchReport']],
+    ['POST', '/organizador/campeonatos/{id}/gerenciar/classificacao/recalcular', [CompetitionManagementController::class, 'recalculateStandings']],
+    ['GET', '/organizador/campeonatos/{id}/relatorios/{type}', [CompetitionManagementController::class, 'export']],
+    ['GET', '/organizador/campeonatos/{id}/partidas/{matchId}/gerenciar', [CompetitionManagementController::class, 'manageMatch']],
     ['GET', '/organizador/campeonatos/{id}/editar', [OrganizerController::class, 'edit']],
     ['POST', '/organizador/campeonatos/{id}', [OrganizerController::class, 'update']],
     ['GET', '/organizador/inscricoes', [OrganizerController::class, 'registrations']],

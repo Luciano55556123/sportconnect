@@ -11,6 +11,11 @@ function url(string $path = ''): string
 {
     $config = require BASE_PATH . '/config/app.php';
     $base = rtrim($config['base_url'], '/');
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    if ($host !== '' && preg_match('/^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/', $host)) {
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $base = $scheme . '://' . $host;
+    }
     if ($base === '') {
         $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
         $base = $scriptDir === '/' ? '' : $scriptDir;

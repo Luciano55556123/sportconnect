@@ -89,6 +89,18 @@ class Registration extends Model
         return $stmt->fetchAll();
     }
 
+    public function countPendingForChampionship(int $championshipId): int
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*)
+             FROM registrations
+             WHERE championship_id = ?
+             AND status IN ('pendente', 'aguardando_pagamento')"
+        );
+        $stmt->execute([$championshipId]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public function setStatus(int $id, string $status, int $organizerId): void
     {
         $stmt = $this->db->prepare(

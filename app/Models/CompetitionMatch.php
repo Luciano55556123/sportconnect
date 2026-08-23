@@ -47,6 +47,9 @@ class CompetitionMatch extends Model
 
     public function save(array $data, int $championshipId): int
     {
+        $payload = $this->payload($data, $championshipId);
+        $this->validateParticipants($payload, $championshipId);
+
         if (!empty($data['id'])) {
             $stmt = $this->db->prepare(
                 'UPDATE matches
@@ -60,7 +63,7 @@ class CompetitionMatch extends Model
                  WHERE id = :id AND championship_id = :championship_id
                  RETURNING id'
             );
-            $stmt->execute($this->payload($data, $championshipId) + ['id' => (int) $data['id']]);
+            $stmt->execute($payload + ['id' => (int) $data['id']]);
             return (int) $stmt->fetchColumn();
         }
 
@@ -75,7 +78,7 @@ class CompetitionMatch extends Model
               :referee, :status, :next_match_id, :next_match_position, :notes)
              RETURNING id'
         );
-        $stmt->execute($this->payload($data, $championshipId));
+        $stmt->execute($payload);
         return (int) $stmt->fetchColumn();
     }
 
@@ -101,7 +104,7 @@ class CompetitionMatch extends Model
                 $winnerAthleteId = $match['away_athlete_id'] ? (int) $match['away_athlete_id'] : null;
             }
 
-            $status = in_array($data['status'] ?? '', ['agendada', 'em_andamento', 'finalizada', 'adiada', 'cancelada'], true) ? $data['status'] : 'finalizada';
+            $status = in_array($data['status'] ?? '', $this->allowedStatuses(), true) ? $data['status'] : 'finalizada';
             $stmt = $this->db->prepare(
                 'UPDATE matches
                  SET home_score = ?, away_score = ?, status = ?, winner_team_id = ?, winner_athlete_id = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
@@ -167,10 +170,55 @@ class CompetitionMatch extends Model
             'venue' => trim($data['venue'] ?? '') ?: null,
             'court_or_field' => trim($data['court_or_field'] ?? '') ?: null,
             'referee' => trim($data['referee'] ?? '') ?: null,
-            'status' => in_array($data['status'] ?? '', ['agendada', 'em_andamento', 'finalizada', 'adiada', 'cancelada'], true) ? $data['status'] : 'agendada',
+            'status' => in_array($data['status'] ?? '', $this->allowedStatuses(), true) ? $data['status'] : 'agendada',
             'next_match_id' => !empty($data['next_match_id']) ? (int) $data['next_match_id'] : null,
             'next_match_position' => in_array($data['next_match_position'] ?? '', ['home', 'away'], true) ? $data['next_match_position'] : null,
             'notes' => trim($data['notes'] ?? '') ?: null,
         ];
+    }
+
+    private function allowedStatuses(): array
+    {
+        return ['agendada', 'em_andamento', 'finalizada'];
+    }
+
+    private function validateParticipants(array $payload, int $championshipId): void
+    {
+        $homeTeamId = $payload['home_team_id'];
+        $awayTeamId = $payload['away_team_id'];
+        if ($homeTeamId && $awayTeamId && (int) $homeTeamId === (int) $awayTeamId) {
+            throw new \InvalidArgumentException('Mandante e visitante nao podem ser iguais.');
+        }
+
+        foreach (['home_team_id' => $homeTeamId, 'away_team_id' => $awayTeamId] as $field => $teamId) {
+            if (!$teamId) {
+                continue;
+            }
+            $stmt = $this->db->prepare('SELECT 1 FROM teams WHERE id = ? AND championship_id = ? LIMIT 1');
+            $stmt->execute([$teamId, $championshipId]);
+            if (!$stmt->fetchColumn()) {
+                throw new \InvalidArgumentException('Equipe invalida para este campeonato: ' . $field);
+            }
+        }
+
+        foreach (['home_athlete_id', 'away_athlete_id'] as $field) {
+            $athleteId = $payload[$field];
+            if (!$athleteId) {
+                continue;
+            }
+            $stmt = $this->db->prepare('SELECT 1 FROM athletes WHERE id = ? AND championship_id = ? LIMIT 1');
+            $stmt->execute([$athleteId, $championshipId]);
+            if (!$stmt->fetchColumn()) {
+                throw new \InvalidArgumentException('Atleta invalido para este campeonato: ' . $field);
+            }
+        }
+
+        if ($payload['next_match_id']) {
+            $stmt = $this->db->prepare('SELECT 1 FROM matches WHERE id = ? AND championship_id = ? LIMIT 1');
+            $stmt->execute([$payload['next_match_id'], $championshipId]);
+            if (!$stmt->fetchColumn()) {
+                throw new \InvalidArgumentException('Proxima partida invalida para este campeonato.');
+            }
+        }
     }
 }

@@ -45,7 +45,7 @@ class Athlete extends Model
                 'UPDATE athletes
                  SET team_id = :team_id, name = :name, birth_date = :birth_date, city = :city,
                      shirt_number = :shirt_number, position = :position, category = :category,
-                     status = :status, updated_at = CURRENT_TIMESTAMP
+                     photo = :photo, status = :status, updated_at = CURRENT_TIMESTAMP
                  WHERE id = :id AND championship_id = :championship_id
                  RETURNING id'
             );
@@ -54,8 +54,8 @@ class Athlete extends Model
         }
 
         $stmt = $this->db->prepare(
-            'INSERT INTO athletes (championship_id, team_id, name, birth_date, city, shirt_number, position, category, status)
-             VALUES (:championship_id, :team_id, :name, :birth_date, :city, :shirt_number, :position, :category, :status)
+            'INSERT INTO athletes (championship_id, team_id, name, birth_date, city, shirt_number, position, category, photo, status)
+             VALUES (:championship_id, :team_id, :name, :birth_date, :city, :shirt_number, :position, :category, :photo, :status)
              RETURNING id'
         );
         $stmt->execute($this->payload($data, $championshipId));
@@ -77,15 +77,26 @@ class Athlete extends Model
 
     private function payload(array $data, int $championshipId): array
     {
+        $name = trim($data['name'] ?? '');
+        if ($name === '') {
+            throw new \InvalidArgumentException('Informe o nome do atleta.');
+        }
+
+        $teamId = !empty($data['team_id']) ? (int) $data['team_id'] : null;
+        if ($teamId && !(new Team())->findInChampionship($teamId, $championshipId)) {
+            throw new \InvalidArgumentException('Equipe invalida para este campeonato.');
+        }
+
         return [
             'championship_id' => $championshipId,
-            'team_id' => !empty($data['team_id']) ? (int) $data['team_id'] : null,
-            'name' => trim($data['name'] ?? ''),
+            'team_id' => $teamId,
+            'name' => $name,
             'birth_date' => ($data['birth_date'] ?? '') !== '' ? $data['birth_date'] : null,
             'city' => trim($data['city'] ?? '') ?: null,
             'shirt_number' => ($data['shirt_number'] ?? '') !== '' ? (int) $data['shirt_number'] : null,
             'position' => trim($data['position'] ?? '') ?: null,
             'category' => trim($data['category'] ?? '') ?: null,
+            'photo' => trim($data['photo'] ?? '') ?: null,
             'status' => in_array($data['status'] ?? '', ['pendente', 'aprovado', 'rejeitado', 'cancelado'], true) ? $data['status'] : 'aprovado',
         ];
     }

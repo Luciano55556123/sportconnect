@@ -85,4 +85,22 @@ class User extends Model
 
         return $stmt->fetchAll();
     }
+
+    public function isSuspendedOrganizer(int $id): bool
+    {
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT suspended_at
+                 FROM users
+                 WHERE id = ?
+                 AND role IN ('organizer', 'organizador')
+                 LIMIT 1"
+            );
+            $stmt->execute([$id]);
+            $row = $stmt->fetch();
+            return !empty($row['suspended_at']);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
 }

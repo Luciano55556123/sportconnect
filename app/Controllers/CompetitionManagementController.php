@@ -39,10 +39,17 @@ class CompetitionManagementController extends Controller
     {
         $championship = $this->authorizedChampionship((int) $id);
         verify_csrf();
-        (new Team())->save($_POST, (int) $championship['id']);
-        $this->log((int) $championship['id'], 'equipe_salva', 'Equipe cadastrada ou atualizada: ' . ($_POST['name'] ?? 'sem nome'));
-        flash('success', 'Equipe salva.');
-        $this->redirect('/organizador/campeonatos/' . $id . '/gerenciar#equipes');
+        try {
+            (new Team())->save($_POST, (int) $championship['id']);
+            $this->log((int) $championship['id'], 'equipe_salva', 'Equipe cadastrada ou atualizada: ' . ($_POST['name'] ?? 'sem nome'));
+            flash('success', 'Equipe salva.');
+        } catch (\InvalidArgumentException $exception) {
+            flash('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            error_log($exception->getMessage());
+            flash('error', 'Nao foi possivel salvar a equipe.');
+        }
+        $this->redirect($_POST['return_to'] ?? ('/organizador/campeonatos/' . $id . '/gerenciar#equipes'));
     }
 
     public function deleteTeam(string $id, string $teamId): void
@@ -58,10 +65,17 @@ class CompetitionManagementController extends Controller
     {
         $championship = $this->authorizedChampionship((int) $id);
         verify_csrf();
-        (new Athlete())->save($_POST, (int) $championship['id']);
-        $this->log((int) $championship['id'], 'atleta_salvo', 'Atleta ou participante salvo: ' . ($_POST['name'] ?? 'sem nome'));
-        flash('success', 'Atleta ou participante salvo.');
-        $this->redirect('/organizador/campeonatos/' . $id . '/gerenciar#atletas');
+        try {
+            (new Athlete())->save($_POST, (int) $championship['id']);
+            $this->log((int) $championship['id'], 'atleta_salvo', 'Atleta ou participante salvo: ' . ($_POST['name'] ?? 'sem nome'));
+            flash('success', 'Atleta ou participante salvo.');
+        } catch (\InvalidArgumentException $exception) {
+            flash('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            error_log($exception->getMessage());
+            flash('error', 'Nao foi possivel salvar o atleta.');
+        }
+        $this->redirect($_POST['return_to'] ?? ('/organizador/campeonatos/' . $id . '/gerenciar#atletas'));
     }
 
     public function deleteAthlete(string $id, string $athleteId): void
@@ -77,10 +91,17 @@ class CompetitionManagementController extends Controller
     {
         $championship = $this->authorizedChampionship((int) $id);
         verify_csrf();
-        $matchId = (new CompetitionMatch())->save($_POST, (int) $championship['id']);
-        $this->log((int) $championship['id'], 'partida_criada', 'Partida cadastrada ou atualizada #' . $matchId);
-        flash('success', 'Jogo salvo.');
-        $this->redirect('/organizador/campeonatos/' . $id . '/gerenciar#jogos');
+        try {
+            $matchId = (new CompetitionMatch())->save($_POST, (int) $championship['id']);
+            $this->log((int) $championship['id'], 'partida_salva', 'Partida cadastrada ou atualizada #' . $matchId);
+            flash('success', 'Jogo salvo.');
+        } catch (\InvalidArgumentException $exception) {
+            flash('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            error_log($exception->getMessage());
+            flash('error', 'Nao foi possivel salvar a partida.');
+        }
+        $this->redirect($_POST['return_to'] ?? ('/organizador/campeonatos/' . $id . '/gerenciar#partidas'));
     }
 
     public function deleteMatch(string $id, string $matchId): void
@@ -89,7 +110,7 @@ class CompetitionManagementController extends Controller
         verify_csrf();
         (new CompetitionMatch())->deleteIfNoResult((int) $matchId, (int) $championship['id']);
         flash('success', 'Jogo excluido quando nao havia resultado/eventos.');
-        $this->redirect('/organizador/campeonatos/' . $id . '/gerenciar#jogos');
+        $this->redirect('/organizador/campeonatos/' . $id . '/gerenciar#partidas');
     }
 
     public function recordResult(string $id, string $matchId): void
@@ -254,9 +275,17 @@ class CompetitionManagementController extends Controller
         $goals = array_filter($flatEvents, fn ($event) => in_array($event['event_type'] ?? '', ['gol', 'gol_contra', 'penalti_convertido'], true));
         $next = null;
         foreach ($matches as $match) {
-            if (($match['status'] ?? '') === 'agendada') {
+            if (($match['status'] ?? '') === 'em_andamento') {
                 $next = $match;
                 break;
+            }
+        }
+        if ($next === null) {
+            foreach ($matches as $match) {
+                if (($match['status'] ?? '') === 'agendada') {
+                    $next = $match;
+                    break;
+                }
             }
         }
 
@@ -265,6 +294,7 @@ class CompetitionManagementController extends Controller
             'athletes_count' => count($athletes),
             'matches_count' => count($matches),
             'finished_matches' => count($finished),
+            'in_progress_matches' => count(array_filter($matches, fn ($match) => ($match['status'] ?? '') === 'em_andamento')),
             'pending_registrations' => (new Registration())->countPendingForChampionship($id),
             'goals_count' => count($goals),
             'next_match' => $next,

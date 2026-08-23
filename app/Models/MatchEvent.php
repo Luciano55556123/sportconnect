@@ -25,6 +25,8 @@ class MatchEvent extends Model
 
     public function save(array $data, int $championshipId): void
     {
+        $eventType = in_array($data['event_type'] ?? '', $this->allowedTypes(), true) ? $data['event_type'] : 'observacao';
+
         if (!empty($data['id'])) {
             $stmt = $this->db->prepare(
                 'UPDATE match_events e
@@ -37,7 +39,7 @@ class MatchEvent extends Model
                 'id' => (int) $data['id'],
                 'team_id' => !empty($data['team_id']) ? (int) $data['team_id'] : null,
                 'athlete_id' => !empty($data['athlete_id']) ? (int) $data['athlete_id'] : null,
-                'event_type' => $data['event_type'] ?? 'observacao',
+                'event_type' => $eventType,
                 'minute' => ($data['minute'] ?? '') !== '' ? (int) $data['minute'] : null,
                 'additional_time' => ($data['additional_time'] ?? '') !== '' ? (int) $data['additional_time'] : null,
                 'value' => ($data['value'] ?? '') !== '' ? (int) $data['value'] : null,
@@ -57,7 +59,7 @@ class MatchEvent extends Model
             'match_id' => (int) $data['match_id'],
             'team_id' => !empty($data['team_id']) ? (int) $data['team_id'] : null,
             'athlete_id' => !empty($data['athlete_id']) ? (int) $data['athlete_id'] : null,
-            'event_type' => $data['event_type'] ?? 'observacao',
+            'event_type' => $eventType,
             'minute' => ($data['minute'] ?? '') !== '' ? (int) $data['minute'] : null,
             'additional_time' => ($data['additional_time'] ?? '') !== '' ? (int) $data['additional_time'] : null,
             'value' => ($data['value'] ?? '') !== '' ? (int) $data['value'] : null,
@@ -82,5 +84,22 @@ class MatchEvent extends Model
     {
         $events = $this->byChampionship($championshipId);
         return $events[$matchId] ?? [];
+    }
+
+    private function allowedTypes(): array
+    {
+        return [
+            'gol',
+            'gol_contra',
+            'penalti_convertido',
+            'penalti_perdido',
+            'cartao_amarelo',
+            'cartao_vermelho',
+            'substituicao',
+            'ponto',
+            'saque',
+            'bloqueio',
+            'observacao',
+        ];
     }
 }
