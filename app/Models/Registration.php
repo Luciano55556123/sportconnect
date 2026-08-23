@@ -41,6 +41,7 @@ class Registration extends Model
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
              c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ', c.pix_instructions, c.email_contato,
+             c.whatsapp_contato,
              c.modality, c.category AS championship_category, c.organizer_id, s.name AS sport_name,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
              p.rejection_reason AS review_notes
@@ -62,7 +63,7 @@ class Registration extends Model
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.event_date, c.status AS championship_status,
              c.registration_fee, c.requires_payment, c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ',
-             c.pix_instructions, s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
+             c.pix_instructions, c.whatsapp_contato, s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
              p.receipt_file AS receipt_path, p.rejection_reason AS review_notes
              FROM registrations r
              JOIN championships c ON c.id = r.championship_id
@@ -77,7 +78,7 @@ class Registration extends Model
     public function byOrganizer(int $organizerId): array
     {
         $stmt = $this->db->prepare(
-            'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
+            'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment, c.whatsapp_contato,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
              p.updated_at AS submitted_at, p.reviewed_at, p.rejection_reason AS review_notes
              FROM registrations r

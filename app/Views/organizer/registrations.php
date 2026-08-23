@@ -20,6 +20,9 @@
                 'cancelado' => 'Cancelada',
             ];
             ?>
+            <?php if (!$registrations): ?>
+                <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma inscricao recebida.</td></tr>
+            <?php endif; ?>
             <?php foreach ($registrations as $r): ?>
                 <?php $paid = !empty($r['requires_payment']) && (float) ($r['registration_fee'] ?? 0) > 0; ?>
                 <tr>
@@ -32,6 +35,8 @@
                             <span class="badge text-bg-info"><?= e($labels[$paymentStatus] ?? $paymentStatus) ?></span>
                             <?php if (!empty($r['receipt_path'])): ?>
                                 <br><a class="btn btn-sm btn-outline-secondary mt-2" target="_blank" href="<?= url('/organizador/inscricoes/' . $r['id'] . '/comprovante') ?>">Visualizar comprovante</a>
+                            <?php else: ?>
+                                <br><small class="text-muted">Comprovante enviado pelo WhatsApp.</small>
                             <?php endif; ?>
                         <?php else: ?>
                             <span class="badge text-bg-success">Gratuito</span>
@@ -43,8 +48,8 @@
                             <form method="post" action="<?= url('/organizador/inscricoes/' . $r['id'] . '/pagamento') ?>" class="mb-2">
                                 <?= csrf_field() ?>
                                 <input class="form-control form-control-sm mb-2" name="review_notes" placeholder="Observacao opcional">
-                                <button class="btn btn-sm btn-success" name="action" value="approve">Aprovar pagamento</button>
-                                <button class="btn btn-sm btn-outline-danger" name="action" value="reject">Rejeitar pagamento</button>
+                                <button class="btn btn-sm btn-success" name="action" value="approve">Aprovar inscricao paga</button>
+                                <button class="btn btn-sm btn-outline-danger" name="action" value="reject">Rejeitar inscricao paga</button>
                             </form>
                         <?php endif; ?>
                         <form method="post" action="<?= url('/organizador/inscricoes/' . $r['id'] . '/status') ?>">

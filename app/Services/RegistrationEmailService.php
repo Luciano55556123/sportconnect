@@ -49,7 +49,7 @@ class RegistrationEmailService
             $lines[] = 'Valor: R$ ' . number_format((float) ($registration['registration_fee'] ?? 0), 2, ',', '.');
             $lines[] = 'Chave PIX: ' . ($registration['pix_key'] ?? '');
             $lines[] = 'Titular: ' . ($registration['pix_holder_name'] ?? '');
-            $lines[] = 'Apos o pagamento, envie o comprovante atraves da plataforma Ponto Competitivo.';
+            $lines[] = 'Apos o pagamento, acesse seu historico e envie o comprovante pelo WhatsApp do organizador.';
             $lines[] = 'Status atual: Aguardando pagamento.';
         } else {
             $lines[] = 'Voce pode acompanhar o status da inscricao atraves da plataforma Ponto Competitivo.';

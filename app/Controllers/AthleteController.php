@@ -75,22 +75,7 @@ class AthleteController extends Controller
             $this->redirect('/atleta/historico');
         }
 
-        $path = $this->uploadReceiptFile('receipt_file');
-        if ($path === null) {
-            $this->redirect('/atleta/historico');
-        }
-
-        if ($paymentModel->submitReceipt((int) $id, Auth::user()['id'], $path)) {
-            $registration = (new Registration())->findDetails((int) $id);
-            if ($registration) {
-                (new RegistrationEmailService())->receiptToOrganizer($registration);
-                (new Notification())->create((int) $registration['organizer_id'], 'Comprovante recebido em ' . $registration['championship_name'] . '.');
-            }
-            flash('success', 'Comprovante recebido. Pagamento em analise.');
-        } else {
-            flash('error', 'Nao foi possivel enviar o comprovante.');
-        }
-
+        flash('error', 'O envio de comprovante agora e feito pelo WhatsApp do organizador. Abra o PIX no seu historico e use o botao de WhatsApp.');
         $this->redirect('/atleta/historico');
     }
 

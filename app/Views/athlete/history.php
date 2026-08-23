@@ -21,7 +21,18 @@
             ];
             ?>
             <?php foreach ($registrations as $r): ?>
-                <?php $paid = !empty($r['requires_payment']) && (float) ($r['registration_fee'] ?? 0) > 0; ?>
+                <?php
+                    $paid = !empty($r['requires_payment']) && (float) ($r['registration_fee'] ?? 0) > 0;
+                    $amount = (float) ($r['payment_amount'] ?? $r['registration_fee']);
+                    $whatsappMessage = "Ola! Fiz minha inscricao pelo Ponto Competitivo.\n\n"
+                        . 'Campeonato: ' . ($r['championship_name'] ?? '') . "\n"
+                        . 'Participante: ' . ($r['name'] ?? '') . "\n"
+                        . 'Valor da inscricao: ' . money_br($amount) . "\n\n"
+                        . "Estou entrando em contato para enviar meu comprovante de pagamento.\n\n"
+                        . 'Aguardo a confirmacao da inscricao. Obrigado!';
+                    $whatsappNumber = whatsapp_number($r['whatsapp_contato'] ?? '');
+                    $whatsappLink = $whatsappNumber !== '' ? whatsapp_url($whatsappNumber, $whatsappMessage) : null;
+                ?>
                 <tr>
                     <td><?= e($r['championship_name']) ?><br><small><?= e($r['sport_name']) ?></small></td>
                     <td><?= e(date('d/m/Y', strtotime($r['event_date']))) ?></td>
@@ -38,21 +49,18 @@
                     <td>
                         <?php if ($paid): ?>
                             <button class="btn btn-sm btn-outline-primary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#pix-<?= (int) $r['id'] ?>">Pagar via PIX</button>
-                            <?php if (!empty($r['receipt_path'])): ?>
-                                <a class="btn btn-sm btn-outline-secondary mb-2" target="_blank" href="<?= url('/atleta/inscricoes/' . $r['id'] . '/comprovante') ?>">Visualizar comprovante</a>
-                            <?php endif; ?>
                             <div class="collapse" id="pix-<?= (int) $r['id'] ?>">
                                 <div class="pix-payment mt-2">
-                                    <h2>Finalize sua inscricao</h2>
+                                    <h2>Pagamento via PIX</h2>
                                     <p class="mb-1"><strong><?= e($r['championship_name']) ?></strong></p>
                                     <p class="mb-1">Status: <?= e($labels[$paymentStatus] ?? $paymentStatus) ?></p>
-                                    <p class="pix-amount">Valor: R$ <?= number_format((float) ($r['payment_amount'] ?? $r['registration_fee']), 2, ',', '.') ?></p>
+                                    <p class="pix-amount">Valor: <?= e(money_br($amount)) ?></p>
                                     <?php if (!empty($r['pix_qr']) && !empty($r['pix_payload'])): ?>
                                         <img class="pix-qr" src="<?= e($r['pix_qr']) ?>" alt="QR Code PIX">
                                         <p class="text-muted mb-2">Escaneie o QR Code com o aplicativo do seu banco.</p>
-                                        <button class="btn btn-sm btn-outline-primary js-copy-pix mb-2" type="button" data-pix-code="<?= e($r['pix_payload']) ?>">Copiar codigo PIX</button>
-                                        <label class="form-label mt-2">PIX Copia e Cola</label>
+                                        <label class="form-label mt-2">Codigo PIX:</label>
                                         <textarea class="form-control pix-code-field" rows="4" readonly><?= e($r['pix_payload']) ?></textarea>
+                                        <button class="btn btn-sm btn-outline-primary js-copy-pix mt-2 mb-2" type="button" data-pix-code="<?= e($r['pix_payload']) ?>">Copiar PIX</button>
                                     <?php else: ?>
                                         <div class="alert alert-warning mb-2">Nao foi possivel gerar o QR Code PIX. Fale com o organizador.</div>
                                     <?php endif; ?>
@@ -60,13 +68,13 @@
                                     <p class="mb-1">Tipo: <?= e($r['pix_key_type'] ?? '') ?></p>
                                     <p class="mb-1">Recebedor: <?= e($r['pix_holder_name'] ?? '') ?></p>
                                     <?php if (!empty($r['pix_instructions'])): ?><p class="mb-2"><?= e($r['pix_instructions']) ?></p><?php endif; ?>
-                                    <h3>Ja realizou o pagamento?</h3>
-                                    <form method="post" enctype="multipart/form-data" action="<?= url('/atleta/inscricoes/' . $r['id'] . '/comprovante') ?>" class="d-flex flex-column gap-2">
-                                        <?= csrf_field() ?>
-                                        <input class="form-control form-control-sm" type="file" name="receipt_file" accept=".jpg,.jpeg,.png,.pdf" required>
-                                        <button class="btn btn-sm btn-primary">Enviar comprovante</button>
-                                    </form>
-                                    <?php if (!empty($r['receipt_path'])): ?><p class="text-muted mt-2 mb-0">Comprovante enviado. Aguardando analise do organizador.</p><?php endif; ?>
+                                    <h3>Comprovante de pagamento</h3>
+                                    <p class="mb-2">Apos realizar o PIX, envie o comprovante diretamente para o organizador.</p>
+                                    <?php if ($whatsappNumber !== '' && $whatsappLink !== null): ?>
+                                        <a class="btn btn-sm btn-success d-inline-flex align-items-center gap-2" target="_blank" rel="noopener" href="<?= e($whatsappLink) ?>"><i class="fa-brands fa-whatsapp"></i> Enviar comprovante pelo WhatsApp</a>
+                                    <?php else: ?>
+                                        <div class="alert alert-warning mb-0">WhatsApp do organizador nao informado neste campeonato.</div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endif; ?>

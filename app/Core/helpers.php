@@ -37,6 +37,39 @@ function versioned_asset(string $path): string
     return asset($relative) . '?v=' . $version;
 }
 
+function whatsapp_number(?string $value): string
+{
+    $number = preg_replace('/\D/', '', (string) $value);
+    if ($number === '') {
+        return '';
+    }
+
+    if (str_starts_with($number, '00')) {
+        $number = substr($number, 2);
+    }
+
+    if (!str_starts_with($number, '55') && strlen($number) <= 11) {
+        $number = '55' . $number;
+    }
+
+    return $number;
+}
+
+function whatsapp_url(?string $phone, string $message): ?string
+{
+    $number = whatsapp_number($phone);
+    if ($number === '') {
+        return null;
+    }
+
+    return 'https://wa.me/' . $number . '?text=' . rawurlencode($message);
+}
+
+function money_br(float $amount): string
+{
+    return 'R$ ' . number_format($amount, 2, ',', '.');
+}
+
 function csrf_token(): string
 {
     if (empty($_SESSION['csrf'])) {
