@@ -80,9 +80,15 @@ class RegistrationPayment extends Model
             $stmt->execute([$paymentStatus, $organizerId, $notes ?: null, $registrationId]);
 
             $registration = $this->db->prepare(
-                'UPDATE registrations SET status = ? WHERE id = ?'
+                'UPDATE registrations
+                 SET status = ?
+                 WHERE id = ?
+                 AND EXISTS (
+                    SELECT 1 FROM championships c
+                    WHERE c.id = registrations.championship_id AND c.organizer_id = ?
+                 )'
             );
-            $registration->execute([$registrationStatus, $registrationId]);
+            $registration->execute([$registrationStatus, $registrationId, $organizerId]);
 
             if ($startedTransaction) {
                 $this->db->commit();

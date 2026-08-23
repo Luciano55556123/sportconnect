@@ -258,6 +258,7 @@ class CompetitionManagementController extends Controller
             'setsByMatch' => (new MatchSet())->byChampionship($championshipId),
             'standings' => (new Standing())->byChampionship($championshipId),
             'statistics' => (new AthleteStatistic())->byChampionship($championshipId),
+            'registrations' => (new Registration())->byChampionshipForOrganizer($championshipId, (int) Auth::user()['id']),
             'summary' => $this->summary($championship),
             'activityLogs' => (new CompetitionActivityLog())->byChampionship($championshipId),
         ];

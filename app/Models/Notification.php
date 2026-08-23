@@ -44,7 +44,7 @@ class Notification extends Model
         }
 
         if ($this->hasColumn('is_read')) {
-            $fields['is_read'] = false;
+            $fields['is_read'] = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql' ? 'false' : 0;
         }
 
         $columns = array_keys($fields);

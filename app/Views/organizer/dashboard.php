@@ -8,6 +8,15 @@
     </div>
     <div class="row g-4 mt-2">
         <div class="col-lg-7">
+            <div class="panel mb-4">
+                <h2>Inscricoes aguardando analise</h2>
+                <?php if (($pendingRegistrations ?? 0) > 0): ?>
+                    <p class="lead mb-3"><strong><?= (int) $pendingRegistrations ?></strong> atletas aguardando aprovacao</p>
+                <?php else: ?>
+                    <p class="text-muted mb-3">Nenhuma inscricao aguardando analise</p>
+                <?php endif; ?>
+                <a class="btn btn-primary" href="<?= url('/organizador/inscricoes') ?>">Ver inscricoes</a>
+            </div>
             <div class="panel">
                 <h2>Campeonatos</h2>
                 <div class="table-responsive">

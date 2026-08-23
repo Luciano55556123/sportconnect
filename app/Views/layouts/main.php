@@ -27,6 +27,14 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
                     <?php if (($currentUser['role'] ?? '') === 'athlete'): ?>
                         <li class="nav-item"><a class="nav-link" href="<?= url('/atleta/historico') ?>">Minhas inscricoes</a></li>
                     <?php endif; ?>
+                    <?php if (in_array($currentUser['role'] ?? '', ['organizer', 'organizador'], true)): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?= url('/organizador/inscricoes') ?>">
+                                Inscricoes
+                                <?php if (($organizerPendingRegistrations ?? 0) > 0): ?><span class="badge text-bg-danger ms-1"><?= (int) $organizerPendingRegistrations ?></span><?php endif; ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <?php if ($currentUser['role'] === 'admin'): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="<?= url('/admin/solicitacoes-organizador') ?>">

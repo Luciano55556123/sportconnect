@@ -23,6 +23,7 @@ class OrganizerController extends Controller
         $this->view('organizer/dashboard', [
             'title' => 'Painel do organizador',
             'stats' => (new Registration())->statsForOrganizer(Auth::user()['id']),
+            'pendingRegistrations' => (new Registration())->countPendingForOrganizer(Auth::user()['id']),
             'championships' => (new Championship())->byOrganizer(Auth::user()['id']),
             'notifications' => (new Notification())->forUser(Auth::user()['id']),
         ]);
@@ -165,9 +166,15 @@ class OrganizerController extends Controller
     public function registrations(): void
     {
         $this->requireAuth('organizer');
+        $filter = (string) ($_GET['status'] ?? 'all');
+        if (!in_array($filter, ['all', 'pending', 'approved', 'rejected'], true)) {
+            $filter = 'all';
+        }
+
         $this->view('organizer/registrations', [
             'title' => 'Inscricoes recebidas',
-            'registrations' => (new Registration())->byOrganizer(Auth::user()['id']),
+            'registrations' => (new Registration())->byOrganizer(Auth::user()['id'], $filter),
+            'filter' => $filter,
         ]);
     }
 
@@ -175,23 +182,35 @@ class OrganizerController extends Controller
     {
         $this->requireAuth('organizer');
         verify_csrf();
-        (new Registration())->setStatus((int) $id, $_POST['status'], Auth::user()['id']);
-        flash('success', 'Status atualizado.');
-        $this->redirect('/organizador/inscricoes');
+        $redirectTo = $this->registrationReturnPath();
+        $status = (string) ($_POST['status'] ?? '');
+        $ok = (new Registration())->setStatus((int) $id, $status, Auth::user()['id']);
+        if ($ok) {
+            $registration = (new Registration())->findDetails((int) $id);
+            if ($registration) {
+                $label = $status === 'aprovado' ? 'aprovada' : ($status === 'rejeitado' ? 'rejeitada' : 'atualizada');
+                (new Notification())->create((int) $registration['user_id'], 'Sua inscricao em ' . $registration['championship_name'] . ' foi ' . $label . '.');
+            }
+            flash('success', 'Status atualizado.');
+        } else {
+            flash('error', 'Nao foi possivel atualizar esta inscricao.');
+        }
+        $this->redirect($redirectTo);
     }
 
     public function paymentStatus(string $id): void
     {
         $this->requireAuth('organizer');
         verify_csrf();
+        $redirectTo = $this->registrationReturnPath();
         $action = $_POST['action'] ?? '';
         $notes = trim((string) ($_POST['review_notes'] ?? ''));
         $paymentModel = new RegistrationPayment();
 
         if ($action === 'approve') {
-            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'paid', 'confirmada', $notes);
+            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'paid', 'aprovado', $notes);
         } elseif ($action === 'reject') {
-            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'rejected', 'pagamento_rejeitado', $notes);
+            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'rejected', 'rejeitado', $notes);
         } else {
             $ok = false;
         }
@@ -206,7 +225,7 @@ class OrganizerController extends Controller
             flash('error', 'Nao foi possivel atualizar este pagamento.');
         }
 
-        $this->redirect('/organizador/inscricoes');
+        $this->redirect($redirectTo);
     }
 
     public function receipt(string $id): void
@@ -248,6 +267,12 @@ class OrganizerController extends Controller
         $name = uniqid($field . '_', true) . '.' . $ext;
         move_uploaded_file($_FILES[$field]['tmp_name'], BASE_PATH . '/uploads/' . $name);
         return 'uploads/' . $name;
+    }
+
+    private function registrationReturnPath(): string
+    {
+        $returnTo = (string) ($_POST['return_to'] ?? '/organizador/inscricoes');
+        return str_starts_with($returnTo, '/organizador') ? $returnTo : '/organizador/inscricoes';
     }
 
     private function validateChampionshipPayment(array $data): bool

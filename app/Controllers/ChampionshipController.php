@@ -101,7 +101,7 @@ class ChampionshipController extends Controller
             'cpf' => trim((string) ($_POST['cpf'] ?? '')),
             'notes' => trim((string) ($_POST['notes'] ?? '')),
             'proof_file' => $proof,
-            'status' => $isPaid ? 'aguardando_pagamento' : 'pendente',
+            'status' => 'pendente',
         ]);
             if ($isPaid) {
                 $step = 'create registration payment';
@@ -118,7 +118,13 @@ class ChampionshipController extends Controller
         }
 
         try {
-            (new Notification())->create((int) $championship['organizer_id'], 'Nova inscricao recebida em ' . $championship['name'] . '.');
+            (new Notification())->create(
+                (int) $championship['organizer_id'],
+                trim((string) ($_POST['name'] ?? 'Atleta')) . ' solicitou inscricao no campeonato ' . $championship['name'] . '.',
+                'Nova inscricao recebida',
+                '/organizador/inscricoes?status=pending',
+                'registration'
+            );
         } catch (Throwable $exception) {
             $this->logRegistrationError($exception, $championshipId, $userId, 'notify organizer');
         }

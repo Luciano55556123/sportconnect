@@ -4,6 +4,20 @@ $currentUrl = url('/organizador/campeonatos/' . $championship['id'] . '/gerencia
 $teamStatuses = ['aprovado' => 'Aprovada', 'pendente' => 'Pendente', 'rejeitado' => 'Rejeitada', 'cancelado' => 'Cancelada'];
 $athleteStatuses = ['aprovado' => 'Aprovado', 'pendente' => 'Pendente', 'rejeitado' => 'Rejeitado', 'cancelado' => 'Cancelado'];
 $matchStatuses = ['agendada' => 'Agendada', 'em_andamento' => 'Em andamento', 'finalizada' => 'Finalizada'];
+$registrationLabels = [
+    'aguardando_pagamento' => 'Aguardando pagamento',
+    'pagamento_em_analise' => 'Pagamento em analise',
+    'awaiting_receipt' => 'Aguardando pagamento',
+    'under_review' => 'Pagamento em analise',
+    'paid' => 'Aprovado',
+    'rejected' => 'Rejeitado',
+    'aprovado' => 'Aprovado',
+    'rejeitado' => 'Rejeitado',
+    'pendente' => 'Pendente',
+    'confirmada' => 'Confirmada',
+    'pagamento_rejeitado' => 'Pagamento rejeitado',
+    'cancelado' => 'Cancelada',
+];
 $statusBadge = static fn (string $status): string => [
     'agendada' => 'text-bg-primary',
     'em_andamento' => 'text-bg-warning',
@@ -62,7 +76,7 @@ foreach ($standings as $row) {
 
     <div class="competition-tabs mt-4">
         <ul class="nav nav-pills flex-nowrap" role="tablist">
-            <?php foreach (['resumo' => 'Visao geral', 'equipes' => 'Equipes', 'atletas' => 'Atletas', 'partidas' => 'Partidas', 'classificacao' => 'Classificacao', 'estatisticas' => 'Estatisticas'] as $key => $label): ?>
+            <?php foreach (['resumo' => 'Visao geral', 'inscricoes' => 'Inscricoes', 'equipes' => 'Equipes', 'atletas' => 'Atletas', 'partidas' => 'Partidas', 'classificacao' => 'Classificacao', 'estatisticas' => 'Estatisticas'] as $key => $label): ?>
                 <li class="nav-item"><button class="nav-link <?= $key === 'resumo' ? 'active' : '' ?>" data-bs-toggle="pill" data-bs-target="#<?= e($key) ?>" type="button"><?= e($label) ?></button></li>
             <?php endforeach; ?>
         </ul>
@@ -102,6 +116,49 @@ foreach ($standings as $row) {
                         <?php if (!$activityLogs): ?><p class="text-muted">Nenhuma atividade registrada.</p><?php endif; ?>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="inscricoes">
+            <div class="section-heading"><div><h2>Inscricoes</h2><span><?= count($registrations ?? []) ?> recebidas</span></div><a class="btn btn-outline-primary" href="<?= url('/organizador/inscricoes') ?>">Ver todas</a></div>
+            <div class="panel">
+                <?php if (empty($registrations)): ?>
+                    <p class="text-muted mb-0">Nenhuma inscricao recebida para este campeonato.</p>
+                <?php endif; ?>
+                <?php foreach (($registrations ?? []) as $registration): ?>
+                    <?php
+                        $paidRegistration = !empty($registration['requires_payment']) && (float) ($registration['registration_fee'] ?? 0) > 0;
+                        $registrationStatus = (string) ($registration['status'] ?? '');
+                        $paymentStatus = (string) ($registration['payment_status'] ?? 'awaiting_receipt');
+                    ?>
+                    <div class="note mb-3">
+                        <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+                            <div>
+                                <strong><?= e($registration['name']) ?></strong><br>
+                                <span><?= e($registration['email']) ?><?= !empty($registration['phone']) ? ' | ' . e($registration['phone']) : '' ?></span><br>
+                                <span>Status: <?= e($registrationLabels[$registrationStatus] ?? $registrationStatus) ?></span>
+                                <?php if ($paidRegistration): ?>
+                                    <br><span>Pagamento: <?= e($registrationLabels[$paymentStatus] ?? $paymentStatus) ?></span>
+                                    <?php if ($registrationStatus === 'pendente' && $paymentStatus !== 'paid'): ?>
+                                        <br><small class="text-muted">Pagamento aguardando confirmacao pelo organizador</small>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <br><span>Pagamento: Gratuito</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2 align-items-start">
+                                <?php if ($registrationStatus === 'pendente'): ?>
+                                    <form method="post" action="<?= url('/organizador/inscricoes/' . $registration['id'] . '/status') ?>" class="d-flex flex-wrap gap-2">
+                                        <?= csrf_field() ?>
+                                        <input type="hidden" name="return_to" value="<?= e('/organizador/campeonatos/' . $championship['id'] . '/gerenciar#inscricoes') ?>">
+                                        <button class="btn btn-sm btn-success" name="status" value="aprovado">Aprovar</button>
+                                        <button class="btn btn-sm btn-outline-danger" name="status" value="rejeitado">Rejeitar</button>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
         </div>
 
