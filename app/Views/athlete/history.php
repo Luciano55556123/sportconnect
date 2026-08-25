@@ -22,11 +22,12 @@
             ?>
             <?php foreach ($registrations as $r): ?>
                 <?php
-                    $requiresPayment = !empty($r['championship_requires_payment'] ?? $r['requires_payment'] ?? false);
-                    $registrationFee = (float) ($r['championship_registration_fee'] ?? $r['registration_fee'] ?? 0);
+                    $requiresPayment = !empty($r['championship_requires_payment']);
+                    $registrationFee = (float) ($r['championship_registration_fee'] ?? 0);
                     $amount = (float) ($r['payment_amount'] ?? $registrationFee);
                     $paid = $requiresPayment && $registrationFee > 0;
                     $paymentStatus = $r['payment_status'] ?? null;
+                    $paymentLabel = $paymentStatus ? ($labels[$paymentStatus] ?? $paymentStatus) : 'Aguardando pagamento';
                 ?>
                 <tr>
                     <td><?= e($r['championship_name']) ?><br><small><?= e($r['sport_name']) ?></small></td>
@@ -35,9 +36,7 @@
                     <td>
                         <?php if ($paid): ?>
                             <strong>R$ <?= number_format($amount, 2, ',', '.') ?></strong>
-                            <?php if ($paymentStatus): ?>
-                                <br><span class="badge text-bg-info"><?= e($labels[$paymentStatus] ?? $paymentStatus) ?></span>
-                            <?php endif; ?>
+                            <br><span class="badge text-bg-info"><?= e($paymentLabel) ?></span>
                         <?php else: ?>
                             <span class="badge text-bg-success">Gratuito</span>
                         <?php endif; ?>
@@ -52,7 +51,7 @@
                                 <div class="pix-payment mt-2">
                                     <h2>Finalize sua inscricao</h2>
                                     <p class="mb-1"><strong><?= e($r['championship_name']) ?></strong></p>
-                                    <?php if ($paymentStatus): ?><p class="mb-1">Status: <?= e($labels[$paymentStatus] ?? $paymentStatus) ?></p><?php endif; ?>
+                                    <p class="mb-1">Status: <?= e($paymentLabel) ?></p>
                                     <p class="pix-amount">Valor: R$ <?= number_format($amount, 2, ',', '.') ?></p>
                                     <?php if (!empty($r['pix_qr']) && !empty($r['pix_payload'])): ?>
                                         <img class="pix-qr" src="<?= e($r['pix_qr']) ?>" alt="QR Code PIX">
@@ -73,12 +72,7 @@
                                         if ($whatsappNumber !== '' && !str_starts_with($whatsappNumber, '55') && strlen($whatsappNumber) <= 11) {
                                             $whatsappNumber = '55' . $whatsappNumber;
                                         }
-                                        $athleteName = trim((string) ($r['name'] ?? ''));
-                                        $message = 'Ola! ';
-                                        if ($athleteName !== '') {
-                                            $message .= 'Eu, ' . $athleteName . ', ';
-                                        }
-                                        $message .= 'realizei o pagamento da inscricao no campeonato ' . ($r['championship_name'] ?? '') . ' e estou enviando o comprovante para validacao.';
+                                        $message = 'Ola! Realizei o pagamento da inscricao no campeonato ' . ($r['championship_name'] ?? '') . ' e estou enviando o comprovante para validacao.';
                                         $whatsappUrl = $whatsappNumber !== '' ? 'https://wa.me/' . $whatsappNumber . '?text=' . rawurlencode($message) : '';
                                     ?>
                                     <?php if ($whatsappUrl !== ''): ?>

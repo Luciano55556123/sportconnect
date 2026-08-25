@@ -57,24 +57,25 @@ class Registration extends Model
     public function byUser(int $userId): array
     {
         $pixReceiverCitySelect = $this->championshipHasColumn('pix_receiver_city')
-            ? 'c.pix_receiver_city'
-            : 'c.city AS pix_receiver_city';
+            ? 'championships.pix_receiver_city'
+            : 'championships.city AS pix_receiver_city';
         $championshipWhatsappSelect = $this->championshipHasColumn('whatsapp_contato')
-            ? 'c.whatsapp_contato AS championship_whatsapp_contato'
+            ? 'championships.whatsapp_contato AS championship_whatsapp_contato'
             : 'NULL AS championship_whatsapp_contato';
         $stmt = $this->db->prepare(
-            'SELECT r.*, c.name AS championship_name, c.event_date, c.status AS championship_status,
-             c.registration_fee, c.registration_fee AS championship_registration_fee,
-             c.requires_payment, c.requires_payment AS championship_requires_payment,
-             c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ',
-             c.pix_instructions, ' . $championshipWhatsappSelect . ',
+            'SELECT r.*, championships.name AS championship_name, championships.event_date, championships.status AS championship_status,
+             championships.requires_payment AS championship_requires_payment,
+             championships.registration_fee AS championship_registration_fee,
+             ' . $championshipWhatsappSelect . ',
+             championships.pix_key, championships.pix_key_type, championships.pix_holder_name, ' . $pixReceiverCitySelect . ',
+             championships.pix_instructions,
              s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
              p.receipt_file AS receipt_path, p.rejection_reason AS review_notes
              FROM registrations r
-             JOIN championships c ON c.id = r.championship_id
-             JOIN sports s ON s.id = c.sport_id
+             JOIN championships ON championships.id = r.championship_id
+             JOIN sports s ON s.id = championships.sport_id
              LEFT JOIN registration_payments p ON p.registration_id = r.id
-             WHERE r.user_id = ? ORDER BY c.event_date DESC'
+             WHERE r.user_id = ? ORDER BY championships.event_date DESC'
         );
         $stmt->execute([$userId]);
         return $stmt->fetchAll();
