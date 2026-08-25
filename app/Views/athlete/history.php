@@ -19,15 +19,33 @@
                 'pagamento_rejeitado' => 'Pagamento rejeitado',
                 'cancelado' => 'Cancelada',
             ];
+            $normalizeBrazilianWhatsapp = static function (?string $phone): string {
+                $digits = preg_replace('/\D+/', '', (string) $phone);
+                if ($digits === '') {
+                    return '';
+                }
+
+                if (str_starts_with($digits, '00')) {
+                    $digits = substr($digits, 2);
+                }
+
+                if (!str_starts_with($digits, '55') && strlen($digits) >= 10 && strlen($digits) <= 11) {
+                    $digits = '55' . $digits;
+                }
+
+                return $digits;
+            };
             ?>
             <?php foreach ($registrations as $r): ?>
                 <?php
                     $requiresPayment = !empty($r['championship_requires_payment']);
                     $registrationFee = (float) ($r['championship_registration_fee'] ?? 0);
-                    $amount = (float) ($r['payment_amount'] ?? $registrationFee);
                     $paid = $requiresPayment && $registrationFee > 0;
                     $paymentStatus = $r['payment_status'] ?? null;
                     $paymentLabel = $paymentStatus ? ($labels[$paymentStatus] ?? $paymentStatus) : 'Aguardando pagamento';
+                    if ($paid && $paymentStatus !== 'paid') {
+                        $paymentLabel = $labels[$paymentStatus ?? 'awaiting_receipt'] ?? 'Aguardando pagamento';
+                    }
                 ?>
                 <tr>
                     <td><?= e($r['championship_name']) ?><br><small><?= e($r['sport_name']) ?></small></td>
@@ -35,7 +53,7 @@
                     <td><span class="badge text-bg-secondary"><?= e($labels[$r['status']] ?? $r['status']) ?></span></td>
                     <td>
                         <?php if ($paid): ?>
-                            <strong>R$ <?= number_format($amount, 2, ',', '.') ?></strong>
+                            <strong>R$ <?= number_format($registrationFee, 2, ',', '.') ?></strong>
                             <br><span class="badge text-bg-info"><?= e($paymentLabel) ?></span>
                         <?php else: ?>
                             <span class="badge text-bg-success">Gratuito</span>
@@ -52,7 +70,7 @@
                                     <h2>Finalize sua inscricao</h2>
                                     <p class="mb-1"><strong><?= e($r['championship_name']) ?></strong></p>
                                     <p class="mb-1">Status: <?= e($paymentLabel) ?></p>
-                                    <p class="pix-amount">Valor: R$ <?= number_format($amount, 2, ',', '.') ?></p>
+                                    <p class="pix-amount">Valor: R$ <?= number_format($registrationFee, 2, ',', '.') ?></p>
                                     <?php if (!empty($r['pix_qr']) && !empty($r['pix_payload'])): ?>
                                         <img class="pix-qr" src="<?= e($r['pix_qr']) ?>" alt="QR Code PIX">
                                         <p class="text-muted mb-2">Escaneie o QR Code com o aplicativo do seu banco.</p>
@@ -68,10 +86,7 @@
                                     <?php if (!empty($r['pix_instructions'])): ?><p class="mb-2"><?= e($r['pix_instructions']) ?></p><?php endif; ?>
                                     <h3>Ja realizou o pagamento?</h3>
                                     <?php
-                                        $whatsappNumber = preg_replace('/\D+/', '', (string) ($r['championship_whatsapp_contato'] ?? ''));
-                                        if ($whatsappNumber !== '' && !str_starts_with($whatsappNumber, '55') && strlen($whatsappNumber) <= 11) {
-                                            $whatsappNumber = '55' . $whatsappNumber;
-                                        }
+                                        $whatsappNumber = $normalizeBrazilianWhatsapp($r['championship_whatsapp_contato'] ?? '');
                                         $message = 'Ola! Realizei o pagamento da inscricao no campeonato ' . ($r['championship_name'] ?? '') . ' e estou enviando o comprovante para validacao.';
                                         $whatsappUrl = $whatsappNumber !== '' ? 'https://wa.me/' . $whatsappNumber . '?text=' . rawurlencode($message) : '';
                                     ?>

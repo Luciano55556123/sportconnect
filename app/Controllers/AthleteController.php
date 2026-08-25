@@ -64,21 +64,6 @@ class AthleteController extends Controller
         ]);
     }
 
-    public function uploadReceipt(string $id): void
-    {
-        $this->requireAuth('athlete');
-        verify_csrf();
-        $paymentModel = new RegistrationPayment();
-        $payment = $paymentModel->findForAthlete((int) $id, Auth::user()['id']);
-        if (!$payment) {
-            flash('error', 'Pagamento nao encontrado para esta inscricao.');
-            $this->redirect('/atleta/historico');
-        }
-
-        flash('error', 'O envio de comprovante agora e feito pelo WhatsApp do organizador. Abra o PIX no seu historico e use o botao de WhatsApp.');
-        $this->redirect('/atleta/historico');
-    }
-
     public function receipt(string $id): void
     {
         $this->requireAuth('athlete');
@@ -101,41 +86,6 @@ class AthleteController extends Controller
         ]);
     }
 
-    private function uploadReceiptFile(string $field): ?string
-    {
-        if (empty($_FILES[$field]['name'])) {
-            flash('error', 'Selecione um comprovante para enviar.');
-            return null;
-        }
-
-        if (($_FILES[$field]['size'] ?? 0) > 5 * 1024 * 1024) {
-            flash('error', 'O comprovante deve ter no maximo 5 MB.');
-            return null;
-        }
-
-        $allowed = [
-            'pdf' => 'application/pdf',
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-        ];
-        $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
-        $mime = mime_content_type($_FILES[$field]['tmp_name']);
-
-        if (!isset($allowed[$ext]) || $allowed[$ext] !== $mime) {
-            flash('error', 'Formato de comprovante invalido.');
-            return null;
-        }
-
-        $name = uniqid('receipt_', true) . '.' . $ext;
-        if (!move_uploaded_file($_FILES[$field]['tmp_name'], BASE_PATH . '/uploads/' . $name)) {
-            flash('error', 'Nao foi possivel salvar o comprovante.');
-            return null;
-        }
-
-        return 'uploads/' . $name;
-    }
-
     private function attachPixCodes(array &$registrations): void
     {
         $pix = new PixService();
@@ -154,7 +104,7 @@ class AthleteController extends Controller
                     'pix_key_type' => $registration['pix_key_type'] ?? '',
                     'pix_holder_name' => $registration['pix_holder_name'] ?? '',
                     'pix_receiver_city' => $registration['pix_receiver_city'] ?? $registration['city'] ?? '',
-                    'amount' => (float) ($registration['payment_amount'] ?? $registrationFee),
+                    'amount' => $registrationFee,
                     'txid' => 'REG' . (int) $registration['id'],
                 ]);
 

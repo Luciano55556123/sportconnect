@@ -40,6 +40,8 @@ class Registration extends Model
             : 'c.city AS pix_receiver_city';
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
+             c.registration_fee AS championship_registration_fee,
+             c.requires_payment AS championship_requires_payment,
              c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ', c.pix_instructions, c.email_contato,
              c.modality, c.category AS championship_category, c.organizer_id, s.name AS sport_name,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
