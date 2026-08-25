@@ -59,12 +59,16 @@ class Registration extends Model
         $pixReceiverCitySelect = $this->championshipHasColumn('pix_receiver_city')
             ? 'c.pix_receiver_city'
             : 'c.city AS pix_receiver_city';
+        $championshipWhatsappSelect = $this->championshipHasColumn('whatsapp_contato')
+            ? 'c.whatsapp_contato AS championship_whatsapp_contato'
+            : 'NULL AS championship_whatsapp_contato';
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.event_date, c.status AS championship_status,
              c.registration_fee, c.registration_fee AS championship_registration_fee,
              c.requires_payment, c.requires_payment AS championship_requires_payment,
              c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ',
-             c.pix_instructions, s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
+             c.pix_instructions, ' . $championshipWhatsappSelect . ',
+             s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
              p.receipt_file AS receipt_path, p.rejection_reason AS review_notes
              FROM registrations r
              JOIN championships c ON c.id = r.championship_id
