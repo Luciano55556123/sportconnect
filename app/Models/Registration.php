@@ -41,7 +41,6 @@ class Registration extends Model
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
              c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ', c.pix_instructions, c.email_contato,
-             c.whatsapp_contato,
              c.modality, c.category AS championship_category, c.organizer_id, s.name AS sport_name,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
              p.rejection_reason AS review_notes
@@ -62,8 +61,10 @@ class Registration extends Model
             : 'c.city AS pix_receiver_city';
         $stmt = $this->db->prepare(
             'SELECT r.*, c.name AS championship_name, c.event_date, c.status AS championship_status,
-             c.registration_fee, c.requires_payment, c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ',
-             c.pix_instructions, c.whatsapp_contato, s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
+             c.registration_fee, c.registration_fee AS championship_registration_fee,
+             c.requires_payment, c.requires_payment AS championship_requires_payment,
+             c.pix_key, c.pix_key_type, c.pix_holder_name, ' . $pixReceiverCitySelect . ',
+             c.pix_instructions, s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
              p.receipt_file AS receipt_path, p.rejection_reason AS review_notes
              FROM registrations r
              JOIN championships c ON c.id = r.championship_id
@@ -75,61 +76,19 @@ class Registration extends Model
         return $stmt->fetchAll();
     }
 
-    public function byOrganizer(int $organizerId, string $filter = 'all'): array
+    public function byOrganizer(int $organizerId): array
     {
-        $statusFilters = [
-            'pending' => ['pendente'],
-            'approved' => ['aprovado'],
-            'rejected' => ['rejeitado'],
-        ];
-        $params = [$organizerId];
-        $where = 'WHERE c.organizer_id = ?';
-        if (isset($statusFilters[$filter])) {
-            $where .= ' AND r.status IN (' . implode(',', array_fill(0, count($statusFilters[$filter]), '?')) . ')';
-            array_push($params, ...$statusFilters[$filter]);
-        }
-
         $stmt = $this->db->prepare(
-            'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment, c.whatsapp_contato,
+            'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
              p.updated_at AS submitted_at, p.reviewed_at, p.rejection_reason AS review_notes
              FROM registrations r
              JOIN championships c ON c.id = r.championship_id
              LEFT JOIN registration_payments p ON p.registration_id = r.id
-             ' . $where . ' ORDER BY r.created_at DESC'
-        );
-        $stmt->execute($params);
-        return $stmt->fetchAll();
-    }
-
-    public function byChampionshipForOrganizer(int $championshipId, int $organizerId): array
-    {
-        $stmt = $this->db->prepare(
-            'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment, c.whatsapp_contato,
-             p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
-             p.updated_at AS submitted_at, p.reviewed_at, p.rejection_reason AS review_notes
-             FROM registrations r
-             JOIN championships c ON c.id = r.championship_id
-             LEFT JOIN registration_payments p ON p.registration_id = r.id
-             WHERE r.championship_id = ?
-             AND c.organizer_id = ?
-             ORDER BY r.created_at DESC'
-        );
-        $stmt->execute([$championshipId, $organizerId]);
-        return $stmt->fetchAll();
-    }
-
-    public function countPendingForOrganizer(int $organizerId): int
-    {
-        $stmt = $this->db->prepare(
-            "SELECT COUNT(*)
-             FROM registrations r
-             JOIN championships c ON c.id = r.championship_id
-             WHERE c.organizer_id = ?
-             AND r.status = 'pendente'"
+             WHERE c.organizer_id = ? ORDER BY r.created_at DESC'
         );
         $stmt->execute([$organizerId]);
-        return (int) $stmt->fetchColumn();
+        return $stmt->fetchAll();
     }
 
     public function countPendingForChampionship(int $championshipId): int
@@ -138,18 +97,14 @@ class Registration extends Model
             "SELECT COUNT(*)
              FROM registrations
              WHERE championship_id = ?
-             AND status = 'pendente'"
+             AND status IN ('pendente', 'aguardando_pagamento')"
         );
         $stmt->execute([$championshipId]);
         return (int) $stmt->fetchColumn();
     }
 
-    public function setStatus(int $id, string $status, int $organizerId): bool
+    public function setStatus(int $id, string $status, int $organizerId): void
     {
-        if (!in_array($status, ['pendente', 'aprovado', 'rejeitado', 'cancelado'], true)) {
-            return false;
-        }
-
         $stmt = $this->db->prepare(
             'UPDATE registrations
              SET status = ?
@@ -160,7 +115,6 @@ class Registration extends Model
              )'
         );
         $stmt->execute([$status, $id, $organizerId]);
-        return $stmt->rowCount() > 0;
     }
 
     public function statsForOrganizer(int $organizerId): array
