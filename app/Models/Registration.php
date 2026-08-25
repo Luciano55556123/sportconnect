@@ -98,6 +98,22 @@ class Registration extends Model
         return $stmt->fetchAll();
     }
 
+    public function byChampionshipForOrganizer(int $championshipId, int $organizerId): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
+             p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
+             p.updated_at AS submitted_at, p.reviewed_at, p.rejection_reason AS review_notes
+             FROM registrations r
+             JOIN championships c ON c.id = r.championship_id
+             LEFT JOIN registration_payments p ON p.registration_id = r.id
+             WHERE r.championship_id = ? AND c.organizer_id = ?
+             ORDER BY r.created_at DESC'
+        );
+        $stmt->execute([$championshipId, $organizerId]);
+        return $stmt->fetchAll();
+    }
+
     public function countPendingForChampionship(int $championshipId): int
     {
         $stmt = $this->db->prepare(
