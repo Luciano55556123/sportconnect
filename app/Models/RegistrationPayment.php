@@ -20,18 +20,6 @@ class RegistrationPayment extends Model
         return $stmt->fetch() ?: null;
     }
 
-    public function findForAthlete(int $registrationId, int $userId): ?array
-    {
-        $stmt = $this->db->prepare(
-            'SELECT p.*, p.receipt_file AS receipt_path, p.rejection_reason AS review_notes, r.user_id, r.championship_id
-             FROM registration_payments p
-             JOIN registrations r ON r.id = p.registration_id
-             WHERE p.registration_id = ? AND r.user_id = ? LIMIT 1'
-        );
-        $stmt->execute([$registrationId, $userId]);
-        return $stmt->fetch() ?: null;
-    }
-
     public function findForOrganizer(int $registrationId, int $organizerId): ?array
     {
         $stmt = $this->db->prepare(
@@ -43,18 +31,6 @@ class RegistrationPayment extends Model
         );
         $stmt->execute([$registrationId, $organizerId]);
         return $stmt->fetch() ?: null;
-    }
-
-    public function submitReceipt(int $registrationId, int $userId, string $receiptPath): bool
-    {
-        $stmt = $this->db->prepare(
-            'UPDATE registration_payments p
-             SET receipt_file = ?, status = ?, updated_at = CURRENT_TIMESTAMP
-             WHERE p.registration_id = ?
-             AND EXISTS (SELECT 1 FROM registrations r WHERE r.id = p.registration_id AND r.user_id = ?)'
-        );
-        $stmt->execute([$receiptPath, 'under_review', $registrationId, $userId]);
-        return $stmt->rowCount() > 0;
     }
 
     public function review(int $registrationId, int $organizerId, string $paymentStatus, string $registrationStatus, string $notes = ''): bool

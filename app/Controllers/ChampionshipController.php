@@ -75,7 +75,6 @@ class ChampionshipController extends Controller
             $this->redirect('/campeonatos/' . $id);
         }
 
-        $proof = $this->upload('proof_file', ['pdf', 'jpg', 'jpeg', 'png']);
         $isPaid = $this->championshipRequiresPayment($championship);
         if ($isPaid && !$this->championshipHasPixConfiguration($championship)) {
             flash('error', 'Este campeonato ainda nao possui os dados PIX configurados. Entre em contato com o organizador.');
@@ -100,7 +99,7 @@ class ChampionshipController extends Controller
             'city' => trim((string) ($_POST['city'] ?? '')),
             'cpf' => trim((string) ($_POST['cpf'] ?? '')),
             'notes' => trim((string) ($_POST['notes'] ?? '')),
-            'proof_file' => $proof,
+            'proof_file' => null,
             'status' => 'pendente',
         ]);
             if ($isPaid) {
@@ -171,22 +170,6 @@ class ChampionshipController extends Controller
             'title' => 'Calendario esportivo',
             'events' => (new Championship())->calendar(),
         ]);
-    }
-
-    private function upload(string $field, array $allowed): ?string
-    {
-        if (empty($_FILES[$field]['name'])) {
-            return null;
-        }
-        $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
-        if (!in_array($ext, $allowed, true)) {
-            flash('error', 'Arquivo invalido.');
-            return null;
-        }
-        $name = uniqid($field . '_', true) . '.' . $ext;
-        $target = BASE_PATH . '/uploads/' . $name;
-        move_uploaded_file($_FILES[$field]['tmp_name'], $target);
-        return 'uploads/' . $name;
     }
 
     private function championshipRequiresPayment(array $championship): bool

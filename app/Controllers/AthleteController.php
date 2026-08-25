@@ -9,7 +9,6 @@ use App\Models\Notification;
 use App\Models\OrganizerRequest;
 use App\Models\Recommendation;
 use App\Models\Registration;
-use App\Models\RegistrationPayment;
 use App\Models\Sport;
 use App\Models\User;
 use App\Services\PixService;
@@ -62,18 +61,6 @@ class AthleteController extends Controller
             'title' => 'Historico',
             'registrations' => $registrations,
         ]);
-    }
-
-    public function receipt(string $id): void
-    {
-        $this->requireAuth('athlete');
-        $payment = (new RegistrationPayment())->findForAthlete((int) $id, Auth::user()['id']);
-        if (!$payment || empty($payment['receipt_path'])) {
-            http_response_code(404);
-            $this->view('errors/404', ['title' => 'Comprovante nao encontrado']);
-            return;
-        }
-        $this->downloadUpload($payment['receipt_path']);
     }
 
     public function recommendations(): void
@@ -135,18 +122,4 @@ class AthleteController extends Controller
         return $payload !== '' && preg_match('/^000201.*6304[0-9A-F]{4}$/', $payload) === 1;
     }
 
-    private function downloadUpload(string $path): void
-    {
-        $base = realpath(BASE_PATH . '/uploads');
-        $file = realpath(BASE_PATH . '/' . $path);
-        if (!$base || !$file || !str_starts_with($file, $base) || !is_file($file)) {
-            http_response_code(404);
-            exit('Arquivo nao encontrado.');
-        }
-
-        header('Content-Type: ' . (mime_content_type($file) ?: 'application/octet-stream'));
-        header('Content-Disposition: inline; filename="' . basename($file) . '"');
-        readfile($file);
-        exit;
-    }
 }

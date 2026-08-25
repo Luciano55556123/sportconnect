@@ -57,7 +57,7 @@
                 <a class="btn btn-success w-100" target="_blank" href="https://wa.me/55<?= preg_replace('/\D/', '', $championship['organizer_phone'] ?? '') ?>"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
                 <button class="btn btn-outline-primary w-100" onclick="navigator.share ? navigator.share({title: document.title, url: location.href}) : navigator.clipboard.writeText(location.href)"><i class="fa-solid fa-share-nodes"></i> Compartilhar</button>
                 <div class="collapse mt-3" id="registerForm">
-                    <form method="post" enctype="multipart/form-data" action="<?= url('/campeonatos/' . $championship['id'] . '/inscrever') ?>" class="stack-form">
+                    <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/inscrever') ?>" class="stack-form">
                         <?= csrf_field() ?>
                         <input class="form-control" name="name" required placeholder="Nome">
                         <input class="form-control" name="phone" required placeholder="Telefone">
@@ -67,8 +67,6 @@
                         <input class="form-control" name="city" required placeholder="Cidade">
                         <input class="form-control" name="cpf" placeholder="CPF opcional">
                         <textarea class="form-control" name="notes" placeholder="Observacoes"></textarea>
-                        <label class="form-label">Documento opcional</label>
-                        <input class="form-control" type="file" name="proof_file" accept=".pdf,.jpg,.jpeg,.png">
                         <button class="btn btn-primary">Enviar inscricao</button>
                     </form>
                 </div>

@@ -30,7 +30,6 @@ return [
     ['POST', '/atleta/perfil', [AthleteController::class, 'updateProfile']],
     ['GET', '/atleta/favoritos', [AthleteController::class, 'favorites']],
     ['GET', '/atleta/historico', [AthleteController::class, 'history']],
-    ['GET', '/atleta/inscricoes/{id}/comprovante', [AthleteController::class, 'receipt']],
     ['GET', '/atleta/recomendacoes', [AthleteController::class, 'recommendations']],
     ['GET', '/organizador/solicitar', [OrganizerRequestController::class, 'create']],
     ['POST', '/organizador/solicitar', [OrganizerRequestController::class, 'store']],

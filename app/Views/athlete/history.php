@@ -25,6 +25,10 @@
                     return '';
                 }
 
+                if (preg_match('/^0+$/', $digits) === 1) {
+                    return '';
+                }
+
                 if (str_starts_with($digits, '00')) {
                     $digits = substr($digits, 2);
                 }
@@ -62,9 +66,6 @@
                     <td>
                         <?php if ($paid): ?>
                             <button class="btn btn-sm btn-outline-primary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#pix-<?= (int) $r['id'] ?>">Pagar via PIX</button>
-                            <?php if (!empty($r['receipt_path'])): ?>
-                                <a class="btn btn-sm btn-outline-secondary mb-2" target="_blank" href="<?= url('/atleta/inscricoes/' . $r['id'] . '/comprovante') ?>">Visualizar comprovante</a>
-                            <?php endif; ?>
                             <div class="collapse" id="pix-<?= (int) $r['id'] ?>">
                                 <div class="pix-payment mt-2">
                                     <h2>Finalize sua inscricao</h2>
@@ -88,6 +89,9 @@
                                     <?php
                                         $whatsappNumber = $normalizeBrazilianWhatsapp($r['championship_whatsapp_contato'] ?? '');
                                         $message = 'Ola! Realizei o pagamento da inscricao no campeonato ' . ($r['championship_name'] ?? '') . ' e estou enviando o comprovante para validacao.';
+                                        if (!empty($r['name'])) {
+                                            $message .= ' Atleta: ' . $r['name'] . '.';
+                                        }
                                         $whatsappUrl = $whatsappNumber !== '' ? 'https://wa.me/' . $whatsappNumber . '?text=' . rawurlencode($message) : '';
                                     ?>
                                     <?php if ($whatsappUrl !== ''): ?>
@@ -95,7 +99,6 @@
                                     <?php else: ?>
                                         <div class="alert alert-warning mb-2">O organizador não informou um WhatsApp para envio do comprovante.</div>
                                     <?php endif; ?>
-                                    <?php if (!empty($r['receipt_path'])): ?><p class="text-muted mt-2 mb-0">Comprovante enviado. Aguardando analise do organizador.</p><?php endif; ?>
                                 </div>
                             </div>
                         <?php endif; ?>

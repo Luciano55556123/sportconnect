@@ -72,7 +72,7 @@ class Registration extends Model
              championships.pix_key, championships.pix_key_type, championships.pix_holder_name, ' . $pixReceiverCitySelect . ',
              championships.pix_instructions,
              s.name AS sport_name, p.status AS payment_status, p.amount AS payment_amount,
-             p.receipt_file AS receipt_path, p.rejection_reason AS review_notes
+             p.rejection_reason AS review_notes
              FROM registrations r
              JOIN championships ON championships.id = r.championship_id
              JOIN sports s ON s.id = championships.sport_id
