@@ -291,7 +291,7 @@ class CompetitionManagementController extends Controller
         }
 
         return [
-            'teams_count' => count($teams),
+            'teams_count' => count(array_filter($teams, fn ($team) => ($team['status'] ?? '') === 'aprovado')),
             'athletes_count' => count($athletes),
             'matches_count' => count($matches),
             'finished_matches' => count($finished),

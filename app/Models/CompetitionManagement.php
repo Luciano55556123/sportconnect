@@ -36,7 +36,7 @@ class CompetitionManagement extends Model
     public function counts(int $championshipId): array
     {
         return [
-            'teams' => $this->countByChampionship('teams', $championshipId),
+            'teams' => $this->countApprovedTeams($championshipId),
             'athletes' => $this->countByChampionship('athletes', $championshipId),
             'matches' => $this->countByChampionship('matches', $championshipId),
             'events' => $this->countByMatches('match_events', $championshipId),
@@ -360,6 +360,22 @@ class CompetitionManagement extends Model
         }
 
         $stmt = $this->db->prepare('SELECT COUNT(*) FROM ' . $table . ' WHERE championship_id = ?');
+        $stmt->execute([$championshipId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    private function countApprovedTeams(int $championshipId): int
+    {
+        if (!$this->tableExists('teams')) {
+            return 0;
+        }
+
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*)
+             FROM teams
+             WHERE championship_id = ?
+             AND status = 'aprovado'"
+        );
         $stmt->execute([$championshipId]);
         return (int) $stmt->fetchColumn();
     }

@@ -7,7 +7,7 @@ class Championship extends Model
     public function search(array $filters = [], int $limit = 50): array
     {
         $sql = 'SELECT c.*, s.name AS sport_name, u.name AS organizer_name,
-                (SELECT COUNT(*) FROM registrations r WHERE r.championship_id = c.id) AS registrations_count
+                (SELECT COUNT(*) FROM registrations r WHERE r.championship_id = c.id AND r.status = \'aprovado\') AS registrations_count
                 FROM championships c
                 JOIN sports s ON s.id = c.sport_id
                 JOIN users u ON u.id = c.organizer_id
@@ -80,7 +80,7 @@ class Championship extends Model
     {
         $stmt = $this->db->prepare(
             'SELECT c.*, s.name AS sport_name, u.name AS organizer_name, u.phone AS organizer_phone,
-             (SELECT COUNT(*) FROM registrations r WHERE r.championship_id = c.id) AS registrations_count
+                (SELECT COUNT(*) FROM registrations r WHERE r.championship_id = c.id AND r.status = \'aprovado\') AS registrations_count
              FROM championships c
              JOIN sports s ON s.id = c.sport_id
              JOIN users u ON u.id = c.organizer_id
@@ -135,7 +135,7 @@ class Championship extends Model
     {
         $stmt = $this->db->prepare(
             'SELECT c.*, s.name AS sport_name,
-            (SELECT COUNT(*) FROM registrations r WHERE r.championship_id = c.id) AS registrations_count
+                (SELECT COUNT(*) FROM registrations r WHERE r.championship_id = c.id AND r.status = \'aprovado\') AS registrations_count
             FROM championships c JOIN sports s ON s.id = c.sport_id
             WHERE c.organizer_id = ? ORDER BY c.event_date DESC'
         );

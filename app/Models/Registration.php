@@ -139,7 +139,7 @@ class Registration extends Model
         return (int) $stmt->fetchColumn();
     }
 
-    public function setStatus(int $id, string $status, int $organizerId): void
+    public function setStatus(int $id, string $status, int $organizerId): bool
     {
         $stmt = $this->db->prepare(
             'UPDATE registrations
@@ -151,6 +151,26 @@ class Registration extends Model
              )'
         );
         $stmt->execute([$status, $id, $organizerId]);
+        $updated = $stmt->rowCount() > 0;
+        if ($updated && in_array($status, ['pendente', 'aprovado', 'rejeitado', 'cancelado'], true)) {
+            $team = $this->db->prepare(
+                'UPDATE teams t
+                 SET status = ?, updated_at = CURRENT_TIMESTAMP
+                 WHERE t.id = (
+                    SELECT r.team_id
+                    FROM registrations r
+                    JOIN championships c ON c.id = r.championship_id
+                    WHERE r.id = ?
+                    AND c.organizer_id = ?
+                    AND r.registration_type = ?
+                    AND r.team_id IS NOT NULL
+                    LIMIT 1
+                 )'
+            );
+            $team->execute([$status, $id, $organizerId, 'team']);
+        }
+
+        return $updated;
     }
 
     public function statsForOrganizer(int $organizerId): array
