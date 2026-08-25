@@ -35,9 +35,13 @@ class CompetitionManagement extends Model
 
     public function counts(int $championshipId): array
     {
+        $registrations = new Registration();
+
         return [
-            'teams' => $this->countApprovedTeams($championshipId),
-            'athletes' => $this->countByChampionship('athletes', $championshipId),
+            'teams' => $registrations->countApprovedTeamsForChampionship($championshipId),
+            'athletes' => $this->isTeamRegistrationChampionship($championshipId)
+                ? $this->countByChampionship('athletes', $championshipId)
+                : $registrations->countApprovedIndividualRegistrationsForChampionship($championshipId),
             'matches' => $this->countByChampionship('matches', $championshipId),
             'events' => $this->countByMatches('match_events', $championshipId),
             'goals' => $this->countEventsByType($championshipId, ['gol', 'penalti_convertido', 'ponto', 'ataque', 'ace', 'bloqueio']),
@@ -378,6 +382,13 @@ class CompetitionManagement extends Model
         );
         $stmt->execute([$championshipId]);
         return (int) $stmt->fetchColumn();
+    }
+
+    private function isTeamRegistrationChampionship(int $championshipId): bool
+    {
+        $stmt = $this->db->prepare('SELECT registration_type FROM championships WHERE id = ?');
+        $stmt->execute([$championshipId]);
+        return $stmt->fetchColumn() === 'team';
     }
 
     private function countByMatches(string $table, int $championshipId): int

@@ -139,6 +139,37 @@ class Registration extends Model
         return (int) $stmt->fetchColumn();
     }
 
+    public function countApprovedTeamsForChampionship(int $championshipId): int
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(DISTINCT r.team_id)
+             FROM registrations r
+             JOIN championships c ON c.id = r.championship_id
+             WHERE r.championship_id = ?
+             AND c.registration_type = 'team'
+             AND r.registration_type = 'team'
+             AND r.status = 'aprovado'
+             AND r.team_id IS NOT NULL"
+        );
+        $stmt->execute([$championshipId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function countApprovedIndividualRegistrationsForChampionship(int $championshipId): int
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*)
+             FROM registrations r
+             JOIN championships c ON c.id = r.championship_id
+             WHERE r.championship_id = ?
+             AND COALESCE(c.registration_type, 'individual') <> 'team'
+             AND COALESCE(r.registration_type, 'individual') <> 'team'
+             AND r.status = 'aprovado'"
+        );
+        $stmt->execute([$championshipId]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public function setStatus(int $id, string $status, int $organizerId): bool
     {
         $stmt = $this->db->prepare(
