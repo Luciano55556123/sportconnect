@@ -10,6 +10,8 @@ RUN apt-get update \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
+RUN printf 'upload_max_filesize=10M\npost_max_size=12M\nmemory_limit=256M\n' > /usr/local/etc/php/conf.d/sportconnect-uploads.ini
+
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public

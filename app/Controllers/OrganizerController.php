@@ -268,13 +268,14 @@ class OrganizerController extends Controller
         if (!$this->hasUploadedFile($field)) {
             return null;
         }
-        if (($_FILES[$field]['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
-            flash('error', 'Falha no envio do arquivo ' . $field . '.');
+        $error = $_FILES[$field]['error'] ?? UPLOAD_ERR_NO_FILE;
+        if ($error !== UPLOAD_ERR_OK) {
+            flash('error', $this->uploadErrorMessage($field, $error));
             return null;
         }
         $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
         if (!in_array($ext, $allowed, true)) {
-            flash('error', 'Arquivo invalido em ' . $field . '.');
+            flash('error', 'Upload bloqueado por extensao em ' . $field . '.');
             return null;
         }
 
@@ -452,5 +453,19 @@ class OrganizerController extends Controller
         header('Content-Disposition: inline; filename="' . basename($file) . '"');
         readfile($file);
         exit;
+    }
+
+    private function uploadErrorMessage(string $field, int $error): string
+    {
+        return match ($error) {
+            UPLOAD_ERR_INI_SIZE,
+            UPLOAD_ERR_FORM_SIZE => 'O arquivo enviado em ' . $field . ' e grande demais. O limite para imagens de campeonato e 10 MB.',
+            UPLOAD_ERR_PARTIAL => 'O upload do arquivo em ' . $field . ' foi enviado apenas parcialmente. Tente novamente.',
+            UPLOAD_ERR_NO_FILE => 'Nenhum arquivo foi enviado em ' . $field . '.',
+            UPLOAD_ERR_NO_TMP_DIR => 'A pasta temporaria de upload nao esta disponivel no servidor.',
+            UPLOAD_ERR_CANT_WRITE => 'Nao foi possivel gravar o arquivo enviado em ' . $field . '.',
+            UPLOAD_ERR_EXTENSION => 'Upload bloqueado por extensao em ' . $field . '.',
+            default => 'Falha no envio do arquivo ' . $field . '.',
+        };
     }
 }
