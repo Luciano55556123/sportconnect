@@ -14,7 +14,6 @@
                 <div class="hero-panel">
                     <div class="stat"><strong><?= count($featured) ?></strong><span>eventos ativos</span></div>
                     <div class="stat"><strong><?= count($sports) ?></strong><span>modalidades</span></div>
-                    <div class="stat"><strong>99%</strong><span>compatibilidade maxima</span></div>
                 </div>
             </div>
         </div>
