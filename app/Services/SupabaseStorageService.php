@@ -33,24 +33,46 @@ class SupabaseStorageService
         }
 
         $endpoint = $this->url . '/storage/v1/object/' . rawurlencode($this->bucket) . '/' . $this->encodeObjectPath($objectPath);
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'POST',
-                'header' => implode("\r\n", [
+        $curl = curl_init();
+        if ($curl === false) {
+            throw new RuntimeException('Falha ao iniciar cURL para upload no Supabase Storage.');
+        }
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $endpoint,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $contents,
+            CURLOPT_HTTPHEADER => [
                 'Authorization: Bearer ' . $this->key,
                 'apikey: ' . $this->key,
                 'Content-Type: ' . $contentType,
                 'x-upsert: false',
-                ]),
-                'content' => $contents,
-                'ignore_errors' => true,
             ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => false,
         ]);
 
-        $response = file_get_contents($endpoint, false, $context);
-        $status = $this->responseStatus($http_response_header ?? []);
-        if ($response === false || $status < 200 || $status >= 300) {
-            throw new RuntimeException('Falha ao enviar imagem ao Supabase Storage. HTTP ' . $status);
+        $response = curl_exec($curl);
+        $errno = curl_errno($curl);
+        $error = curl_error($curl);
+        $status = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        if ($response === false) {
+            throw new RuntimeException(
+                'Falha ao enviar imagem ao Supabase Storage. cURL errno ' . $errno
+                . ': ' . $error
+                . '. URL: ' . $endpoint
+                . '. HTTP ' . $status
+            );
+        }
+
+        if ($status < 200 || $status >= 300) {
+            throw new RuntimeException(
+                'Falha ao enviar imagem ao Supabase Storage. HTTP ' . $status
+                . '. URL: ' . $endpoint
+                . '. Resposta: ' . $this->summarizeResponse($response)
+            );
         }
 
         return $this->publicUrl($objectPath);
@@ -66,13 +88,13 @@ class SupabaseStorageService
         return implode('/', array_map('rawurlencode', explode('/', ltrim($objectPath, '/'))));
     }
 
-    private function responseStatus(array $headers): int
+    private function summarizeResponse(string $response): string
     {
-        $statusLine = $headers[0] ?? '';
-        if (preg_match('/\s(\d{3})\s/', $statusLine, $matches)) {
-            return (int) $matches[1];
+        $response = trim(preg_replace('/\s+/', ' ', $response) ?? '');
+        if ($response === '') {
+            return '[sem corpo]';
         }
 
-        return 0;
+        return mb_substr($response, 0, 500);
     }
 }
