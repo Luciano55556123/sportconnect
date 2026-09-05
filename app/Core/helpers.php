@@ -9,6 +9,10 @@ function e(?string $value): string
 
 function url(string $path = ''): string
 {
+    if (preg_match('#^https?://#i', $path)) {
+        return $path;
+    }
+
     $config = require BASE_PATH . '/config/app.php';
     $base = rtrim($config['base_url'], '/');
     $host = $_SERVER['HTTP_HOST'] ?? '';

@@ -13,6 +13,7 @@ use App\Models\Sport;
 use App\Services\PixService;
 use App\Services\QrCodeService;
 use App\Services\RegistrationEmailService;
+use App\Services\SupabaseStorageService;
 use PDOException;
 
 class OrganizerController extends Controller
@@ -51,7 +52,11 @@ class OrganizerController extends Controller
         if (!$this->validateChampionshipPayment($_POST)) {
             $this->redirect('/organizador/campeonatos/novo');
         }
-        $_POST['image'] = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']) ?? 'assets/img/default-event.svg';
+        $image = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']);
+        if ($this->hasUploadedFile('image') && $image === null) {
+            $this->redirect('/organizador/campeonatos/novo');
+        }
+        $_POST['image'] = $image ?? 'assets/img/default-event.svg';
         $_POST['rules_file'] = $this->upload('rules_file', ['pdf']);
         try {
             $id = (new Championship())->create($_POST, Auth::user()['id']);
@@ -150,7 +155,11 @@ class OrganizerController extends Controller
         if (!$this->validateChampionshipPayment($_POST)) {
             $this->redirect('/organizador/campeonatos/' . $id . '/editar');
         }
-        $_POST['image'] = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']) ?? ($_POST['current_image'] ?? 'assets/img/default-event.svg');
+        $image = $this->upload('image', ['jpg', 'jpeg', 'png', 'webp']);
+        if ($this->hasUploadedFile('image') && $image === null) {
+            $this->redirect('/organizador/campeonatos/' . $id . '/editar');
+        }
+        $_POST['image'] = $image ?? ($_POST['current_image'] ?? 'assets/img/default-event.svg');
         $_POST['rules_file'] = $this->upload('rules_file', ['pdf']) ?? ($_POST['current_rules_file'] ?? null);
         try {
             (new Championship())->update((int) $id, $_POST, Auth::user()['id']);
@@ -256,7 +265,11 @@ class OrganizerController extends Controller
 
     private function upload(string $field, array $allowed): ?string
     {
-        if (empty($_FILES[$field]['name'])) {
+        if (!$this->hasUploadedFile($field)) {
+            return null;
+        }
+        if (($_FILES[$field]['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+            flash('error', 'Falha no envio do arquivo ' . $field . '.');
             return null;
         }
         $ext = strtolower(pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION));
@@ -264,9 +277,42 @@ class OrganizerController extends Controller
             flash('error', 'Arquivo invalido em ' . $field . '.');
             return null;
         }
-        $name = uniqid($field . '_', true) . '.' . $ext;
-        move_uploaded_file($_FILES[$field]['tmp_name'], BASE_PATH . '/uploads/' . $name);
-        return 'uploads/' . $name;
+
+        if ($field !== 'image') {
+            $name = uniqid($field . '_', true) . '.' . $ext;
+            move_uploaded_file($_FILES[$field]['tmp_name'], BASE_PATH . '/uploads/' . $name);
+            return 'uploads/' . $name;
+        }
+
+        $allowedMimes = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+        ];
+        $mime = mime_content_type($_FILES[$field]['tmp_name']);
+        if (!isset($allowedMimes[$ext]) || $allowedMimes[$ext] !== $mime) {
+            flash('error', 'Tipo de imagem invalido.');
+            return null;
+        }
+
+        try {
+            $name = uniqid('championship_', true) . '.' . $ext;
+            return (new SupabaseStorageService())->uploadPublicObject(
+                $_FILES[$field]['tmp_name'],
+                $name,
+                $mime
+            );
+        } catch (\Throwable $exception) {
+            error_log('Erro ao enviar imagem do campeonato: ' . $exception->getMessage());
+            flash('error', 'Nao foi possivel salvar a imagem do campeonato.');
+            return null;
+        }
+    }
+
+    private function hasUploadedFile(string $field): bool
+    {
+        return !empty($_FILES[$field]['name']);
     }
 
     private function registrationReturnPath(): string
