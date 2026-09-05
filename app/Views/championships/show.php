@@ -1,4 +1,6 @@
 <section class="sc-public-hero">
+    <?php $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true); ?>
+    <?php $registrationsClosed = ($championship['status'] ?? '') === 'encerrado' || !$registrationsOpen; ?>
     <div class="container">
         <div class="sc-public-hero-grid">
             <div class="sc-public-copy">
@@ -13,7 +15,11 @@
                     <span><i class="fa-solid fa-user-tie"></i><?= e($championship['organizer_name'] ?? 'Organizador') ?></span>
                 </div>
                 <div class="sc-public-actions">
-                    <button class="btn btn-warning btn-lg" data-bs-toggle="collapse" data-bs-target="#registerForm"><i class="fa-solid fa-user-plus"></i> Participar</button>
+                    <?php if (!$registrationsClosed): ?>
+                        <button class="btn btn-warning btn-lg" data-bs-toggle="collapse" data-bs-target="#registerForm"><i class="fa-solid fa-user-plus"></i> Participar</button>
+                    <?php else: ?>
+                        <span class="badge text-bg-secondary">Inscrições encerradas</span>
+                    <?php endif; ?>
                     <?php if ($championship['map_link']): ?><a class="btn btn-outline-light btn-lg" target="_blank" href="<?= e($championship['map_link']) ?>">Abrir mapa</a><?php endif; ?>
                     <?php if ($championship['rules_file']): ?><a class="btn btn-outline-light btn-lg" href="<?= url($championship['rules_file']) ?>">Regulamento</a><?php endif; ?>
                 </div>
@@ -56,20 +62,24 @@
                 <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/favoritar') ?>"><?= csrf_field() ?><button class="btn btn-outline-danger w-100"><i class="fa-solid fa-heart"></i> Favoritar</button></form>
                 <a class="btn btn-success w-100" target="_blank" href="https://wa.me/55<?= preg_replace('/\D/', '', $championship['organizer_phone'] ?? '') ?>"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
                 <button class="btn btn-outline-primary w-100" onclick="navigator.share ? navigator.share({title: document.title, url: location.href}) : navigator.clipboard.writeText(location.href)"><i class="fa-solid fa-share-nodes"></i> Compartilhar</button>
-                <div class="collapse mt-3" id="registerForm">
-                    <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/inscrever') ?>" class="stack-form">
-                        <?= csrf_field() ?>
-                        <input class="form-control" name="name" required placeholder="Nome">
-                        <input class="form-control" name="phone" required placeholder="Telefone">
-                        <input class="form-control" type="email" name="email" required placeholder="Email">
-                        <input class="form-control" name="team" placeholder="Equipe">
-                        <input class="form-control" name="category" placeholder="Categoria">
-                        <input class="form-control" name="city" required placeholder="Cidade">
-                        <input class="form-control" name="cpf" placeholder="CPF opcional">
-                        <textarea class="form-control" name="notes" placeholder="Observacoes"></textarea>
-                        <button class="btn btn-primary">Enviar inscricao</button>
-                    </form>
-                </div>
+                <?php if (!$registrationsClosed): ?>
+                    <div class="collapse mt-3" id="registerForm">
+                        <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/inscrever') ?>" class="stack-form">
+                            <?= csrf_field() ?>
+                            <input class="form-control" name="name" required placeholder="Nome">
+                            <input class="form-control" name="phone" required placeholder="Telefone">
+                            <input class="form-control" type="email" name="email" required placeholder="Email">
+                            <input class="form-control" name="team" placeholder="Equipe">
+                            <input class="form-control" name="category" placeholder="Categoria">
+                            <input class="form-control" name="city" required placeholder="Cidade">
+                            <input class="form-control" name="cpf" placeholder="CPF opcional">
+                            <textarea class="form-control" name="notes" placeholder="Observacoes"></textarea>
+                            <button class="btn btn-primary">Enviar inscricao</button>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-secondary mb-0">Inscrições encerradas</div>
+                <?php endif; ?>
                 <hr>
                 <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/avaliar') ?>" class="stack-form">
                     <?= csrf_field() ?>

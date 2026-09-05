@@ -261,7 +261,7 @@ class Championship extends Model
 
     private function visibleStatuses(): array
     {
-        $desired = ['ativo', 'registration_open', 'in_progress', 'em_andamento'];
+        $desired = ['ativo', 'registration_open', 'in_progress', 'em_andamento', 'encerrado'];
 
         if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) !== 'pgsql') {
             return $desired;

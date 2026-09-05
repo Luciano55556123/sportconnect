@@ -64,6 +64,12 @@ class ChampionshipController extends Controller
             return;
         }
 
+        $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true);
+        if (($championship['status'] ?? '') === 'encerrado' || !$registrationsOpen) {
+            flash('error', 'As inscrições para este campeonato estão encerradas.');
+            $this->redirect('/campeonatos/' . $id);
+        }
+
         if ((new Registration())->existsForUser($championshipId, $userId)) {
             flash('error', 'Voce ja esta inscrito neste campeonato.');
             $this->redirect('/campeonatos/' . $id);
