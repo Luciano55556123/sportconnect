@@ -1,6 +1,8 @@
 <section class="sc-public-hero">
     <?php $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true); ?>
     <?php $registrationsClosed = ($championship['status'] ?? '') === 'encerrado' || !$registrationsOpen; ?>
+    <?php $contactWhatsapp = (string) (($championship['whatsapp_contato'] ?? '') ?: ($championship['organizer_phone'] ?? '')); ?>
+    <?php $contactWhatsappNumber = whatsapp_number($contactWhatsapp); ?>
     <div class="container">
         <div class="sc-public-hero-grid">
             <div class="sc-public-copy">
@@ -54,13 +56,13 @@
                 <div class="sc-side-info">
                     <span><i class="fa-solid fa-users"></i><?= (int) $championship['registrations_count'] ?> / <?= (int) $championship['max_participants'] ?> inscritos</span>
                     <span><i class="fa-solid fa-city"></i><?= e($championship['city']) ?></span>
-                    <span><i class="fa-brands fa-whatsapp"></i><?= e($championship['organizer_phone'] ?? '') ?></span>
+                    <span><i class="fa-brands fa-whatsapp"></i><?= e($contactWhatsapp) ?></span>
                 </div>
                 <?php if (!empty($championship['requires_payment']) && (float) ($championship['registration_fee'] ?? 0) > 0): ?>
                     <div class="alert alert-warning">Pagamento via PIX apos a inscricao. Status inicial: aguardando pagamento.</div>
                 <?php endif; ?>
                 <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/favoritar') ?>"><?= csrf_field() ?><button class="btn btn-outline-danger w-100"><i class="fa-solid fa-heart"></i> Favoritar</button></form>
-                <a class="btn btn-success w-100" target="_blank" href="https://wa.me/55<?= preg_replace('/\D/', '', $championship['organizer_phone'] ?? '') ?>"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                <?php if ($contactWhatsappNumber !== ''): ?><a class="btn btn-success w-100" target="_blank" href="https://wa.me/<?= e($contactWhatsappNumber) ?>"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a><?php endif; ?>
                 <button class="btn btn-outline-primary w-100" onclick="navigator.share ? navigator.share({title: document.title, url: location.href}) : navigator.clipboard.writeText(location.href)"><i class="fa-solid fa-share-nodes"></i> Compartilhar</button>
                 <?php if (!$registrationsClosed): ?>
                     <div class="collapse mt-3" id="registerForm">
