@@ -27,6 +27,35 @@ foreach ($matches as $match) {
     $round = (string) ($match['round_number'] ?? 'Sem rodada');
     $groupedRounds[$round][] = $match;
 }
+$phaseLabels = [
+    'Classificatoria' => 'Fase classificatória',
+    'Repescagem' => 'Repescagem',
+    'Quartas de final' => 'Quartas de final',
+    'Semifinais' => 'Semifinais',
+    'Disputa de 3º lugar' => 'Disputa de 3º lugar',
+    'Final' => 'Final',
+];
+$matchesByPhase = [];
+foreach ($phaseLabels as $phase => $label) {
+    $matchesByPhase[$phase] = [
+        'label' => $label,
+        'matches' => [],
+    ];
+}
+foreach ($matches as $match) {
+    $phase = (string) ($match['phase'] ?? '');
+    if ($phase === '') {
+        $phase = 'Sem fase';
+    }
+    if (!isset($matchesByPhase[$phase])) {
+        $matchesByPhase[$phase] = [
+            'label' => $phase,
+            'matches' => [],
+        ];
+    }
+    $matchesByPhase[$phase]['matches'][] = $match;
+}
+$matchesByPhase = array_filter($matchesByPhase, static fn(array $phase): bool => !empty($phase['matches']));
 $statCards = [
     ['icon' => 'fa-solid fa-people-group', 'value' => (int) ($counts['teams'] ?? 0), 'label' => 'Equipes'],
     ['icon' => 'fa-solid fa-person-running', 'value' => (int) ($counts['athletes'] ?? 0), 'label' => 'Atletas'],
@@ -115,12 +144,20 @@ $statCards = [
             </section>
 
             <section class="sc-tab-panel" id="panel-matches" role="tabpanel" aria-labelledby="tab-matches" data-tab-panel="matches" hidden>
-                <div class="sc-match-list">
-                    <?php foreach ($matches as $match): ?>
-                        <?php require BASE_PATH . '/app/Views/championships/_match_card.php'; ?>
+                <?php if ($matchesByPhase): ?>
+                    <?php foreach ($matchesByPhase as $phase): ?>
+                        <section class="sc-panel mb-3">
+                            <div class="sc-panel-head"><div><span class="sc-eyebrow">Fase</span><h3><?= e($phase['label']) ?></h3></div><span><?= count($phase['matches']) ?> partidas</span></div>
+                            <div class="sc-match-list">
+                                <?php foreach ($phase['matches'] as $match): ?>
+                                    <?php require BASE_PATH . '/app/Views/championships/_match_card.php'; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </section>
                     <?php endforeach; ?>
-                    <?php if (!$matches): ?><article class="sc-empty-state"><i class="fa-solid fa-calendar-days"></i><strong>Nenhum dado disponivel nesta secao.</strong></article><?php endif; ?>
-                </div>
+                <?php else: ?>
+                    <article class="sc-empty-state"><i class="fa-solid fa-calendar-days"></i><strong>Nenhum dado disponivel nesta secao.</strong></article>
+                <?php endif; ?>
             </section>
 
             <section class="sc-tab-panel" id="panel-standings" role="tabpanel" aria-labelledby="tab-standings" data-tab-panel="standings" hidden>

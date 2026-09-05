@@ -273,6 +273,8 @@ class CompetitionManagementController extends Controller
         $events = (new MatchEvent())->byChampionship($id);
         $registrations = new Registration();
         $isTeamRegistration = ($championship['registration_type'] ?? '') === 'team';
+        $approvedTeams = $registrations->countApprovedTeamsForChampionship($id);
+        $approvedIndividualRegistrations = $registrations->countApprovedIndividualRegistrationsForChampionship($id);
         $flatEvents = array_merge(...array_values($events ?: [[]]));
         $finished = array_filter($matches, fn ($match) => ($match['status'] ?? '') === 'finalizada');
         $goals = array_filter($flatEvents, fn ($event) => in_array($event['event_type'] ?? '', ['gol', 'gol_contra', 'penalti_convertido'], true));
@@ -293,8 +295,12 @@ class CompetitionManagementController extends Controller
         }
 
         return [
-            'teams_count' => $registrations->countApprovedTeamsForChampionship($id),
-            'athletes_count' => $isTeamRegistration ? count($athletes) : $registrations->countApprovedIndividualRegistrationsForChampionship($id),
+            'teams_count' => $isTeamRegistration ? count($teams) : $approvedTeams,
+            'athletes_count' => $isTeamRegistration ? count($athletes) : $approvedIndividualRegistrations,
+            'real_teams_count' => count($teams),
+            'real_athletes_count' => count($athletes),
+            'approved_teams_count' => $approvedTeams,
+            'approved_individual_registrations_count' => $approvedIndividualRegistrations,
             'matches_count' => count($matches),
             'finished_matches' => count($finished),
             'in_progress_matches' => count(array_filter($matches, fn ($match) => ($match['status'] ?? '') === 'em_andamento')),

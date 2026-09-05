@@ -36,12 +36,19 @@ class CompetitionManagement extends Model
     public function counts(int $championshipId): array
     {
         $registrations = new Registration();
+        $isTeamRegistration = $this->isTeamRegistrationChampionship($championshipId);
+        $realTeams = $this->countByChampionship('teams', $championshipId);
+        $realAthletes = $this->countByChampionship('athletes', $championshipId);
+        $approvedTeams = $registrations->countApprovedTeamsForChampionship($championshipId);
+        $approvedIndividualRegistrations = $registrations->countApprovedIndividualRegistrationsForChampionship($championshipId);
 
         return [
-            'teams' => $registrations->countApprovedTeamsForChampionship($championshipId),
-            'athletes' => $this->isTeamRegistrationChampionship($championshipId)
-                ? $this->countByChampionship('athletes', $championshipId)
-                : $registrations->countApprovedIndividualRegistrationsForChampionship($championshipId),
+            'teams' => $isTeamRegistration ? $realTeams : $approvedTeams,
+            'athletes' => $isTeamRegistration ? $realAthletes : $approvedIndividualRegistrations,
+            'real_teams' => $realTeams,
+            'real_athletes' => $realAthletes,
+            'approved_teams' => $approvedTeams,
+            'approved_individual_registrations' => $approvedIndividualRegistrations,
             'matches' => $this->countByChampionship('matches', $championshipId),
             'events' => $this->countByMatches('match_events', $championshipId),
             'goals' => $this->countEventsByType($championshipId, ['gol', 'penalti_convertido', 'ponto', 'ataque', 'ace', 'bloqueio']),
