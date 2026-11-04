@@ -90,10 +90,11 @@ function csrf_field(): string
 function verify_csrf(): void
 {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $token = $_POST['_csrf'] ?? '';
-        if (!hash_equals($_SESSION['csrf'] ?? '', $token)) {
-            http_response_code(419);
-            exit('Sessao expirada. Recarregue a pagina.');
+        $token = $_POST['_csrf'] ?? null;
+        $expected = $_SESSION['csrf'] ?? '';
+        if (!is_string($token) || !is_string($expected) || $expected === ''
+            || !hash_equals($expected, $token)) {
+            \App\Core\Security::abort(419, 'Sua sessao expirou. Recarregue a pagina e tente novamente.');
         }
     }
 }
