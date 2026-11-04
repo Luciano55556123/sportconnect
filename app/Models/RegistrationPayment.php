@@ -41,7 +41,9 @@ class RegistrationPayment extends Model
         }
         try {
             $payment = $this->findForOrganizer($registrationId, $organizerId);
-            if (!$payment) {
+            if (!$payment || in_array(($payment['status'] ?? ''), ['paid', 'waived', 'refunded'], true)
+                || !in_array($paymentStatus, ['paid', 'rejected'], true)
+                || !in_array($registrationStatus, ['aprovado', 'rejeitado'], true)) {
                 if ($startedTransaction) {
                     $this->db->rollBack();
                 }
