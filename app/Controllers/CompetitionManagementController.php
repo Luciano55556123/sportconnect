@@ -121,7 +121,11 @@ class CompetitionManagementController extends Controller
             (new CompetitionMatch())->recordResult((int) $matchId, (int) $championship['id'], $_POST);
             $this->log((int) $championship['id'], 'resultado_alterado', 'Resultado alterado na partida #' . $matchId);
             flash('success', 'Resultado registrado e classificacao recalculada.');
-        } catch (\Throwable) {
+        } catch (\DomainException $exception) {
+            // Explica por que a correcao da chave foi bloqueada sem alterar jogos disputados.
+            flash('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            error_log('Falha ao registrar resultado: ' . $exception->getMessage());
             flash('error', 'Nao foi possivel registrar o resultado.');
         }
         $this->redirect($_POST['return_to'] ?? ('/organizador/campeonatos/' . $id . '/gerenciar#resultados'));
