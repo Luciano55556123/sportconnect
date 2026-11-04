@@ -7,12 +7,12 @@
                 <p class="lead">Encontre eventos esportivos, inscreva sua equipe e receba recomendacoes inteligentes conforme seu perfil.</p>
                 <form class="search-bar" action="<?= url('/campeonatos') ?>" method="get">
                     <input class="form-control form-control-lg" name="q" placeholder="Buscar por nome, cidade ou organizador">
-                    <button class="btn btn-warning btn-lg"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <button class="btn btn-warning btn-lg" aria-label="Pesquisar campeonatos"><i class="fa-solid fa-magnifying-glass"></i></button>
                 </form>
             </div>
             <div class="col-lg-5">
                 <div class="hero-panel">
-                    <div class="stat"><strong><?= count($featured) ?></strong><span>eventos ativos</span></div>
+                    <div class="stat"><strong><?= (int) ($upcomingCount ?? count($featured)) ?></strong><span>próximos eventos ativos</span></div>
                     <div class="stat"><strong><?= count($sports) ?></strong><span>modalidades</span></div>
                 </div>
             </div>
@@ -33,6 +33,7 @@
     <div class="section-heading"><h2>Proximos campeonatos</h2><span>Eventos em destaque</span></div>
     <div class="row g-4">
         <?php foreach ($featured as $event): require BASE_PATH . '/app/Views/championships/_card.php'; endforeach; ?>
+        <?php if (!$featured): ?><p class="text-muted">Nenhum campeonato futuro disponível no momento. <a href="<?= url('/campeonatos') ?>">Ver todos os campeonatos</a>.</p><?php endif; ?>
     </div>
 </section>
 
@@ -40,5 +41,6 @@
     <div class="section-heading"><h2>Mais procurados</h2><span>Ordenados por visualizacoes</span></div>
     <div class="row g-4">
         <?php foreach ($mostViewed as $event): require BASE_PATH . '/app/Views/championships/_card.php'; endforeach; ?>
+        <?php if (!$mostViewed): ?><p class="text-muted">Nenhum campeonato encontrado.</p><?php endif; ?>
     </div>
 </section>
