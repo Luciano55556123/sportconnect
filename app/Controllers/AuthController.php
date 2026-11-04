@@ -41,7 +41,7 @@ class AuthController extends Controller
         $name = trim((string) ($_POST['name'] ?? ''));
         $email = strtolower(trim((string) ($_POST['email'] ?? '')));
         $password = (string) ($_POST['password'] ?? '');
-        if (mb_strlen($name) < 2 || mb_strlen($name) > 160 || !filter_var($email, FILTER_VALIDATE_EMAIL)
+        if (strlen($name) < 2 || strlen($name) > 320 || !filter_var($email, FILTER_VALIDATE_EMAIL)
             || strlen($password) < 8 || strlen($password) > 72) {
             flash('error', 'Informe um nome, e-mail valido e senha de 8 a 72 caracteres.');
             $this->redirect('/cadastro');
@@ -85,6 +85,7 @@ class AuthController extends Controller
 
     public function logout(): void
     {
+        verify_csrf();
         Auth::logout();
         session_start();
         flash('success', 'Voce saiu da sua conta.');
