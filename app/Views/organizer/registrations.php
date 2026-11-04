@@ -55,8 +55,16 @@
                     </td>
                     <td>
                         <span class="badge text-bg-secondary"><?= e($labels[$r['status']] ?? $r['status']) ?></span>
-                        <?php if ($paid && (($r['payment_status'] ?? '') !== 'paid')): ?>
-                            <br><small class="text-muted">Inscricao pendente - pagamento aguardando confirmacao</small>
+                        <?php if ($paid && !in_array(($r['payment_status'] ?? ''), ['paid', 'waived'], true) && !in_array($registrationStatus, ['rejeitado', 'cancelado'], true)): ?>
+                            <br><small class="text-muted">
+                                <?php if (in_array($registrationStatus, ['aprovado', 'confirmada'], true)): ?>
+                                    Inscricao aprovada - pagamento ainda nao confirmado.
+                                <?php elseif (($r['payment_status'] ?? '') === 'rejected'): ?>
+                                    Pagamento rejeitado - entre em contato com o participante.
+                                <?php else: ?>
+                                    Inscricao pendente - pagamento ainda nao confirmado.
+                                <?php endif; ?>
+                            </small>
                         <?php endif; ?>
                     </td>
                     <td>
