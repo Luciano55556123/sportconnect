@@ -24,7 +24,8 @@
                     <?php else: ?>
                         <span class="badge text-bg-secondary"><?= $isFull ? 'Vagas esgotadas' : 'Inscrições encerradas' ?></span>
                     <?php endif; ?>
-                    <?php if ($championship['map_link']): ?><a class="btn btn-outline-light btn-lg" target="_blank" href="<?= e($championship['map_link']) ?>">Abrir mapa</a><?php endif; ?>
+                    <?php $mapLink = (string) ($championship['map_link'] ?? ''); ?>
+                    <?php if (filter_var($mapLink, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $mapLink)): ?><a class="btn btn-outline-light btn-lg" target="_blank" rel="noopener" href="<?= e($mapLink) ?>">Abrir mapa</a><?php endif; ?>
                     <?php if ($championship['rules_file']): ?><a class="btn btn-outline-light btn-lg" href="<?= url('/campeonatos/' . (int) $championship['id'] . '/regulamento') ?>" target="_blank" rel="noopener">Regulamento</a><?php endif; ?>
                 </div>
             </div>
@@ -88,8 +89,8 @@
                 <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/avaliar') ?>" class="stack-form">
                     <?= csrf_field() ?>
                     <label class="form-label">Avaliar campeonato</label>
-                    <select class="form-select" name="rating"><option value="5">5 estrelas</option><option value="4">4 estrelas</option><option value="3">3 estrelas</option></select>
-                    <textarea class="form-control" name="comment" placeholder="Comentario"></textarea>
+                    <select class="form-select" name="rating"><?php foreach ([5, 4, 3, 2, 1] as $stars): ?><option value="<?= $stars ?>"><?= $stars ?> <?= $stars === 1 ? 'estrela' : 'estrelas' ?></option><?php endforeach; ?></select>
+                    <textarea class="form-control" name="comment" maxlength="1500" placeholder="Comentário (opcional)"></textarea>
                     <button class="btn btn-outline-primary">Avaliar</button>
                 </form>
             </div>
