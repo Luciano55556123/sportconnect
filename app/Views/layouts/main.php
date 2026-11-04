@@ -43,7 +43,7 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
                             </a>
                         </li>
                     <?php endif; ?>
-                    <li class="nav-item"><a class="btn btn-sm btn-light" href="<?= url('/logout') ?>">Sair</a></li>
+                    <li class="nav-item"><form method="post" action="<?= url('/logout') ?>" class="m-0"><?= csrf_field() ?><button type="submit" class="btn btn-sm btn-light">Sair</button></form></li>
                 <?php else: ?>
                     <li class="nav-item"><a class="nav-link" href="<?= url('/login') ?>">Entrar</a></li>
                     <li class="nav-item"><a class="btn btn-sm btn-warning" href="<?= url('/cadastro') ?>">Criar conta</a></li>
