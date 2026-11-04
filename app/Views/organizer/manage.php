@@ -139,8 +139,12 @@ foreach ($standings as $row) {
                                 <span>Status: <?= e($registrationLabels[$registrationStatus] ?? $registrationStatus) ?></span>
                                 <?php if ($paidRegistration): ?>
                                     <br><span>Pagamento: <?= e($registrationLabels[$paymentStatus] ?? $paymentStatus) ?></span>
-                                    <?php if ($registrationStatus === 'pendente' && $paymentStatus !== 'paid'): ?>
-                                        <br><small class="text-muted">Pagamento aguardando confirmacao pelo organizador</small>
+                                    <?php if (!in_array($paymentStatus, ['paid', 'waived'], true) && !in_array($registrationStatus, ['rejeitado', 'cancelado'], true)): ?>
+                                        <br><small class="text-muted">
+                                            <?= in_array($registrationStatus, ['aprovado', 'confirmada'], true)
+                                                ? 'Inscricao aprovada - pagamento ainda nao confirmado.'
+                                                : 'Inscricao pendente - pagamento ainda nao confirmado.' ?>
+                                        </small>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <br><span>Pagamento: Gratuito</span>
