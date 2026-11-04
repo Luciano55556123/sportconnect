@@ -414,7 +414,8 @@ class OrganizerController extends Controller
             flash('error', 'Selecione uma modalidade esportiva valida.');
             return false;
         }
-        $maximum = filter_var($data['max_participants'] ?? 0, FILTER_VALIDATE_INT, [
+        $maximumInput = ($data['max_participants'] ?? '') === '' ? 0 : $data['max_participants'];
+        $maximum = filter_var($maximumInput, FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 0],
         ]);
         if ($maximum === false) {
