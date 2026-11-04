@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Core\Security;
 use App\Models\Notification;
 use App\Models\OrganizerRequest;
 use App\Models\User;
@@ -44,6 +45,7 @@ class OrganizerRequestController extends Controller
     {
         $this->requireAuth();
         verify_csrf();
+        Security::rateLimit('organizer-request', 3, 3600);
 
         $user = (new User())->find(Auth::user()['id']);
         if (!$user || $user['role'] !== 'athlete') {
