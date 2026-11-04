@@ -86,13 +86,27 @@ class CompetitionMatch extends Model
     {
         $this->db->beginTransaction();
         try {
+            // Serializa correcoes concorrentes da mesma partida.
+            $lock = $this->db->prepare(
+                'SELECT id FROM matches WHERE id = ? AND championship_id = ? FOR UPDATE'
+            );
+            $lock->execute([$id, $championshipId]);
+            if (!$lock->fetchColumn()) {
+                throw new \DomainException('Partida nao encontrada.');
+            }
+
             $match = $this->findInChampionship($id, $championshipId);
             if (!$match) {
                 throw new \RuntimeException('Partida nao encontrada.');
             }
 
-            $homeScore = (int) ($data['home_score'] ?? 0);
-            $awayScore = (int) ($data['away_score'] ?? 0);
+            foreach (['home_score', 'away_score'] as $field) {
+                if (filter_var($data[$field] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false) {
+                    throw new \DomainException('Informe placares inteiros, maiores ou iguais a zero.');
+                }
+            }
+            $homeScore = (int) $data['home_score'];
+            $awayScore = (int) $data['away_score'];
             $status = in_array($data['status'] ?? '', $this->allowedStatuses(), true) ? $data['status'] : 'finalizada';
             $winnerTeamId = null;
             $winnerAthleteId = null;
