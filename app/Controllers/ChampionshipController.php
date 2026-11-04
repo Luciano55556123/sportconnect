@@ -83,9 +83,11 @@ class ChampionshipController extends Controller
             $this->redirect('/campeonatos/' . $id);
         }
 
-        foreach (['name', 'phone', 'city'] as $requiredField) {
-            if (trim((string) ($_POST[$requiredField] ?? '')) === '') {
-                flash('error', 'Preencha nome, telefone e cidade para participar.');
+        foreach (['name' => 160, 'phone' => 30, 'city' => 100, 'team' => 160, 'category' => 100] as $field => $limit) {
+            $value = $_POST[$field] ?? '';
+            if (!is_string($value) || strlen(trim($value)) > $limit
+                || (in_array($field, ['name', 'phone', 'city'], true) && trim($value) === '')) {
+                flash('error', 'Confira os campos nome, telefone, cidade, equipe e categoria.');
                 $this->redirect('/campeonatos/' . $id);
             }
         }
