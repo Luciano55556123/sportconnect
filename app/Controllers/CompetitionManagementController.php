@@ -135,9 +135,16 @@ class CompetitionManagementController extends Controller
     {
         $championship = $this->authorizedChampionship((int) $id);
         verify_csrf();
-        (new MatchEvent())->save($_POST, (int) $championship['id']);
-        $this->log((int) $championship['id'], 'evento_registrado', 'Evento registrado na partida #' . (int) ($_POST['match_id'] ?? 0));
-        flash('success', 'Evento registrado.');
+        try {
+            (new MatchEvent())->save($_POST, (int) $championship['id']);
+            $this->log((int) $championship['id'], 'evento_registrado', 'Evento registrado na partida #' . (int) ($_POST['match_id'] ?? 0));
+            flash('success', 'Evento registrado.');
+        } catch (\DomainException $exception) {
+            flash('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            error_log('Erro ao salvar evento: ' . $exception->getMessage());
+            flash('error', 'Nao foi possivel salvar o evento.');
+        }
         $this->redirect($_POST['return_to'] ?? ('/organizador/campeonatos/' . $id . '/gerenciar#eventos'));
     }
 
@@ -145,9 +152,16 @@ class CompetitionManagementController extends Controller
     {
         $championship = $this->authorizedChampionship((int) $id);
         verify_csrf();
-        (new MatchSet())->save($_POST, (int) $championship['id']);
-        $this->log((int) $championship['id'], 'set_salvo', 'Set salvo na partida #' . (int) ($_POST['match_id'] ?? 0));
-        flash('success', 'Set salvo.');
+        try {
+            (new MatchSet())->save($_POST, (int) $championship['id']);
+            $this->log((int) $championship['id'], 'set_salvo', 'Set salvo na partida #' . (int) ($_POST['match_id'] ?? 0));
+            flash('success', 'Set salvo.');
+        } catch (\DomainException $exception) {
+            flash('error', $exception->getMessage());
+        } catch (\Throwable $exception) {
+            error_log('Erro ao salvar set: ' . $exception->getMessage());
+            flash('error', 'Nao foi possivel salvar o set.');
+        }
         $this->redirect($_POST['return_to'] ?? ('/organizador/campeonatos/' . $id . '/gerenciar#sets'));
     }
 
