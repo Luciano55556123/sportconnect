@@ -74,7 +74,7 @@ class OrganizerController extends Controller
     public function edit(string $id): void
     {
         $this->requireAuth('organizer');
-        $championship = (new Championship())->find((int) $id);
+        $championship = $this->ownedChampionship((int) $id);
         $this->view('organizer/form', [
             'title' => 'Editar campeonato',
             'sports' => (new Sport())->all(),
@@ -152,6 +152,7 @@ class OrganizerController extends Controller
     {
         $this->requireAuth('organizer');
         verify_csrf();
+        $this->ownedChampionship((int) $id);
         $this->normalizePaymentData($_POST);
         if (!$this->validateChampionshipPayment($_POST)) {
             $this->redirect('/organizador/campeonatos/' . $id . '/editar');
@@ -263,6 +264,22 @@ class OrganizerController extends Controller
             fputcsv($out, [$row['championship_name'], $row['name'], $row['email'], $row['city'], $row['status'], $row['registration_fee']]);
         }
         fclose($out);
+    }
+
+    private function ownedChampionship(int $id): array
+    {
+        $championship = (new Championship())->find($id);
+        if (!$championship) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Campeonato nao encontrado']);
+            exit;
+        }
+        if ((int) $championship['organizer_id'] !== (int) Auth::user()['id']) {
+            http_response_code(403);
+            $this->view('errors/403', ['title' => 'Acesso negado']);
+            exit;
+        }
+        return $championship;
     }
 
     private function upload(string $field, array $allowed): ?string
