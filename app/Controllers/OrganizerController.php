@@ -58,7 +58,11 @@ class OrganizerController extends Controller
             $this->redirect('/organizador/campeonatos/novo');
         }
         $_POST['image'] = $image ?? 'assets/img/default-event.svg';
-        $_POST['rules_file'] = $this->upload('rules_file', ['pdf']);
+        $rules = $this->upload('rules_file', ['pdf']);
+        if ($this->hasUploadedFile('rules_file') && $rules === null) {
+            $this->redirect('/organizador/campeonatos/novo');
+        }
+        $_POST['rules_file'] = $rules;
         try {
             $id = (new Championship())->create($_POST, Auth::user()['id']);
         } catch (PDOException $exception) {
@@ -162,7 +166,11 @@ class OrganizerController extends Controller
             $this->redirect('/organizador/campeonatos/' . $id . '/editar');
         }
         $_POST['image'] = $image ?? ($_POST['current_image'] ?? 'assets/img/default-event.svg');
-        $_POST['rules_file'] = $this->upload('rules_file', ['pdf']) ?? ($_POST['current_rules_file'] ?? null);
+        $rules = $this->upload('rules_file', ['pdf']);
+        if ($this->hasUploadedFile('rules_file') && $rules === null) {
+            $this->redirect('/organizador/campeonatos/' . $id . '/editar');
+        }
+        $_POST['rules_file'] = $rules ?? ($_POST['current_rules_file'] ?? null);
         try {
             (new Championship())->update((int) $id, $_POST, Auth::user()['id']);
         } catch (PDOException $exception) {
@@ -303,10 +311,27 @@ class OrganizerController extends Controller
             return null;
         }
 
-        if ($field !== 'image') {
-            $name = uniqid($field . '_', true) . '.' . $ext;
-            move_uploaded_file($_FILES[$field]['tmp_name'], BASE_PATH . '/uploads/' . $name);
-            return 'uploads/' . $name;
+        if ($field === 'rules_file') {
+            $tmp = $_FILES[$field]['tmp_name'];
+            $mime = mime_content_type($tmp);
+            $signature = file_get_contents($tmp, false, null, 0, 4);
+            $size = (int) ($_FILES[$field]['size'] ?? 0);
+            if ($ext !== 'pdf' || $mime !== 'application/pdf'
+                || $signature !== '%PDF' || $size < 4 || $size > 8 * 1024 * 1024) {
+                flash('error', 'Envie um regulamento PDF valido de ate 8 MB.');
+                return null;
+            }
+            try {
+                $name = uniqid('regulamento_', true) . '.pdf';
+                // Arquivos no disco do Render nao sao permanentes apos deploy.
+                return (new SupabaseStorageService())->uploadPublicObject(
+                    $tmp, $name, 'application/pdf'
+                );
+            } catch (\Throwable $exception) {
+                error_log('Erro ao salvar regulamento no Storage: ' . $exception->getMessage());
+                flash('error', 'Nao foi possivel enviar o regulamento. Tente novamente.');
+                return null;
+            }
         }
 
         $allowedMimes = [
