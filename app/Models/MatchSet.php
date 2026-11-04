@@ -23,22 +23,33 @@ class MatchSet extends Model
 
     public function save(array $data, int $championshipId): void
     {
+        $matchId = (int) ($data['match_id'] ?? 0);
+        $match = (new CompetitionMatch())->findInChampionship($matchId, $championshipId);
+        if (!$match) {
+            throw new \DomainException('Partida nao encontrada neste campeonato.');
+        }
+
+        $setNumber = filter_var($data['set_number'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $homeScore = filter_var($data['home_score'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        $awayScore = filter_var($data['away_score'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if ($setNumber === false || $homeScore === false || $awayScore === false) {
+            throw new \DomainException('Informe numero do set e placares inteiros validos.');
+        }
+
         $stmt = $this->db->prepare(
             'INSERT INTO match_sets (match_id, set_number, home_score, away_score, winner_team_id, winner_athlete_id)
              SELECT :match_id, :set_number, :home_score, :away_score, :winner_team_id, :winner_athlete_id
-             WHERE EXISTS (SELECT 1 FROM matches WHERE id = :match_id AND championship_id = :championship_id)
+             WHERE EXISTS (SELECT 1 FROM matches WHERE id = :checked_match_id AND championship_id = :championship_id)
              ON CONFLICT (match_id, set_number) DO UPDATE
              SET home_score = EXCLUDED.home_score,
                  away_score = EXCLUDED.away_score,
                  winner_team_id = EXCLUDED.winner_team_id,
                  winner_athlete_id = EXCLUDED.winner_athlete_id'
         );
-        $homeScore = (int) ($data['home_score'] ?? 0);
-        $awayScore = (int) ($data['away_score'] ?? 0);
-        $match = (new CompetitionMatch())->findInChampionship((int) $data['match_id'], $championshipId);
         $stmt->execute([
-            'match_id' => (int) $data['match_id'],
-            'set_number' => (int) ($data['set_number'] ?? 1),
+            'match_id' => $matchId,
+            'checked_match_id' => $matchId,
+            'set_number' => $setNumber,
             'home_score' => $homeScore,
             'away_score' => $awayScore,
             'winner_team_id' => $homeScore === $awayScore ? null : ($homeScore > $awayScore ? ($match['home_team_id'] ?? null) : ($match['away_team_id'] ?? null)),
