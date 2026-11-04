@@ -184,6 +184,9 @@ class Registration extends Model
 
     public function setStatus(int $id, string $status, int $organizerId): bool
     {
+        if (!in_array($status, ['pendente', 'aprovado', 'rejeitado', 'cancelado'], true)) {
+            return false;
+        }
         $stmt = $this->db->prepare(
             'UPDATE registrations
              SET status = ?
