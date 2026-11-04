@@ -25,7 +25,7 @@
                         <span class="badge text-bg-secondary"><?= $isFull ? 'Vagas esgotadas' : 'Inscrições encerradas' ?></span>
                     <?php endif; ?>
                     <?php if ($championship['map_link']): ?><a class="btn btn-outline-light btn-lg" target="_blank" href="<?= e($championship['map_link']) ?>">Abrir mapa</a><?php endif; ?>
-                    <?php if ($championship['rules_file']): ?><a class="btn btn-outline-light btn-lg" href="<?= url($championship['rules_file']) ?>">Regulamento</a><?php endif; ?>
+                    <?php if ($championship['rules_file']): ?><a class="btn btn-outline-light btn-lg" href="<?= url('/campeonatos/' . (int) $championship['id'] . '/regulamento') ?>" target="_blank" rel="noopener">Regulamento</a><?php endif; ?>
                 </div>
             </div>
             <aside class="sc-public-media">
