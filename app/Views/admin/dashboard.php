@@ -26,7 +26,7 @@
                 <h2>Recursos</h2>
                 <div class="admin-links">
                     <a href="<?= url('/admin/solicitacoes-organizador') ?>">Solicitacoes de Organizador<?php if ($pendingCount > 0): ?> <span class="badge text-bg-warning"><?= $pendingCount ?></span><?php endif; ?></a>
-                    <?php foreach (['usuarios','organizadores','esportes','categorias','campeonatos','inscricoes','avaliacoes','comentarios','notificacoes','relatorios'] as $r): ?><a href="<?= url('/admin/' . $r) ?>"><?= e(ucfirst($r)) ?></a><?php endforeach; ?>
+                    <?php foreach (['usuarios', 'organizadores', 'campeonatos'] as $r): ?><a href="<?= url('/admin/' . $r) ?>"><?= e(ucfirst($r)) ?></a><?php endforeach; ?>
                 </div>
             </div>
         </div>
