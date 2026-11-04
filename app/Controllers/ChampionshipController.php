@@ -93,6 +93,39 @@ class ChampionshipController extends Controller
 
         $db->beginTransaction();
         try {
+            // Bloqueia o campeonato durante a verificacao de vagas para evitar
+            // duas inscricoes simultaneas ocuparem a ultima vaga.
+            $step = 'check available spots';
+            $lockedStmt = $db->prepare(
+                'SELECT status, registrations_open, max_participants
+                 FROM championships WHERE id = ? FOR UPDATE'
+            );
+            $lockedStmt->execute([$championshipId]);
+            $lockedChampionship = $lockedStmt->fetch();
+            $stillOpen = $lockedChampionship && in_array(
+                $lockedChampionship['registrations_open'] ?? false,
+                [true, 1, '1', 't', 'true', 'yes', 'on'],
+                true
+            );
+            if (!$stillOpen || in_array(($lockedChampionship['status'] ?? ''), ['encerrado', 'cancelado'], true)) {
+                throw new \DomainException('As inscricoes para este campeonato estao encerradas.');
+            }
+            if ($registrationModel->existsForUser($championshipId, $userId)) {
+                throw new \DomainException('Voce ja esta inscrito neste campeonato.');
+            }
+            $maxParticipants = (int) ($lockedChampionship['max_participants'] ?? 0);
+            if ($maxParticipants > 0) {
+                $countStmt = $db->prepare(
+                    "SELECT COUNT(*) FROM registrations
+                     WHERE championship_id = ?
+                       AND status NOT IN ('rejeitado', 'cancelado', 'pagamento_rejeitado')"
+                );
+                $countStmt->execute([$championshipId]);
+                if ((int) $countStmt->fetchColumn() >= $maxParticipants) {
+                    throw new \DomainException('Nao ha mais vagas disponiveis para este campeonato.');
+                }
+            }
+
             $step = 'create registration';
             $registrationId = $registrationModel->create([
             'championship_id' => $championshipId,
@@ -113,6 +146,12 @@ class ChampionshipController extends Controller
                 $paymentModel->createPending($registrationId, (float) $championship['registration_fee']);
             }
             $db->commit();
+        } catch (\DomainException $exception) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            flash('error', $exception->getMessage());
+            $this->redirect('/campeonatos/' . $id);
         } catch (Throwable $exception) {
             if ($db->inTransaction()) {
                 $db->rollBack();
