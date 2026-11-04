@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Database;
+use App\Core\Security;
 use App\Models\Championship;
 use App\Models\CompetitionManagement;
 use App\Models\Favorite;
@@ -58,6 +59,7 @@ class ChampionshipController extends Controller
     {
         $this->requireAuth('athlete');
         verify_csrf();
+        Security::rateLimit('registration', 8, 900);
         $userId = (int) Auth::user()['id'];
         $championshipId = (int) $id;
         $step = 'load championship';
@@ -70,7 +72,8 @@ class ChampionshipController extends Controller
         }
 
         $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true);
-        if (in_array(($championship['status'] ?? ''), ['encerrado', 'cancelado'], true) || !$registrationsOpen) {
+        if (in_array(($championship['status'] ?? ''), ['encerrado', 'cancelado'], true)
+            || !$registrationsOpen || ($championship['event_date'] ?? '') < date('Y-m-d')) {
             flash('error', 'As inscrições para este campeonato estão encerradas.');
             $this->redirect('/campeonatos/' . $id);
         }
@@ -80,6 +83,12 @@ class ChampionshipController extends Controller
             $this->redirect('/campeonatos/' . $id);
         }
 
+        foreach (['name', 'phone', 'city'] as $requiredField) {
+            if (trim((string) ($_POST[$requiredField] ?? '')) === '') {
+                flash('error', 'Preencha nome, telefone e cidade para participar.');
+                $this->redirect('/campeonatos/' . $id);
+            }
+        }
         $email = trim((string) ($_POST['email'] ?? ''));
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             flash('error', 'Informe um e-mail valido.');
@@ -199,11 +208,28 @@ class ChampionshipController extends Controller
     {
         $this->requireAuth('athlete');
         verify_csrf();
-        $stmt = \App\Core\Database::connection()->prepare(
-            'INSERT INTO reviews (championship_id, user_id, rating, comment) VALUES (?, ?, ?, ?)'
-        );
-        $stmt->execute([(int) $id, Auth::user()['id'], (int) $_POST['rating'], $_POST['comment'] ?? '']);
-        flash('success', 'Avaliacao publicada.');
+        Security::rateLimit('review', 10, 3600);
+
+        $rating = filter_var($_POST['rating'] ?? null, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 5],
+        ]);
+        $comment = trim((string) ($_POST['comment'] ?? ''));
+        if ($rating === false || strlen($comment) > 1500
+            || !(new Championship())->find((int) $id)) {
+            flash('error', 'Informe uma avaliacao de 1 a 5 estrelas e um comentario valido.');
+            $this->redirect('/campeonatos/' . $id);
+        }
+
+        try {
+            $stmt = Database::connection()->prepare(
+                'INSERT INTO reviews (championship_id, user_id, rating, comment) VALUES (?, ?, ?, ?)'
+            );
+            $stmt->execute([(int) $id, (int) Auth::user()['id'], $rating, $comment]);
+            flash('success', 'Avaliacao publicada.');
+        } catch (\Throwable $exception) {
+            error_log('Nao foi possivel publicar avaliacao: ' . $exception->getMessage());
+            flash('error', 'Nao foi possivel publicar a avaliacao.');
+        }
         $this->redirect('/campeonatos/' . $id);
     }
 
