@@ -20,11 +20,15 @@ class ChampionshipController extends Controller
 {
     public function index(): void
     {
+        $filters = [];
+        foreach (['q', 'city', 'sport_id', 'date', 'max_price', 'category', 'modality', 'status'] as $key) {
+            $filters[$key] = is_string($_GET[$key] ?? null) ? trim($_GET[$key]) : '';
+        }
         $this->view('championships/index', [
             'title' => 'Pesquisar campeonatos',
             'sports' => (new Sport())->all(),
-            'championships' => (new Championship())->search($_GET),
-            'filters' => $_GET,
+            'championships' => (new Championship())->search($filters),
+            'filters' => $filters,
         ]);
     }
 
@@ -66,7 +70,7 @@ class ChampionshipController extends Controller
         }
 
         $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true);
-        if (($championship['status'] ?? '') === 'encerrado' || !$registrationsOpen) {
+        if (in_array(($championship['status'] ?? ''), ['encerrado', 'cancelado'], true) || !$registrationsOpen) {
             flash('error', 'As inscrições para este campeonato estão encerradas.');
             $this->redirect('/campeonatos/' . $id);
         }
