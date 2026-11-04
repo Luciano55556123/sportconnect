@@ -14,11 +14,13 @@ class Championship extends Model
                 WHERE 1 = 1';
         $params = [];
 
-        foreach (['city', 'modality'] as $field) {
-            if (!empty($filters[$field])) {
-                $sql .= " AND c.$field = ?";
-                $params[] = $filters[$field];
-            }
+        if (is_string($filters['city'] ?? null) && trim($filters['city']) !== '') {
+            $sql .= ' AND LOWER(c.city) LIKE LOWER(?)';
+            $params[] = '%' . trim($filters['city']) . '%';
+        }
+        if (is_string($filters['modality'] ?? null) && trim($filters['modality']) !== '') {
+            $sql .= ' AND c.modality = ?';
+            $params[] = $filters['modality'];
         }
         if (!empty($filters['status'])) {
             if (is_array($filters['status'])) {
@@ -33,25 +35,32 @@ class Championship extends Model
             }
         }
         if (!empty($filters['q'])) {
-            $sql .= ' AND (c.name LIKE ? OR c.description LIKE ? OR u.name LIKE ?)';
-            $term = '%' . $filters['q'] . '%';
-            array_push($params, $term, $term, $term);
+            $sql .= ' AND (LOWER(c.name) LIKE LOWER(?) OR LOWER(c.description) LIKE LOWER(?)
+                        OR LOWER(u.name) LIKE LOWER(?) OR LOWER(c.city) LIKE LOWER(?)
+                        OR LOWER(c.location) LIKE LOWER(?))';
+            $term = '%' . trim((string) $filters['q']) . '%';
+            array_push($params, $term, $term, $term, $term, $term);
         }
         if (!empty($filters['sport_id'])) {
             $sql .= ' AND c.sport_id = ?';
             $params[] = (int) $filters['sport_id'];
         }
         if (!empty($filters['category'])) {
-            $sql .= ' AND c.category LIKE ?';
+            $sql .= ' AND LOWER(c.category) LIKE LOWER(?)';
             $params[] = '%' . $filters['category'] . '%';
         }
         if (!empty($filters['date'])) {
             $sql .= ' AND c.event_date = ?';
             $params[] = $filters['date'];
         }
-        if ($filters['max_price'] ?? '' !== '') {
+        if (isset($filters['future_from'])) {
+            $sql .= ' AND c.event_date >= ?';
+            $params[] = (string) $filters['future_from'];
+        }
+        $maxPrice = $filters['max_price'] ?? null;
+        if (is_scalar($maxPrice) && $maxPrice !== '' && is_numeric($maxPrice) && (float) $maxPrice >= 0) {
             $sql .= ' AND c.registration_fee <= ?';
-            $params[] = (float) $filters['max_price'];
+            $params[] = (float) $maxPrice;
         }
 
         $sql .= ' ORDER BY c.event_date ASC LIMIT ' . (int) $limit;
@@ -62,7 +71,30 @@ class Championship extends Model
 
     public function featured(): array
     {
-        return $this->search(['status' => $this->visibleStatuses()], 6);
+        return $this->search([
+            'status' => $this->openStatuses(),
+            'future_from' => date('Y-m-d'),
+        ], 6);
+    }
+
+    public function countUpcoming(): int
+    {
+        $statuses = $this->openStatuses();
+        $placeholders = implode(', ', array_fill(0, count($statuses), '?'));
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM championships WHERE status IN ({$placeholders}) AND event_date >= ?"
+        );
+        $stmt->execute([...$statuses, date('Y-m-d')]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    private function openStatuses(): array
+    {
+        $open = array_values(array_intersect(
+            $this->visibleStatuses(),
+            ['ativo', 'registration_open', 'in_progress', 'em_andamento']
+        ));
+        return $open ?: ['ativo'];
     }
 
     public function mostViewed(): array
@@ -101,22 +133,66 @@ class Championship extends Model
             return 0;
         }
 
-        $registrationStmt = $this->db->prepare(
-            "SELECT COUNT(*) FROM registrations
-             WHERE championship_id = ?
-             AND status NOT IN ('rejeitado', 'cancelado', 'pagamento_rejeitado')"
-        );
-        $registrationStmt->execute([$id]);
-        $online = (int) $registrationStmt->fetchColumn();
-
-        $table = ($championship['registration_type'] ?? 'individual') === 'team' ? 'teams' : 'athletes';
+        $byTeam = ($championship['registration_type'] ?? 'individual') === 'team';
+        $manualTable = $byTeam ? 'teams' : 'athletes';
         $manualStmt = $this->db->prepare(
-            "SELECT COUNT(*) FROM {$table}
+            "SELECT id, name" . ($byTeam ? '' : ', user_id') . "
+             FROM {$manualTable}
              WHERE championship_id = ? AND status NOT IN ('rejeitado', 'cancelado')"
         );
         $manualStmt->execute([$id]);
+        $manual = $manualStmt->fetchAll();
+        $occupied = count($manual);
 
-        return $online + (int) $manualStmt->fetchColumn();
+        $manualIds = [];
+        $manualNames = [];
+        $manualUsers = [];
+        foreach ($manual as $participant) {
+            $manualIds[(int) $participant['id']] = true;
+            $manualNames[$this->spotKey((string) $participant['name'])] = true;
+            if (!$byTeam && !empty($participant['user_id'])) {
+                $manualUsers[(int) $participant['user_id']] = true;
+            }
+        }
+
+        $onlineStmt = $this->db->prepare(
+            "SELECT id, user_id, team_id, team, name
+             FROM registrations WHERE championship_id = ?
+             AND status NOT IN ('rejeitado', 'cancelado', 'pagamento_rejeitado')"
+        );
+        $onlineStmt->execute([$id]);
+        $onlineKeys = [];
+        foreach ($onlineStmt->fetchAll() as $registration) {
+            if ($byTeam) {
+                $linkedId = (int) ($registration['team_id'] ?? 0);
+                $name = $this->spotKey((string) ($registration['team'] ?? ''));
+                if (($linkedId > 0 && isset($manualIds[$linkedId]))
+                    || ($name !== '' && isset($manualNames[$name]))) {
+                    continue;
+                }
+                $key = $linkedId > 0 ? 'team:' . $linkedId
+                    : ($name !== '' ? 'team-name:' . $name : 'registration:' . $registration['id']);
+                if (!isset($onlineKeys[$key])) {
+                    $onlineKeys[$key] = true;
+                    $occupied++;
+                }
+            } else {
+                $name = $this->spotKey((string) ($registration['name'] ?? ''));
+                if (isset($manualUsers[(int) $registration['user_id']])
+                    || ($name !== '' && isset($manualNames[$name]))) {
+                    continue;
+                }
+                // Inscricoes individuais distintas contam separadamente.
+                $occupied++;
+            }
+        }
+        return $occupied;
+    }
+
+    private function spotKey(string $value): string
+    {
+        $value = trim(preg_replace('/\\s+/u', ' ', $value) ?? $value);
+        return function_exists('mb_strtolower') ? mb_strtolower($value, 'UTF-8') : strtolower($value);
     }
 
     public function incrementViews(int $id): void
