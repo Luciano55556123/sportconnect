@@ -70,7 +70,9 @@
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($pending): ?>
+                        <?php if ($paid && ($r['payment_status'] ?? '') === 'paid'): ?>
+                            <small class="text-success">Pagamento confirmado. Para corrigir um cancelamento ou reembolso, procure o administrador.</small>
+                        <?php elseif ($pending): ?>
                             <form method="post" action="<?= url('/organizador/inscricoes/' . $r['id'] . '/status') ?>" class="d-flex flex-wrap gap-2">
                                 <?= csrf_field() ?>
                                 <button class="btn btn-sm btn-success" name="status" value="aprovado">Aprovar</button>
