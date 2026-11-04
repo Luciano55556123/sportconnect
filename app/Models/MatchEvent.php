@@ -27,6 +27,17 @@ class MatchEvent extends Model
     {
         $eventType = in_array($data['event_type'] ?? '', $this->allowedTypes(), true) ? $data['event_type'] : 'observacao';
 
+        if (empty($data['id'])
+            && !(new CompetitionMatch())->findInChampionship((int) ($data['match_id'] ?? 0), $championshipId)) {
+            throw new \DomainException('Partida nao encontrada neste campeonato.');
+        }
+        if (!empty($data['team_id']) && !(new Team())->findInChampionship((int) $data['team_id'], $championshipId)) {
+            throw new \DomainException('Equipe invalida para este campeonato.');
+        }
+        if (!empty($data['athlete_id']) && !(new Athlete())->findInChampionship((int) $data['athlete_id'], $championshipId)) {
+            throw new \DomainException('Atleta invalido para este campeonato.');
+        }
+
         if (!empty($data['id'])) {
             $stmt = $this->db->prepare(
                 'UPDATE match_events e
@@ -53,10 +64,11 @@ class MatchEvent extends Model
         $stmt = $this->db->prepare(
             'INSERT INTO match_events (match_id, team_id, athlete_id, event_type, minute, additional_time, value, description)
              SELECT :match_id, :team_id, :athlete_id, :event_type, :minute, :additional_time, :value, :description
-             WHERE EXISTS (SELECT 1 FROM matches WHERE id = :match_id AND championship_id = :championship_id)'
+             WHERE EXISTS (SELECT 1 FROM matches WHERE id = :checked_match_id AND championship_id = :championship_id)'
         );
         $stmt->execute([
             'match_id' => (int) $data['match_id'],
+            'checked_match_id' => (int) $data['match_id'],
             'team_id' => !empty($data['team_id']) ? (int) $data['team_id'] : null,
             'athlete_id' => !empty($data['athlete_id']) ? (int) $data['athlete_id'] : null,
             'event_type' => $eventType,
