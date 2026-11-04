@@ -26,7 +26,7 @@
                                 <tr>
                                     <td><?= e($c['name']) ?><br><small><?= e($c['sport_name']) ?></small></td>
                                     <td><?= e($c['status']) ?></td>
-                                    <td><?= (int) $c['registrations_count'] ?> inscritos</td>
+                                    <td><?= (int) ($c['occupied_spots'] ?? $c['registrations_count']) ?> vagas ocupadas</td>
                                     <td class="text-nowrap">
                                         <a class="btn btn-sm btn-outline-primary" href="<?= url('/organizador/campeonatos/' . $c['id'] . '/gerenciar') ?>">Gerenciar competicao</a>
                                         <a class="btn btn-sm btn-outline-secondary" href="<?= url('/organizador/campeonatos/' . $c['id'] . '/editar') ?>">Editar</a>
