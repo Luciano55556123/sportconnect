@@ -1,7 +1,7 @@
 <div class="col-md-6 col-xl-4">
     <?php $status = (string) ($event['status'] ?? ''); ?>
     <article class="event-card h-100">
-        <div class="event-image"><img src="<?= url($event['image'] ?? 'assets/img/default-event.svg') ?>" alt=""></div>
+        <div class="event-image"><img loading="lazy" src="<?= url($event['image'] ?? 'assets/img/default-event.svg') ?>" alt="Imagem do campeonato <?= e($event['name'] ?? '') ?>"></div>
         <div class="p-3">
             <div class="d-flex justify-content-between gap-2 mb-2">
                 <span class="badge text-bg-primary"><?= e($event['sport_name']) ?></span>
