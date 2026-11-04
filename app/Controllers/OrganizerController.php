@@ -310,6 +310,11 @@ class OrganizerController extends Controller
             flash('error', 'Upload bloqueado por extensao em ' . $field . '.');
             return null;
         }
+        $maximumUpload = $field === 'rules_file' ? 8 * 1024 * 1024 : 5 * 1024 * 1024;
+        if ((int) ($_FILES[$field]['size'] ?? 0) > $maximumUpload) {
+            flash('error', 'Arquivo muito grande. Limite: ' . ($field === 'rules_file' ? '8 MB' : '5 MB') . '.');
+            return null;
+        }
 
         if ($field === 'rules_file') {
             $tmp = $_FILES[$field]['tmp_name'];
