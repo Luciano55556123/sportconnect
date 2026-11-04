@@ -86,25 +86,40 @@ class CompetitionMatch extends Model
     {
         $this->db->beginTransaction();
         try {
+            // Serializa correcoes concorrentes da mesma partida.
+            $lock = $this->db->prepare(
+                'SELECT id FROM matches WHERE id = ? AND championship_id = ? FOR UPDATE'
+            );
+            $lock->execute([$id, $championshipId]);
+            if (!$lock->fetchColumn()) {
+                throw new \DomainException('Partida nao encontrada.');
+            }
+
             $match = $this->findInChampionship($id, $championshipId);
             if (!$match) {
                 throw new \RuntimeException('Partida nao encontrada.');
             }
 
-            $homeScore = (int) ($data['home_score'] ?? 0);
-            $awayScore = (int) ($data['away_score'] ?? 0);
+            foreach (['home_score', 'away_score'] as $field) {
+                if (filter_var($data[$field] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false) {
+                    throw new \DomainException('Informe placares inteiros, maiores ou iguais a zero.');
+                }
+            }
+            $homeScore = (int) $data['home_score'];
+            $awayScore = (int) $data['away_score'];
+            $status = in_array($data['status'] ?? '', $this->allowedStatuses(), true) ? $data['status'] : 'finalizada';
             $winnerTeamId = null;
             $winnerAthleteId = null;
 
-            if ($homeScore > $awayScore) {
+            // Uma partida nao finalizada nao deve enviar vencedor a fase seguinte.
+            if ($status === 'finalizada' && $homeScore > $awayScore) {
                 $winnerTeamId = $match['home_team_id'] ? (int) $match['home_team_id'] : null;
                 $winnerAthleteId = $match['home_athlete_id'] ? (int) $match['home_athlete_id'] : null;
-            } elseif ($awayScore > $homeScore) {
+            } elseif ($status === 'finalizada' && $awayScore > $homeScore) {
                 $winnerTeamId = $match['away_team_id'] ? (int) $match['away_team_id'] : null;
                 $winnerAthleteId = $match['away_athlete_id'] ? (int) $match['away_athlete_id'] : null;
             }
 
-            $status = in_array($data['status'] ?? '', $this->allowedStatuses(), true) ? $data['status'] : 'finalizada';
             $stmt = $this->db->prepare(
                 'UPDATE matches
                  SET home_score = ?, away_score = ?, status = ?, winner_team_id = ?, winner_athlete_id = ?, notes = ?, updated_at = CURRENT_TIMESTAMP
@@ -137,21 +152,64 @@ class CompetitionMatch extends Model
 
     private function advanceWinner(array $match, ?int $winnerTeamId, ?int $winnerAthleteId): void
     {
-        if (empty($match['next_match_id']) || empty($match['next_match_position']) || (!$winnerTeamId && !$winnerAthleteId)) {
+        if (empty($match['next_match_id']) || empty($match['next_match_position'])) {
             return;
+        }
+
+        $previousTeam = !empty($match['winner_team_id']) ? (int) $match['winner_team_id'] : null;
+        $previousAthlete = !empty($match['winner_athlete_id']) ? (int) $match['winner_athlete_id'] : null;
+        if ($previousTeam === $winnerTeamId && $previousAthlete === $winnerAthleteId
+            && $winnerTeamId === null && $winnerAthleteId === null) {
+            return;
+        }
+
+        $nextId = (int) $match['next_match_id'];
+        if ($nextId === (int) $match['id']) {
+            throw new \DomainException('Uma partida nao pode avancar para ela mesma.');
         }
 
         $position = $match['next_match_position'] === 'away' ? 'away' : 'home';
         $teamColumn = $position . '_team_id';
         $athleteColumn = $position . '_athlete_id';
+
+        // A partida de destino e bloqueada para impedir alteracoes concorrentes.
         $stmt = $this->db->prepare(
-            "UPDATE matches
-             SET {$teamColumn} = COALESCE({$teamColumn}, ?),
-                 {$athleteColumn} = COALESCE({$athleteColumn}, ?),
-                 updated_at = CURRENT_TIMESTAMP
-             WHERE id = ? AND championship_id = ?"
+            'SELECT * FROM matches WHERE id = ? AND championship_id = ? FOR UPDATE'
         );
-        $stmt->execute([$winnerTeamId, $winnerAthleteId, (int) $match['next_match_id'], (int) $match['championship_id']]);
+        $stmt->execute([$nextId, (int) $match['championship_id']]);
+        $next = $stmt->fetch();
+        if (!$next) {
+            throw new \DomainException('A proxima partida configurada nao foi encontrada.');
+        }
+
+        $currentTeam = !empty($next[$teamColumn]) ? (int) $next[$teamColumn] : null;
+        $currentAthlete = !empty($next[$athleteColumn]) ? (int) $next[$athleteColumn] : null;
+
+        if ($currentTeam === $winnerTeamId && $currentAthlete === $winnerAthleteId) {
+            return; // O vencedor correto ja esta na chave.
+        }
+
+        // Nao sobrescrever um participante colocado manualmente ou de outra origem.
+        if (($currentTeam !== null || $currentAthlete !== null)
+            && ($currentTeam !== $previousTeam || $currentAthlete !== $previousAthlete)) {
+            throw new \DomainException(
+                'A vaga na proxima partida pertence a outro participante. Confira o chaveamento antes de alterar.'
+            );
+        }
+
+        // Nunca mudar os participantes de uma partida com resultado ou ja iniciada.
+        if (!in_array($next['status'] ?? '', ['agendada', 'adiada'], true)
+            || $next['home_score'] !== null || $next['away_score'] !== null) {
+            throw new \DomainException(
+                'A proxima partida ja foi iniciada ou possui resultado. Revise essa partida antes de corrigir o classificado.'
+            );
+        }
+
+        $update = $this->db->prepare(
+            "UPDATE matches SET {$teamColumn} = ?, {$athleteColumn} = ?,
+             updated_at = CURRENT_TIMESTAMP WHERE id = ? AND championship_id = ?"
+        );
+        $update->execute([$winnerTeamId, $winnerAthleteId, $nextId, (int) $match['championship_id']]);
     }
 
     private function payload(array $data, int $championshipId): array

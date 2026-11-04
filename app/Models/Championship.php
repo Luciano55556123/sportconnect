@@ -90,6 +90,35 @@ class Championship extends Model
         return $stmt->fetch() ?: null;
     }
 
+    /**
+     * Vagas ocupadas por inscricoes online e participantes incluidos diretamente
+     * na gestao. Em campeonatos por equipes, cada equipe ocupa uma vaga.
+     */
+    public function occupiedSpots(array $championship): int
+    {
+        $id = (int) ($championship['id'] ?? 0);
+        if ($id <= 0) {
+            return 0;
+        }
+
+        $registrationStmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM registrations
+             WHERE championship_id = ?
+             AND status NOT IN ('rejeitado', 'cancelado', 'pagamento_rejeitado')"
+        );
+        $registrationStmt->execute([$id]);
+        $online = (int) $registrationStmt->fetchColumn();
+
+        $table = ($championship['registration_type'] ?? 'individual') === 'team' ? 'teams' : 'athletes';
+        $manualStmt = $this->db->prepare(
+            "SELECT COUNT(*) FROM {$table}
+             WHERE championship_id = ? AND status NOT IN ('rejeitado', 'cancelado')"
+        );
+        $manualStmt->execute([$id]);
+
+        return $online + (int) $manualStmt->fetchColumn();
+    }
+
     public function incrementViews(int $id): void
     {
         $this->db->prepare('UPDATE championships SET views = views + 1 WHERE id = ?')->execute([$id]);
@@ -140,7 +169,12 @@ class Championship extends Model
             WHERE c.organizer_id = ? ORDER BY c.event_date DESC'
         );
         $stmt->execute([$organizerId]);
-        return $stmt->fetchAll();
+        $championships = $stmt->fetchAll();
+        foreach ($championships as &$championship) {
+            $championship['occupied_spots'] = $this->occupiedSpots($championship);
+        }
+        unset($championship);
+        return $championships;
     }
 
     public function canManage(int $id, int $userId, bool $isAdmin = false): bool
