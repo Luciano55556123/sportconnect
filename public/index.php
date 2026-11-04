@@ -32,6 +32,12 @@ session_set_cookie_params([
 
 session_start();
 
+// Cabecalhos minimos sem alterar o mecanismo de sessao do Render.
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+
 $composerAutoload = BASE_PATH . '/vendor/autoload.php';
 if (is_file($composerAutoload)) {
     require_once $composerAutoload;

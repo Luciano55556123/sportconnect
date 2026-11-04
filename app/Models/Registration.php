@@ -184,6 +184,18 @@ class Registration extends Model
 
     public function setStatus(int $id, string $status, int $organizerId): bool
     {
+        if (!in_array($status, ['pendente', 'aprovado', 'rejeitado', 'cancelado'], true)) {
+            return false;
+        }
+        if ($status !== 'aprovado') {
+            $payment = $this->db->prepare(
+                "SELECT 1 FROM registration_payments WHERE registration_id = ? AND status = 'paid' LIMIT 1"
+            );
+            $payment->execute([$id]);
+            if ($payment->fetchColumn()) {
+                return false; // Pagamentos confirmados exigem fluxo financeiro separado.
+            }
+        }
         $stmt = $this->db->prepare(
             'UPDATE registrations
              SET status = ?

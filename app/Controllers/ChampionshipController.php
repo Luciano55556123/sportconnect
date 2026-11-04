@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Core\Database;
+use App\Core\Security;
 use App\Models\Championship;
 use App\Models\CompetitionManagement;
 use App\Models\Favorite;
@@ -20,11 +21,15 @@ class ChampionshipController extends Controller
 {
     public function index(): void
     {
+        $filters = [];
+        foreach (['q', 'city', 'sport_id', 'date', 'max_price', 'category', 'modality', 'status'] as $key) {
+            $filters[$key] = is_string($_GET[$key] ?? null) ? trim($_GET[$key]) : '';
+        }
         $this->view('championships/index', [
             'title' => 'Pesquisar campeonatos',
             'sports' => (new Sport())->all(),
-            'championships' => (new Championship())->search($_GET),
-            'filters' => $_GET,
+            'championships' => (new Championship())->search($filters),
+            'filters' => $filters,
         ]);
     }
 
@@ -54,6 +59,7 @@ class ChampionshipController extends Controller
     {
         $this->requireAuth('athlete');
         verify_csrf();
+        Security::rateLimit('registration', 8, 900);
         $userId = (int) Auth::user()['id'];
         $championshipId = (int) $id;
         $step = 'load championship';
@@ -66,7 +72,8 @@ class ChampionshipController extends Controller
         }
 
         $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true);
-        if (($championship['status'] ?? '') === 'encerrado' || !$registrationsOpen) {
+        if (in_array(($championship['status'] ?? ''), ['encerrado', 'cancelado'], true)
+            || !$registrationsOpen || ($championship['event_date'] ?? '') < date('Y-m-d')) {
             flash('error', 'As inscrições para este campeonato estão encerradas.');
             $this->redirect('/campeonatos/' . $id);
         }
@@ -76,6 +83,14 @@ class ChampionshipController extends Controller
             $this->redirect('/campeonatos/' . $id);
         }
 
+        foreach (['name' => 160, 'phone' => 30, 'city' => 100, 'team' => 160, 'category' => 100] as $field => $limit) {
+            $value = $_POST[$field] ?? '';
+            if (!is_string($value) || strlen(trim($value)) > $limit
+                || (in_array($field, ['name', 'phone', 'city'], true) && trim($value) === '')) {
+                flash('error', 'Confira os campos nome, telefone, cidade, equipe e categoria.');
+                $this->redirect('/campeonatos/' . $id);
+            }
+        }
         $email = trim((string) ($_POST['email'] ?? ''));
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             flash('error', 'Informe um e-mail valido.');
@@ -195,12 +210,66 @@ class ChampionshipController extends Controller
     {
         $this->requireAuth('athlete');
         verify_csrf();
-        $stmt = \App\Core\Database::connection()->prepare(
-            'INSERT INTO reviews (championship_id, user_id, rating, comment) VALUES (?, ?, ?, ?)'
-        );
-        $stmt->execute([(int) $id, Auth::user()['id'], (int) $_POST['rating'], $_POST['comment'] ?? '']);
-        flash('success', 'Avaliacao publicada.');
+        Security::rateLimit('review', 10, 3600);
+
+        $rating = filter_var($_POST['rating'] ?? null, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1, 'max_range' => 5],
+        ]);
+        $comment = trim((string) ($_POST['comment'] ?? ''));
+        if ($rating === false || strlen($comment) > 1500
+            || !(new Championship())->find((int) $id)) {
+            flash('error', 'Informe uma avaliacao de 1 a 5 estrelas e um comentario valido.');
+            $this->redirect('/campeonatos/' . $id);
+        }
+
+        try {
+            $stmt = Database::connection()->prepare(
+                'INSERT INTO reviews (championship_id, user_id, rating, comment) VALUES (?, ?, ?, ?)'
+            );
+            $stmt->execute([(int) $id, (int) Auth::user()['id'], $rating, $comment]);
+            flash('success', 'Avaliacao publicada.');
+        } catch (\Throwable $exception) {
+            error_log('Nao foi possivel publicar avaliacao: ' . $exception->getMessage());
+            flash('error', 'Nao foi possivel publicar a avaliacao.');
+        }
         $this->redirect('/campeonatos/' . $id);
+    }
+
+    public function rules(string $id): void
+    {
+        $championship = (new Championship())->find((int) $id);
+        $rule = (string) ($championship['rules_file'] ?? '');
+        if ($rule === '') {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Regulamento nao encontrado']);
+            return;
+        }
+
+        if (filter_var($rule, FILTER_VALIDATE_URL) && str_starts_with(strtolower($rule), 'https://')) {
+            header('Location: ' . $rule, true, 302);
+            return;
+        }
+
+        // Mantem compatibilidade com PDFs salvos localmente em versoes anteriores.
+        if (preg_match('#^uploads/[a-zA-Z0-9_.-]+\\.pdf$#', $rule) !== 1) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Regulamento indisponivel']);
+            return;
+        }
+        $file = BASE_PATH . '/' . $rule;
+        if (!is_file($file)) {
+            $file = BASE_PATH . '/public/' . $rule;
+        }
+        if (!is_file($file)) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Regulamento indisponivel']);
+            return;
+        }
+
+        header('Content-Type: application/pdf');
+        header('X-Content-Type-Options: nosniff');
+        header('Content-Disposition: inline; filename="regulamento.pdf"');
+        readfile($file);
     }
 
     public function calendar(): void

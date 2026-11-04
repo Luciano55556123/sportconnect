@@ -8,20 +8,26 @@
                 <th>V</th>
                 <th>E</th>
                 <th>D</th>
-                <th>GP</th>
-                <th>GC</th>
-                <th>SG</th>
+                <th title="Placar a favor">PF</th>
+                <th title="Placar contra">PC</th>
+                <th title="Diferenca de placar">Saldo</th>
                 <th>PTS</th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach (($standings ?? []) as $index => $row): ?>
+            <?php $previousGroup = null; $groupPosition = 0; ?>
+            <?php foreach (($standings ?? []) as $row): ?>
                 <?php
-                $positionClass = $index < 2 ? 'is-qualified' : ($index >= max(0, count($standings) - 2) ? 'is-risk' : '');
+                $group = (string) ($row['group_name'] ?? '');
+                if ($previousGroup !== $group) {
+                    $previousGroup = $group;
+                    $groupPosition = 0;
+                }
+                $groupPosition++;
                 $name = (string) (($row['team_name'] ?? '') ?: ($row['athlete_name'] ?? 'Competidor'));
                 ?>
-                <tr class="<?= e($positionClass) ?>">
-                    <td><span class="sc-position"><?= $index + 1 ?></span></td>
+                <tr>
+                    <td><span class="sc-position"><?= $groupPosition ?></span></td>
                     <td>
                         <strong><?= e($name) ?></strong>
                         <?php if (!empty($row['group_name'])): ?><small>Grupo <?= e($row['group_name']) ?></small><?php endif; ?>
@@ -38,4 +44,5 @@
             <?php endforeach; ?>
         </tbody>
     </table>
+    <p class="small text-muted mb-0 px-2 pb-2">Classificação calculada com regra genérica: 3 pontos por vitória e 1 por empate. Critérios específicos da modalidade seguem o regulamento do campeonato.</p>
 </div>

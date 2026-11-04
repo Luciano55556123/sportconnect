@@ -6,7 +6,7 @@ class User extends Model
 {
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->db->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
+        $stmt = $this->db->prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1');
         $stmt->execute([$email]);
         return $stmt->fetch() ?: null;
     }
@@ -33,8 +33,8 @@ class User extends Model
             'role' => 'athlete',
             'phone' => $data['phone'] ?? null,
             'city' => $data['city'] ?? null,
-            'birth_date' => $data['birth_date'] ?: null,
-            'preferred_price_max' => $data['preferred_price_max'] ?: null,
+            'birth_date' => ($data['birth_date'] ?? '') ?: null,
+            'preferred_price_max' => ($data['preferred_price_max'] ?? '') ?: null,
         ]);
         if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
             return (int) $stmt->fetchColumn();
@@ -51,8 +51,8 @@ class User extends Model
             $data['name'],
             $data['phone'] ?? null,
             $data['city'] ?? null,
-            $data['birth_date'] ?: null,
-            $data['preferred_price_max'] ?: null,
+            ($data['birth_date'] ?? '') ?: null,
+            ($data['preferred_price_max'] ?? '') ?: null,
             $id,
         ]);
     }

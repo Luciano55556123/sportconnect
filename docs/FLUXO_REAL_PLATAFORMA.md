@@ -1,55 +1,34 @@
-# Fluxo Real da Plataforma Ponto Competitivo
+# Fluxo real do Ponto Competitivo
+
+Este documento descreve as rotas implementadas, nao etapas futuras planejadas.
 
 ## Atleta
 
-1. Cria conta em `/cadastro`.
-2. Acessa campeonatos publicados em `/campeonatos`.
-3. Visualiza jogos, classificacao, chaveamento, estatisticas e regulamento.
-4. Aceita o regulamento antes de solicitar inscricao.
-5. Acompanha notificacoes em `/notificacoes`.
-6. Caso queira organizar eventos, solicita permissao em `/solicitar-organizador`.
+1. Faz cadastro em `/cadastro` e login em `/login`.
+2. Pesquisa eventos em `/campeonatos` e consulta `/calendario`.
+3. Abre detalhes, equipes, partidas e resultados, quando cadastrados.
+4. Faz inscricao online no formulario do campeonato (se abertas as vagas) e consulta `/atleta/historico`.
+5. Em campeonato pago, gera PIX e envia comprovante por WhatsApp. O organizador confirma manualmente o recebimento.
+6. Pode solicitar perfil organizador em `/organizador/solicitar`.
 
 ## Organizador
 
-1. Aguarda aprovacao do admin.
-2. Apos aprovado, acessa `/organizador`.
-3. Cria campeonato em rascunho.
-4. Completa checklist: informacoes, regulamento, local, inscricoes, equipes e tabela.
-5. Envia campeonato para aprovacao.
-6. Depois de publicado, recebe inscricoes e analisa participantes.
-7. Gerencia equipes, atletas, jogos, resultados, eventos, sets e classificacao.
-8. Usa a central da partida para registrar placar, gols, cartoes e observacoes.
-
-Organizador suspenso nao pode criar, editar ou gerenciar campeonatos.
+1. Apos aprovacao de perfil, acessa `/organizador`.
+2. Cria e edita seus campeonatos, incluindo valores, WhatsApp, PIX e regulamento.
+3. Recebe e analisa inscricoes online em `/organizador/inscricoes`; ha secao separada de atletas incluidos manualmente.
+4. Pode confirmar ou rejeitar pagamentos PIX de forma manual, depois de conferir o recebimento.
+5. Cadastra equipes, atletas, partidas, eventos, sets e resultados; consulta classificacao em `/organizador/campeonatos/{id}/gerenciar`.
+6. Exporta relatorios CSV. Alteracoes de resultados em fases eliminatorias nao sobrescrevem uma partida seguinte ja iniciada.
 
 ## Administrador
 
 1. Acessa `/admin`.
-2. Analisa organizadores em `/admin/solicitacoes-organizadores`.
-3. Aprova, rejeita ou suspende solicitacoes.
-4. Analisa campeonatos em `/admin/campeonatos-pendentes`.
-5. Publica, rejeita, suspende ou cancela campeonatos.
-6. Visualiza recursos administrativos e acompanha moderacao.
+2. Examina solicitacoes de organizador em `/admin/solicitacoes-organizador`.
+3. Consulta usuarios, organizadores e campeonatos por meio de paginas somente de leitura.
+4. Modulos administrativos completos de edicao e moderacao sao evolucoes futuras, nao recursos prontos.
 
-## Dados Demo x Dados Reais
+## Limites da demonstracao
 
-Dados demo existem somente para testes e apresentacao do TCC. Eles podem ser identificados por campos `is_demo` nas tabelas principais preparadas pela migracao.
+O campeonato Arena Boot foi acompanhado de maneira complementar aos registros manuais. A maioria dos participantes foi cadastrada pela gestao do organizador; eles nao aparecem automaticamente como inscricoes online de contas distintas.
 
-Para uso real:
-
-- nao execute `dados_demonstracao_gestao_campeonato.sql`;
-- cadastre organizadores pelo fluxo oficial;
-- crie campeonatos pelo painel;
-- publique somente apos revisao administrativa.
-
-## Migracoes
-
-Execute manualmente no Supabase SQL Editor. Nunca cole senhas ou credenciais em arquivos SQL.
-
-Ordem recomendada:
-
-1. `adicionar_gestao_completa_campeonatos.sql`
-2. `melhorias_gestao_tcc.sql`
-3. `profissionalizacao_fluxo_real.sql`
-
-O SQL de demonstracao e opcional.
+O PIX nao e liquidado pelo sistema. Recomendacoes usam regras por preferencias; classificacao tem pontuacao generica, que precisa de revisao conforme o regulamento de cada modalidade. Teste novos resultados em um campeonato ficticio, nunca no historico do Arena Boot.

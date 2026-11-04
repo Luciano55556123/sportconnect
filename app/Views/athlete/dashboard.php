@@ -50,7 +50,7 @@
             <?php endif; ?>
             <div class="panel mb-4"><h2>Notificacoes</h2><?php foreach ($notifications as $note): ?><p class="note"><?= e($note['message']) ?></p><?php endforeach; ?><?php if (!$notifications): ?><p class="text-muted">Nenhuma notificacao ainda.</p><?php endif; ?></div>
             <div class="section-heading"><h2>Melhores recomendacoes</h2><a href="<?= url('/atleta/recomendacoes') ?>">Ver lista completa</a></div>
-            <div class="row g-3"><?php foreach (array_slice($recommendations, 0, 4) as $event): require BASE_PATH . '/app/Views/championships/_card.php'; endforeach; ?></div>
+            <div class="row g-3"><?php foreach (array_slice($recommendations, 0, 4) as $event): require BASE_PATH . '/app/Views/championships/_card.php'; endforeach; ?><?php if (!$recommendations): ?><p class="text-muted">Nenhum campeonato futuro para recomendar no momento. <a href="<?= url('/campeonatos') ?>">Ver campeonatos</a>.</p><?php endif; ?></div>
         </div>
     </div>
 </section>

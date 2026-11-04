@@ -10,10 +10,12 @@
                 'pagamento_em_analise' => 'Pagamento em analise',
                 'awaiting_receipt' => 'Aguardando pagamento',
                 'under_review' => 'Pagamento em analise',
-                'paid' => 'Pagamento aprovado',
+                'paid' => 'Pagamento confirmado',
+                'waived' => 'Pagamento dispensado',
+                'refunded' => 'Reembolsado',
                 'rejected' => 'Pagamento rejeitado',
-                'aprovado' => 'Pagamento aprovado',
-                'rejeitado' => 'Pagamento rejeitado',
+                'aprovado' => 'Aprovada',
+                'rejeitado' => 'Rejeitada',
                 'pendente' => 'Pendente',
                 'confirmada' => 'Confirmada',
                 'pagamento_rejeitado' => 'Pagamento rejeitado',
@@ -40,6 +42,7 @@
                 return $digits;
             };
             ?>
+            <?php if (!$registrations): ?><tr><td colspan="5" class="text-center text-muted py-4">Você ainda não realizou inscrições online.</td></tr><?php endif; ?>
             <?php foreach ($registrations as $r): ?>
                 <?php
                     $requiresPayment = !empty($r['championship_requires_payment']);
@@ -47,6 +50,9 @@
                     $paid = $requiresPayment && $registrationFee > 0;
                     $paymentStatus = $r['payment_status'] ?? null;
                     $paymentLabel = $paymentStatus ? ($labels[$paymentStatus] ?? $paymentStatus) : 'Aguardando pagamento';
+                    $canPay = $paid
+                        && !in_array(($r['status'] ?? ''), ['rejeitado', 'cancelado', 'pagamento_rejeitado'], true)
+                        && !in_array($paymentStatus, ['paid', 'waived', 'under_review', 'refunded'], true);
                     if ($paid && $paymentStatus !== 'paid') {
                         $paymentLabel = $labels[$paymentStatus ?? 'awaiting_receipt'] ?? 'Aguardando pagamento';
                     }
@@ -64,7 +70,7 @@
                         <?php endif; ?>
                     </td>
                     <td>
-                        <?php if ($paid): ?>
+                        <?php if ($canPay): ?>
                             <button class="btn btn-sm btn-outline-primary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#pix-<?= (int) $r['id'] ?>">Pagar via PIX</button>
                             <div class="collapse" id="pix-<?= (int) $r['id'] ?>">
                                 <div class="pix-payment mt-2">
@@ -101,6 +107,14 @@
                                     <?php endif; ?>
                                 </div>
                             </div>
+                        <?php elseif ($paid && $paymentStatus === 'paid'): ?>
+                            <span class="text-success">Pagamento confirmado. Nenhuma nova ação necessária.</span>
+                        <?php elseif ($paid && $paymentStatus === 'under_review'): ?>
+                            <span class="text-muted">Pagamento em análise pelo organizador.</span>
+                        <?php elseif ($paid && $paymentStatus === 'waived'): ?>
+                            <span class="text-success">Pagamento dispensado pelo organizador.</span>
+                        <?php elseif ($paid && in_array(($r['status'] ?? ''), ['rejeitado', 'cancelado', 'pagamento_rejeitado'], true)): ?>
+                            <span class="text-muted">Inscrição não ativa. Contate o organizador antes de pagar.</span>
                         <?php endif; ?>
                     </td>
                 </tr>

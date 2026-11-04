@@ -20,7 +20,12 @@ class Standing extends Model
 
     public function recalculate(int $championshipId): void
     {
-        $this->db->prepare('DELETE FROM standings WHERE championship_id = ?')->execute([$championshipId]);
+        $startedTransaction = !$this->db->inTransaction();
+        if ($startedTransaction) {
+            $this->db->beginTransaction();
+        }
+        try {
+            $this->db->prepare('DELETE FROM standings WHERE championship_id = ?')->execute([$championshipId]);
         $stmt = $this->db->prepare(
             'SELECT * FROM matches
              WHERE championship_id = ? AND status = ? AND home_score IS NOT NULL AND away_score IS NOT NULL
@@ -44,6 +49,15 @@ class Standing extends Model
                 $row['played'], $row['wins'], $row['draws'], $row['losses'],
                 $row['score_for'], $row['score_against'], $row['score_for'] - $row['score_against'], $row['points'],
             ]);
+        }
+            if ($startedTransaction) {
+                $this->db->commit();
+            }
+        } catch (\Throwable $exception) {
+            if ($startedTransaction && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $exception;
         }
     }
 
