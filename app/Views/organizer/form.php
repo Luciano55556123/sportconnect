@@ -20,7 +20,7 @@
         <div class="col-md-4"><input class="form-control" name="map_link" value="<?= e($championship['map_link'] ?? '') ?>" placeholder="Link do mapa"></div>
         <div class="col-md-3"><input class="form-control" type="date" name="event_date" value="<?= e($championship['event_date'] ?? '') ?>" required></div>
         <div class="col-md-3"><input class="form-control" type="time" name="event_time" value="<?= e($championship['event_time'] ?? '') ?>" required></div>
-        <div class="col-md-3"><input class="form-control" type="number" name="max_participants" value="<?= e($championship['max_participants'] ?? '') ?>" placeholder="Max. participantes"></div>
+        <div class="col-md-3"><input class="form-control" type="number" min="0" name="max_participants" value="<?= e($championship['max_participants'] ?? '') ?>" placeholder="Max. participantes"></div>
         <div class="col-md-4"><input class="form-control" name="category" value="<?= e($championship['category'] ?? '') ?>" placeholder="Categoria"></div>
         <div class="col-md-4">
             <select class="form-select" name="modality">
