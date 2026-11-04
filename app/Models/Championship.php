@@ -77,6 +77,14 @@ class Championship extends Model
         ], 6);
     }
 
+    public function upcoming(int $limit = 50): array
+    {
+        return $this->search([
+            'status' => $this->openStatuses(),
+            'future_from' => date('Y-m-d'),
+        ], $limit);
+    }
+
     public function countUpcoming(): int
     {
         $statuses = $this->openStatuses();
