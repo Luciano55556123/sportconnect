@@ -1,16 +1,15 @@
 <section class="page-band">
-    <div class="container"><span class="eyebrow">Dados pessoais</span><h1>Politica de privacidade</h1><p>Versao inicial para operacao do Ponto Competitivo.</p></div>
+    <div class="container"><h1>Política de privacidade</h1><p>Informações sobre o tratamento de dados no protótipo Ponto Competitivo.</p></div>
 </section>
 <section class="container py-4">
     <div class="panel">
-        <p>O Ponto Competitivo coleta dados necessarios para cadastro, inscricao em campeonatos, comunicacao interna e seguranca da plataforma.</p>
-        <h2>Dados tratados</h2>
-        <p>Nome, email, telefone, cidade, preferencias esportivas, inscricoes, documentos enviados, comprovantes e registros tecnicos como IP podem ser usados para operar o sistema.</p>
-        <h2>Acesso</h2>
-        <p>Atletas veem seus dados. Organizadores veem inscricoes ligadas aos seus campeonatos. Administradores acessam dados necessarios para suporte, moderacao e auditoria.</p>
-        <h2>Seguranca</h2>
-        <p>Senhas sao armazenadas com hash. Documentos privados devem ficar fora de `public` em producao e nao devem ser expostos por URL direta.</p>
-        <h2>Revisao juridica</h2>
-        <p>Este texto e uma base tecnica. Antes de operacao publica real, revise com profissional juridico.</p>
+        <h2>Dados informados</h2>
+        <p>Para permitir cadastro e participação em campeonatos, a plataforma registra nome, e-mail, telefone, cidade, preferências esportivas, inscrições, equipes e resultados. Dados de pagamento, como situação de conferência, são registrados quando aplicável.</p>
+        <h2>Quem pode acessar</h2>
+        <p>O atleta acessa seu histórico de inscrições online na própria conta. O organizador consulta inscrições e participantes vinculados aos seus campeonatos. Administradores possuem acesso às consultas e aprovações necessárias ao serviço.</p>
+        <h2>Pagamentos</h2>
+        <p>O sistema exibe dados para PIX e a confirmação é realizada manualmente pelo organizador após conferência externa. O Ponto Competitivo não recebe nem processa diretamente pagamentos bancários.</p>
+        <h2>Segurança e limites</h2>
+        <p>As senhas são armazenadas como hashes, e o sistema utiliza sessões e controles de acesso. Este projeto é um protótipo acadêmico: a política deve ser revisada e complementada antes de operação comercial ou pública ampliada.</p>
     </div>
 </section>
