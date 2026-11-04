@@ -156,7 +156,7 @@ class OrganizerController extends Controller
     {
         $this->requireAuth('organizer');
         verify_csrf();
-        $this->ownedChampionship((int) $id);
+        $original = $this->ownedChampionship((int) $id);
         $this->normalizePaymentData($_POST);
         if (!$this->validateChampionshipPayment($_POST)) {
             $this->redirect('/organizador/campeonatos/' . $id . '/editar');
@@ -165,12 +165,12 @@ class OrganizerController extends Controller
         if ($this->hasUploadedFile('image') && $image === null) {
             $this->redirect('/organizador/campeonatos/' . $id . '/editar');
         }
-        $_POST['image'] = $image ?? ($_POST['current_image'] ?? 'assets/img/default-event.svg');
+        $_POST['image'] = $image ?? ($original['image'] ?? 'assets/img/default-event.svg');
         $rules = $this->upload('rules_file', ['pdf']);
         if ($this->hasUploadedFile('rules_file') && $rules === null) {
             $this->redirect('/organizador/campeonatos/' . $id . '/editar');
         }
-        $_POST['rules_file'] = $rules ?? ($_POST['current_rules_file'] ?? null);
+        $_POST['rules_file'] = $rules ?? ($original['rules_file'] ?? null);
         try {
             (new Championship())->update((int) $id, $_POST, Auth::user()['id']);
         } catch (PDOException $exception) {
@@ -400,6 +400,31 @@ class OrganizerController extends Controller
                 flash('error', 'O campo ' . $field . ' excede o limite de ' . $limit . ' caracteres.');
                 return false;
             }
+        }
+
+        foreach (['name', 'city', 'location', 'description', 'event_date', 'event_time'] as $required) {
+            if (trim((string) ($data[$required] ?? '')) === '') {
+                flash('error', 'Preencha os campos obrigatorios do campeonato.');
+                return false;
+            }
+        }
+        if (!isset($data['sport_id']) || filter_var($data['sport_id'], FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1],
+        ]) === false) {
+            flash('error', 'Selecione uma modalidade esportiva valida.');
+            return false;
+        }
+        $maximum = filter_var($data['max_participants'] ?? 0, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0],
+        ]);
+        if ($maximum === false) {
+            flash('error', 'O numero maximo de participantes deve ser zero ou positivo.');
+            return false;
+        }
+        $map = trim((string) ($data['map_link'] ?? ''));
+        if ($map !== '' && (!filter_var($map, FILTER_VALIDATE_URL) || !preg_match('#^https?://#i', $map))) {
+            flash('error', 'O link do mapa deve comecar com https:// ou http://.');
+            return false;
         }
 
         $requiresPayment = !empty($data['requires_payment']);
