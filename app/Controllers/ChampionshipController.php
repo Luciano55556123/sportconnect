@@ -207,6 +207,43 @@ class ChampionshipController extends Controller
         $this->redirect('/campeonatos/' . $id);
     }
 
+    public function rules(string $id): void
+    {
+        $championship = (new Championship())->find((int) $id);
+        $rule = (string) ($championship['rules_file'] ?? '');
+        if ($rule === '') {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Regulamento nao encontrado']);
+            return;
+        }
+
+        if (filter_var($rule, FILTER_VALIDATE_URL) && str_starts_with(strtolower($rule), 'https://')) {
+            header('Location: ' . $rule, true, 302);
+            return;
+        }
+
+        // Mantem compatibilidade com PDFs salvos localmente em versoes anteriores.
+        if (preg_match('#^uploads/[a-zA-Z0-9_.-]+\\.pdf$#', $rule) !== 1) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Regulamento indisponivel']);
+            return;
+        }
+        $file = BASE_PATH . '/' . $rule;
+        if (!is_file($file)) {
+            $file = BASE_PATH . '/public/' . $rule;
+        }
+        if (!is_file($file)) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Regulamento indisponivel']);
+            return;
+        }
+
+        header('Content-Type: application/pdf');
+        header('X-Content-Type-Options: nosniff');
+        header('Content-Disposition: inline; filename="regulamento.pdf"');
+        readfile($file);
+    }
+
     public function calendar(): void
     {
         $this->view('championships/calendar', [
