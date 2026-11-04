@@ -43,6 +43,7 @@ class ChampionshipController extends Controller
         $this->view('championships/show', [
             'title' => $championship['name'],
             'championship' => $championship,
+            'occupiedSpots' => $model->occupiedSpots($championship),
             'reviews' => $model->reviews((int) $id),
             'competitionData' => $competitionData,
             'competitionCounts' => $competitionData['summary']['counts'] ?? [],
@@ -97,7 +98,7 @@ class ChampionshipController extends Controller
             // duas inscricoes simultaneas ocuparem a ultima vaga.
             $step = 'check available spots';
             $lockedStmt = $db->prepare(
-                'SELECT status, registrations_open, max_participants
+                'SELECT id, status, registrations_open, max_participants, registration_type
                  FROM championships WHERE id = ? FOR UPDATE'
             );
             $lockedStmt->execute([$championshipId]);
@@ -114,16 +115,9 @@ class ChampionshipController extends Controller
                 throw new \DomainException('Voce ja esta inscrito neste campeonato.');
             }
             $maxParticipants = (int) ($lockedChampionship['max_participants'] ?? 0);
-            if ($maxParticipants > 0) {
-                $countStmt = $db->prepare(
-                    "SELECT COUNT(*) FROM registrations
-                     WHERE championship_id = ?
-                       AND status NOT IN ('rejeitado', 'cancelado', 'pagamento_rejeitado')"
-                );
-                $countStmt->execute([$championshipId]);
-                if ((int) $countStmt->fetchColumn() >= $maxParticipants) {
-                    throw new \DomainException('Nao ha mais vagas disponiveis para este campeonato.');
-                }
+            if ($maxParticipants > 0
+                && $championshipModel->occupiedSpots($lockedChampionship) >= $maxParticipants) {
+                throw new \DomainException('Nao ha mais vagas disponiveis para este campeonato.');
             }
 
             $step = 'create registration';
