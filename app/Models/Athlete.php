@@ -17,6 +17,31 @@ class Athlete extends Model
         return $stmt->fetchAll();
     }
 
+    /**
+     * Listagem dos atletas registrados pela gestao do organizador.
+     * Esses registros nao sao inscricoes online.
+     */
+    public function byOrganizer(int $organizerId, string $filter = 'all'): array
+    {
+        $sql = 'SELECT a.id, a.name, a.status, c.id AS championship_id,
+                       c.name AS championship_name, t.name AS team_name
+                FROM athletes a
+                JOIN championships c ON c.id = a.championship_id
+                LEFT JOIN teams t ON t.id = a.team_id AND t.championship_id = a.championship_id
+                WHERE c.organizer_id = ?';
+        $params = [$organizerId];
+        $statuses = ['pending' => 'pendente', 'approved' => 'aprovado', 'rejected' => 'rejeitado'];
+        if (isset($statuses[$filter])) {
+            $sql .= ' AND a.status = ?';
+            $params[] = $statuses[$filter];
+        }
+        $sql .= ' ORDER BY c.event_date DESC, c.id DESC, t.name, a.name';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
     public function byTeam(int $teamId, int $championshipId): array
     {
         $stmt = $this->db->prepare(
