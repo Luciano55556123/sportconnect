@@ -57,10 +57,10 @@
                         <span class="badge text-bg-secondary"><?= e($labels[$r['status']] ?? $r['status']) ?></span>
                         <?php if ($paid && !in_array(($r['payment_status'] ?? ''), ['paid', 'waived'], true) && !in_array($registrationStatus, ['rejeitado', 'cancelado'], true)): ?>
                             <br><small class="text-muted">
-                                <?php if (in_array($registrationStatus, ['aprovado', 'confirmada'], true)): ?>
-                                    Inscricao aprovada - pagamento ainda nao confirmado.
-                                <?php elseif (($r['payment_status'] ?? '') === 'rejected'): ?>
+                                <?php if (($r['payment_status'] ?? '') === 'rejected'): ?>
                                     Pagamento rejeitado - entre em contato com o participante.
+                                <?php elseif (in_array($registrationStatus, ['aprovado', 'confirmada'], true)): ?>
+                                    Inscricao aprovada - pagamento ainda nao confirmado.
                                 <?php else: ?>
                                     Inscricao pendente - pagamento ainda nao confirmado.
                                 <?php endif; ?>
