@@ -21,7 +21,8 @@ class AuthController extends Controller
         Security::rateLimit('login', 12, 900);
         $email = strtolower(trim((string) ($_POST['email'] ?? '')));
         $user = (new User())->findByEmail($email);
-        if (!$user || !password_verify($_POST['password'] ?? '', $user['password'])) {
+        $password = $_POST['password'] ?? null;
+        if (!$user || !is_string($password) || !password_verify($password, $user['password'])) {
             flash('error', 'Email ou senha invalidos.');
             $this->redirect('/login');
         }
@@ -41,7 +42,7 @@ class AuthController extends Controller
         $name = trim((string) ($_POST['name'] ?? ''));
         $email = strtolower(trim((string) ($_POST['email'] ?? '')));
         $password = (string) ($_POST['password'] ?? '');
-        if (strlen($name) < 2 || strlen($name) > 320 || !filter_var($email, FILTER_VALIDATE_EMAIL)
+        if (strlen($name) < 2 || strlen($name) > 160 || !filter_var($email, FILTER_VALIDATE_EMAIL)
             || strlen($password) < 8 || strlen($password) > 72) {
             flash('error', 'Informe um nome, e-mail valido e senha de 8 a 72 caracteres.');
             $this->redirect('/cadastro');
