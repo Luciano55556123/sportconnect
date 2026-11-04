@@ -17,7 +17,9 @@
                 'pagamento_em_analise' => 'Pagamento em analise',
                 'awaiting_receipt' => 'Aguardando pagamento',
                 'under_review' => 'Pagamento em analise',
-                'paid' => 'Aprovado',
+                'paid' => 'Confirmado',
+                'waived' => 'Dispensado',
+                'refunded' => 'Reembolsado',
                 'rejected' => 'Rejeitado',
                 'aprovado' => 'Aprovado',
                 'rejeitado' => 'Rejeitado',
@@ -47,7 +49,7 @@
                             <?php if (!empty($r['receipt_path'])): ?>
                                 <br><a class="btn btn-sm btn-outline-secondary mt-2" target="_blank" href="<?= url('/organizador/inscricoes/' . $r['id'] . '/comprovante') ?>">Visualizar comprovante</a>
                             <?php else: ?>
-                                <br><small class="text-muted">Comprovante enviado pelo WhatsApp.</small>
+                                <br><small class="text-muted">Comprovante via WhatsApp, quando enviado.</small>
                             <?php endif; ?>
                         <?php else: ?>
                             <span class="badge text-bg-success">Gratuito</span>
@@ -85,6 +87,20 @@
                                 </select>
                                 <button class="btn btn-sm btn-primary">Atualizar</button>
                             </form>
+                        <?php endif; ?>
+                        <?php if ($paid && !in_array(($r['payment_status'] ?? ''), ['paid', 'waived', 'refunded'], true)
+                            && !in_array($registrationStatus, ['cancelado', 'rejeitado'], true)): ?>
+                            <form method="post" action="<?= url('/organizador/inscricoes/' . (int) $r['id'] . '/pagamento') ?>" class="mt-2">
+                                <?= csrf_field() ?>
+                                <p class="small text-muted mb-1">Confirme somente após verificar o comprovante e o recebimento do PIX.</p>
+                                <input class="form-control form-control-sm mb-2" name="review_notes" maxlength="250" placeholder="Observação da conferência (opcional)">
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button class="btn btn-sm btn-outline-success" name="action" value="approve" onclick="return confirm('Confirma que verificou o recebimento deste PIX?')">Confirmar PIX</button>
+                                    <button class="btn btn-sm btn-outline-danger" name="action" value="reject" onclick="return confirm('Rejeitar este pagamento?')">Rejeitar PIX</button>
+                                </div>
+                            </form>
+                        <?php elseif ($paid && ($r['payment_status'] ?? '') === 'paid'): ?>
+                            <small class="text-success d-block mt-2">Pagamento confirmado.</small>
                         <?php endif; ?>
                     </td>
                 </tr>
