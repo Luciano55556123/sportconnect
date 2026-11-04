@@ -20,10 +20,12 @@ class User extends Model
 
     public function create(array $data): int
     {
-        $stmt = $this->db->prepare(
-            'INSERT INTO users (name, email, password, role, phone, city, birth_date, preferred_price_max)
-             VALUES (:name, :email, :password, :role, :phone, :city, :birth_date, :preferred_price_max)'
-        );
+        $sql = 'INSERT INTO users (name, email, password, role, phone, city, birth_date, preferred_price_max)
+                VALUES (:name, :email, :password, :role, :phone, :city, :birth_date, :preferred_price_max)';
+        if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+            $sql .= ' RETURNING id';
+        }
+        $stmt = $this->db->prepare($sql);
         $stmt->execute([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -34,6 +36,9 @@ class User extends Model
             'birth_date' => $data['birth_date'] ?: null,
             'preferred_price_max' => $data['preferred_price_max'] ?: null,
         ]);
+        if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
+            return (int) $stmt->fetchColumn();
+        }
         return (int) $this->db->lastInsertId();
     }
 
