@@ -65,7 +65,7 @@ $contentView = BASE_PATH . '/app/Views/' . $view . '.php';
 <footer class="footer mt-5 py-4">
     <div class="container d-flex flex-column flex-md-row justify-content-between gap-3">
         <div><strong>Ponto Competitivo</strong><br><span>Plataforma regional para atletas, equipes e organizadores.</span></div>
-        <div class="d-flex gap-3"><a href="<?= url('/campeonatos') ?>">Pesquisar</a><a href="<?= url('/calendario') ?>">Calendario</a><a href="<?= url('/cadastro') ?>">Participar</a></div>
+        <div class="d-flex flex-wrap gap-3"><a href="<?= url('/campeonatos') ?>">Pesquisar</a><a href="<?= url('/calendario') ?>">Calendário</a><a href="<?= url('/privacidade') ?>">Privacidade</a><a href="<?= url('/termos') ?>">Termos</a></div>
     </div>
 </footer>
 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
