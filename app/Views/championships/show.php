@@ -2,7 +2,7 @@
     <?php $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true); ?>
     <?php $maximumSpots = (int) ($championship['max_participants'] ?? 0); ?>
     <?php $isFull = $maximumSpots > 0 && (int) ($occupiedSpots ?? 0) >= $maximumSpots; ?>
-    <?php $registrationsClosed = in_array(($championship['status'] ?? ''), ['encerrado', 'cancelado'], true) || !$registrationsOpen || $isFull; ?>
+    <?php $registrationsClosed = in_array(($championship['status'] ?? ''), ['encerrado', 'cancelado'], true) || !$registrationsOpen || $isFull || ($championship['event_date'] ?? '') < date('Y-m-d'); ?>
     <?php $contactWhatsapp = (string) (($championship['whatsapp_contato'] ?? '') ?: ($championship['organizer_phone'] ?? '')); ?>
     <?php $contactWhatsappNumber = whatsapp_number($contactWhatsapp); ?>
     <div class="container">
