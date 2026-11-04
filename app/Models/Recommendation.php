@@ -6,9 +6,7 @@ class Recommendation extends Model
 {
     public function forUser(array $user): array
     {
-        $championships = (new Championship())->search([
-            'status' => ['ativo', 'registration_open'],
-        ], 100);
+        $championships = (new Championship())->upcoming(100);
         $favoriteSports = (new User())->favoriteSportIds((int) $user['id']);
         $history = (new Registration())->byUser((int) $user['id']);
         $favoriteEvents = (new Favorite())->byUser((int) $user['id']);
@@ -24,7 +22,9 @@ class Recommendation extends Model
                 $score += 25;
                 $reasons[] = 'Esporte favorito';
             }
-            if (!empty($user['city']) && mb_strtolower($event['city']) === mb_strtolower($user['city'])) {
+            $normalize = static fn (string $value): string => function_exists('mb_strtolower')
+                ? mb_strtolower($value, 'UTF-8') : strtolower($value);
+            if (!empty($user['city']) && $normalize((string) $event['city']) === $normalize((string) $user['city'])) {
                 $score += 20;
                 $reasons[] = 'Cidade compativel';
             }
