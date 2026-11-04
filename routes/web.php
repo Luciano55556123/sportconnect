@@ -28,7 +28,7 @@ return [
     ['POST', '/login', [AuthController::class, 'login']],
     ['GET', '/cadastro', [AuthController::class, 'registerForm']],
     ['POST', '/cadastro', [AuthController::class, 'register']],
-    ['GET', '/logout', [AuthController::class, 'logout']],
+    ['POST', '/logout', [AuthController::class, 'logout']],
     ['GET', '/atleta', [AthleteController::class, 'dashboard']],
     ['POST', '/atleta/perfil', [AthleteController::class, 'updateProfile']],
     ['GET', '/atleta/favoritos', [AthleteController::class, 'favorites']],
