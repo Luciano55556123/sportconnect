@@ -55,6 +55,11 @@ class AdminController extends Controller
     public function resource(string $resource): void
     {
         $this->requireAuth('admin');
+        if (!in_array($resource, ['usuarios', 'organizadores', 'campeonatos'], true)) {
+            http_response_code(404);
+            $this->view('errors/404', ['title' => 'Modulo nao disponivel']);
+            return;
+        }
         $this->view('admin/resource', [
             'title' => ucfirst($resource),
             'resource' => $resource,
