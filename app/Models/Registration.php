@@ -225,9 +225,10 @@ class Registration extends Model
              COUNT(DISTINCT CASE WHEN c.status = \'encerrado\' THEN c.id END) AS closed_events,
              COUNT(r.id) AS total_registrations,
              SUM(CASE WHEN r.status IN (\'aprovado\', \'confirmada\') THEN 1 ELSE 0 END) AS confirmed,
-             COALESCE(SUM(CASE WHEN r.status IN (\'aprovado\', \'confirmada\') THEN c.registration_fee ELSE 0 END), 0) AS revenue
+             COALESCE(SUM(CASE WHEN p.status = \'paid\' THEN p.amount ELSE 0 END), 0) AS revenue
              FROM championships c
              LEFT JOIN registrations r ON r.championship_id = c.id
+             LEFT JOIN registration_payments p ON p.registration_id = r.id
              WHERE c.organizer_id = ?'
         );
         $stmt->execute([$organizerId]);
