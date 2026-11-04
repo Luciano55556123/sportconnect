@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Models\Athlete;
 use App\Models\Championship;
 use App\Models\CompetitionManagement;
 use App\Models\Notification;
@@ -183,6 +184,7 @@ class OrganizerController extends Controller
         $this->view('organizer/registrations', [
             'title' => 'Inscricoes recebidas',
             'registrations' => (new Registration())->byOrganizer(Auth::user()['id'], $filter),
+            'managedAthletes' => (new Athlete())->byOrganizer((int) Auth::user()['id'], $filter),
             'filter' => $filter,
         ]);
     }

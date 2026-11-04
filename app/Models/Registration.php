@@ -83,18 +83,30 @@ class Registration extends Model
         return $stmt->fetchAll();
     }
 
-    public function byOrganizer(int $organizerId): array
+    public function byOrganizer(int $organizerId, string $filter = 'all'): array
     {
-        $stmt = $this->db->prepare(
-            'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
+        $sql = 'SELECT r.*, c.name AS championship_name, c.registration_fee, c.requires_payment,
              p.status AS payment_status, p.amount AS payment_amount, p.receipt_file AS receipt_path,
              p.updated_at AS submitted_at, p.reviewed_at, p.rejection_reason AS review_notes
              FROM registrations r
              JOIN championships c ON c.id = r.championship_id
              LEFT JOIN registration_payments p ON p.registration_id = r.id
-             WHERE c.organizer_id = ? ORDER BY r.created_at DESC'
-        );
-        $stmt->execute([$organizerId]);
+             WHERE c.organizer_id = ?';
+        $params = [$organizerId];
+        $statuses = [
+            'pending' => ['pendente', 'aguardando_pagamento', 'pagamento_em_analise'],
+            'approved' => ['aprovado', 'confirmada'],
+            'rejected' => ['rejeitado', 'pagamento_rejeitado'],
+        ];
+        if (isset($statuses[$filter])) {
+            $placeholders = implode(', ', array_fill(0, count($statuses[$filter]), '?'));
+            $sql .= ' AND r.status IN (' . $placeholders . ')';
+            array_push($params, ...$statuses[$filter]);
+        }
+        $sql .= ' ORDER BY r.created_at DESC';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
         return $stmt->fetchAll();
     }
 

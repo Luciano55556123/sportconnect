@@ -84,4 +84,42 @@
             </tbody>
         </table>
     </div>
+
+    <?php if (!empty($managedAthletes)): ?>
+        <div class="mt-4">
+            <h2>Atletas cadastrados na gestao (<?= count($managedAthletes) ?>)</h2>
+            <p class="text-muted">
+                Participantes cadastrados diretamente na gestao dos campeonatos.
+                Eles nao sao inscricoes online e nao possuem pagamento associado a esse cadastro.
+            </p>
+            <div class="table-responsive panel">
+                <table class="table align-middle">
+                    <thead><tr><th>Campeonato</th><th>Atleta</th><th>Equipe</th><th>Status</th><th>Acoes</th></tr></thead>
+                    <tbody>
+                    <?php
+                    $managedStatusLabels = [
+                        'aprovado' => 'Aprovado',
+                        'pendente' => 'Pendente',
+                        'rejeitado' => 'Rejeitado',
+                        'cancelado' => 'Cancelado',
+                    ];
+                    ?>
+                    <?php foreach ($managedAthletes as $athlete): ?>
+                        <?php
+                        $managedStatus = (string) ($athlete['status'] ?? '');
+                        $managedStatusLabel = $managedStatusLabels[$managedStatus] ?? ($managedStatus ?: 'Nao informado');
+                        ?>
+                        <tr>
+                            <td><?= e($athlete['championship_name']) ?></td>
+                            <td><?= e($athlete['name']) ?></td>
+                            <td><?= e($athlete['team_name'] ?? 'Sem equipe') ?></td>
+                            <td><span class="badge text-bg-secondary"><?= e($managedStatusLabel) ?></span></td>
+                            <td><a class="btn btn-sm btn-outline-primary" href="<?= url('/organizador/campeonatos/' . (int) $athlete['championship_id'] . '/gerenciar#atletas') ?>">Ver na gestao</a></td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <?php endif; ?>
 </section>
