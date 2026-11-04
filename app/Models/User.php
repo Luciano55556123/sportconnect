@@ -6,7 +6,7 @@ class User extends Model
 {
     public function findByEmail(string $email): ?array
     {
-        $stmt = $this->db->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
+        $stmt = $this->db->prepare('SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1');
         $stmt->execute([$email]);
         return $stmt->fetch() ?: null;
     }
