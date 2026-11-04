@@ -219,11 +219,16 @@ class OrganizerController extends Controller
         $notes = trim((string) ($_POST['review_notes'] ?? ''));
         $paymentModel = new RegistrationPayment();
 
-        if ($action === 'approve') {
-            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'paid', 'aprovado', $notes);
-        } elseif ($action === 'reject') {
-            $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'rejected', 'rejeitado', $notes);
-        } else {
+        try {
+            if ($action === 'approve') {
+                $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'paid', 'aprovado', $notes);
+            } elseif ($action === 'reject') {
+                $ok = $paymentModel->review((int) $id, Auth::user()['id'], 'rejected', 'rejeitado', $notes);
+            } else {
+                $ok = false;
+            }
+        } catch (\Throwable $exception) {
+            error_log('Erro ao revisar pagamento: ' . $exception->getMessage());
             $ok = false;
         }
 
