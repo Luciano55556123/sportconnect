@@ -169,7 +169,12 @@ class Championship extends Model
             WHERE c.organizer_id = ? ORDER BY c.event_date DESC'
         );
         $stmt->execute([$organizerId]);
-        return $stmt->fetchAll();
+        $championships = $stmt->fetchAll();
+        foreach ($championships as &$championship) {
+            $championship['occupied_spots'] = $this->occupiedSpots($championship);
+        }
+        unset($championship);
+        return $championships;
     }
 
     public function canManage(int $id, int $userId, bool $isAdmin = false): bool
