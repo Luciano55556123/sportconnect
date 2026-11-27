@@ -24,7 +24,7 @@
                         <tbody>
                             <?php foreach ($championships as $c): ?>
                                 <tr>
-                                    <td><?= e($c['name']) ?><br><small><?= e($c['sport_name']) ?></small></td>
+                                    <td><?= e($c['name']) ?><br><small><?= e(in_array((int) ($c['sport_id'] ?? 0), [3, 15], true) ? 'Vôlei' : $c['sport_name']) ?></small></td>
                                     <td><?= e(championship_status_label($c)) ?></td>
                                     <td><?= (int) ($c['occupied_spots'] ?? $c['registrations_count']) ?> vagas ocupadas</td>
                                     <td class="text-nowrap">

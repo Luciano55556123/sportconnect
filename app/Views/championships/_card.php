@@ -4,7 +4,7 @@
         <div class="event-image"><img loading="lazy" src="<?= url($event['image'] ?? 'assets/img/default-event.svg') ?>" alt="Imagem do campeonato <?= e($event['name'] ?? '') ?>"></div>
         <div class="p-3">
             <div class="d-flex justify-content-between gap-2 mb-2">
-                <span class="badge text-bg-primary"><?= e($event['sport_name']) ?></span>
+                <span class="badge text-bg-primary"><?= e(in_array((int) ($event['sport_id'] ?? 0), [3, 15], true) ? 'Vôlei' : $event['sport_name']) ?></span>
                 <span class="d-flex align-items-center gap-2">
                     <span class="badge text-bg-secondary"><?= e(championship_status_label($event)) ?></span>
                     <span class="small text-muted"><?= e(date('d/m/Y', strtotime($event['event_date']))) ?></span>

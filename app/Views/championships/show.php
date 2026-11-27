@@ -13,7 +13,7 @@
                 <?php if (championship_is_demo($championship)): ?><span class="badge text-bg-warning">Campeonato demonstrativo — dados fictícios</span><?php endif; ?>
                 <p><?= e($championship['description']) ?></p>
                 <div class="sc-hero-meta">
-                    <span><i class="fa-solid fa-trophy"></i><?= e($championship['sport_name'] ?? '') ?></span>
+                    <span><i class="fa-solid fa-trophy"></i><?= e(in_array((int) ($championship['sport_id'] ?? 0), [3, 15], true) ? 'Vôlei' : ($championship['sport_name'] ?? '')) ?></span>
                     <span><i class="fa-solid fa-layer-group"></i><?= e($championship['modality'] ?? 'misto') ?></span>
                     <span><i class="fa-solid fa-calendar"></i><?= e(date('d/m/Y', strtotime($championship['event_date']))) ?></span>
                     <span><i class="fa-solid fa-location-dot"></i><?= e($championship['location']) ?></span>

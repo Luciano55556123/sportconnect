@@ -49,8 +49,13 @@ class Championship extends Model
             array_push($params, $term, $term, $term, $term, $term);
         }
         if (!empty($filters['sport_id'])) {
-            $sql .= ' AND c.sport_id = ?';
-            $params[] = (int) $filters['sport_id'];
+            $sportId = (int) $filters['sport_id'];
+            if (in_array($sportId, [3, 15], true)) {
+                $sql .= ' AND c.sport_id IN (3, 15)';
+            } else {
+                $sql .= ' AND c.sport_id = ?';
+                $params[] = $sportId;
+            }
         }
         if (!empty($filters['category'])) {
             $sql .= ' AND LOWER(c.category) LIKE LOWER(?)';
