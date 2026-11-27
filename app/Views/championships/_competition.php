@@ -60,9 +60,9 @@ $statCards = [
     ['icon' => 'fa-solid fa-people-group', 'value' => (int) ($counts['teams'] ?? 0), 'label' => 'Equipes'],
     ['icon' => 'fa-solid fa-person-running', 'value' => (int) ($counts['athletes'] ?? 0), 'label' => 'Atletas'],
     ['icon' => 'fa-solid fa-calendar-days', 'value' => (int) ($counts['matches'] ?? 0), 'label' => 'Partidas'],
-    ['icon' => 'fa-solid fa-circle-check', 'value' => (int) ($counts['completed_matches'] ?? 0), 'label' => 'Concluidas'],
-    ['icon' => 'fa-solid fa-volleyball', 'value' => (int) ($counts['goals'] ?? 0), 'label' => 'Pontos/eventos'],
-    ['icon' => 'fa-solid fa-id-card', 'value' => (int) ($championship['registrations_count'] ?? 0), 'label' => 'Inscricoes'],
+    ['icon' => 'fa-solid fa-circle-check', 'value' => (int) ($counts['completed_matches'] ?? 0), 'label' => 'Concluídas'],
+    ['icon' => 'fa-solid fa-volleyball', 'value' => (int) ($counts['goals'] ?? 0), 'label' => 'Eventos de pontos'],
+    ['icon' => 'fa-solid fa-id-card', 'value' => (int) ($championship['online_registrations_count'] ?? $championship['registrations_count'] ?? 0), 'label' => 'Inscrições online'],
 ];
 ?>
 
@@ -74,11 +74,12 @@ $statCards = [
             <?php endforeach; ?>
         </div>
 
+        <p class="small text-muted mb-3">Equipes e atletas incluem cadastros feitos pelo organizador. Inscrições online contabilizam apenas solicitações registradas pela plataforma.</p>
         <section class="sc-progress-panel">
             <div>
                 <span class="sc-eyebrow">Progresso do campeonato</span>
-                <h2><?= (int) ($counts['completed_matches'] ?? 0) ?> de <?= (int) ($counts['matches'] ?? 0) ?> partidas concluidas</h2>
-                <p><?= count($nextMatches) ?> pendencias ou partidas futuras acompanhadas pelo painel.</p>
+                <h2><?= (int) ($counts['completed_matches'] ?? 0) ?> de <?= (int) ($counts['matches'] ?? 0) ?> partidas concluídas</h2>
+                <p><?= count($nextMatches) ?> pendências ou partidas futuras acompanhadas pelo painel.</p>
             </div>
             <div class="sc-progress-meter">
                 <strong><?= $progress ?>%</strong>
@@ -88,23 +89,23 @@ $statCards = [
             </div>
         </section>
 
-        <nav class="sc-tabs" role="tablist" aria-label="Secoes do campeonato">
-            <button class="active" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab-target="overview" type="button"><i class="fa-solid fa-chart-line"></i>Visao geral</button>
+        <nav class="sc-tabs" role="tablist" aria-label="Seções do campeonato">
+            <button class="active" id="tab-overview" role="tab" aria-controls="panel-overview" aria-selected="true" data-tab-target="overview" type="button"><i class="fa-solid fa-chart-line"></i>Visão geral</button>
             <button id="tab-teams" role="tab" aria-controls="panel-teams" aria-selected="false" data-tab-target="teams" type="button"><i class="fa-solid fa-shield-halved"></i>Equipes</button>
             <button id="tab-matches" role="tab" aria-controls="panel-matches" aria-selected="false" data-tab-target="matches" type="button"><i class="fa-solid fa-calendar-days"></i>Partidas</button>
-            <button id="tab-standings" role="tab" aria-controls="panel-standings" aria-selected="false" data-tab-target="standings" type="button"><i class="fa-solid fa-ranking-star"></i>Classificacao</button>
+            <button id="tab-standings" role="tab" aria-controls="panel-standings" aria-selected="false" data-tab-target="standings" type="button"><i class="fa-solid fa-ranking-star"></i>Classificação</button>
             <button id="tab-bracket" role="tab" aria-controls="panel-bracket" aria-selected="false" data-tab-target="bracket" type="button"><i class="fa-solid fa-sitemap"></i>Rodadas</button>
-            <button id="tab-stats" role="tab" aria-controls="panel-stats" aria-selected="false" data-tab-target="stats" type="button"><i class="fa-solid fa-chart-simple"></i>Estatisticas</button>
+            <button id="tab-stats" role="tab" aria-controls="panel-stats" aria-selected="false" data-tab-target="stats" type="button"><i class="fa-solid fa-chart-simple"></i>Estatísticas</button>
             <button id="tab-events" role="tab" aria-controls="panel-events" aria-selected="false" data-tab-target="events" type="button"><i class="fa-solid fa-bolt"></i>Eventos</button>
             <button id="tab-goals" role="tab" aria-controls="panel-goals" aria-selected="false" data-tab-target="goals" type="button"><i class="fa-solid fa-volleyball"></i>Pontos</button>
-            <button id="tab-history" role="tab" aria-controls="panel-history" aria-selected="false" data-tab-target="history" type="button"><i class="fa-solid fa-clock-rotate-left"></i>Historico</button>
+            <button id="tab-history" role="tab" aria-controls="panel-history" aria-selected="false" data-tab-target="history" type="button"><i class="fa-solid fa-clock-rotate-left"></i>Histórico</button>
         </nav>
 
         <div class="sc-tab-content">
             <section class="sc-tab-panel active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-tab-panel="overview">
                 <div class="sc-dashboard-grid">
                     <article class="sc-panel sc-panel-wide">
-                        <div class="sc-panel-head"><div><span class="sc-eyebrow">Agenda</span><h3>Proximas e ultimas partidas</h3></div><span><?= count($matches) ?> jogos</span></div>
+                        <div class="sc-panel-head"><div><span class="sc-eyebrow">Agenda</span><h3>Próximas e últimas partidas</h3></div><span><?= count($matches) ?> jogos</span></div>
                         <div class="sc-match-list">
                             <?php foreach (array_slice($matches, 0, 5) as $match): ?>
                                 <?php require BASE_PATH . '/app/Views/championships/_match_card.php'; ?>
@@ -118,12 +119,12 @@ $statCards = [
                             <?php foreach (array_slice($topScorers, 0, 5) as $index => $stat): ?>
                                 <div class="sc-rank-row"><span><?= $index + 1 ?></span><div><strong><?= e($stat['athlete_name'] ?? 'Atleta') ?></strong><small><?= e($stat['team_name'] ?? '') ?></small></div><b><?= (int) ($stat['goals'] ?? 0) ?></b></div>
                             <?php endforeach; ?>
-                            <?php if (!$topScorers): ?><p class="text-muted mb-0">Nenhum gol registrado.</p><?php endif; ?>
+                            <?php if (!$topScorers): ?><p class="text-muted mb-0">Nenhuma pontuação individual registrada.</p><?php endif; ?>
                         </div>
                     </article>
 
                     <article class="sc-panel">
-                        <div class="sc-panel-head"><div><span class="sc-eyebrow">Situacao</span><h3>Atividades recentes</h3></div></div>
+                        <div class="sc-panel-head"><div><span class="sc-eyebrow">Situação</span><h3>Atividades recentes</h3></div></div>
                         <div class="sc-activity-list">
                             <?php foreach (array_slice($events, 0, 5) as $event): ?>
                                 <p><strong><?= e($event['event_type'] ?? 'Evento') ?></strong><span><?= (int) ($event['minute'] ?? 0) ?>' - <?= e($event['athlete_name'] ?? '') ?></span></p>
@@ -162,7 +163,7 @@ $statCards = [
 
             <section class="sc-tab-panel" id="panel-standings" role="tabpanel" aria-labelledby="tab-standings" data-tab-panel="standings" hidden>
                 <article class="sc-panel">
-                    <div class="sc-panel-head"><div><span class="sc-eyebrow">Tabela</span><h3>Classificacao</h3></div></div>
+                    <div class="sc-panel-head"><div><span class="sc-eyebrow">Tabela</span><h3>Classificação</h3></div></div>
                     <?php if ($standings): ?><?php require BASE_PATH . '/app/Views/championships/_standings_table.php'; ?><?php else: ?><article class="sc-empty-state"><i class="fa-solid fa-ranking-star"></i><strong>Nenhum dado disponivel nesta secao.</strong></article><?php endif; ?>
                 </article>
             </section>

@@ -3,6 +3,7 @@
     <?php $maximumSpots = (int) ($championship['max_participants'] ?? 0); ?>
     <?php $isFull = $maximumSpots > 0 && (int) ($occupiedSpots ?? 0) >= $maximumSpots; ?>
     <?php $registrationsClosed = !championship_registration_open($championship) || $isFull; ?>
+    <?php $closedLabel = in_array($championship['status'] ?? '', ['encerrado', 'finished'], true) ? 'Campeonato encerrado' : (!championship_registration_open($championship) ? 'Inscrições encerradas' : 'Vagas esgotadas'); ?>
     <?php $contactWhatsapp = (string) (($championship['whatsapp_contato'] ?? '') ?: ($championship['organizer_phone'] ?? '')); ?>
     <?php $contactWhatsappNumber = whatsapp_number($contactWhatsapp); ?>
     <div class="container">
@@ -14,7 +15,7 @@
                 <p><?= e($championship['description']) ?></p>
                 <div class="sc-hero-meta">
                     <span><i class="fa-solid fa-trophy"></i><?= e(in_array((int) ($championship['sport_id'] ?? 0), [3, 15], true) ? 'Vôlei' : ($championship['sport_name'] ?? '')) ?></span>
-                    <span><i class="fa-solid fa-layer-group"></i><?= e($championship['modality'] ?? 'misto') ?></span>
+                    <span><i class="fa-solid fa-layer-group"></i><?= e(ucfirst($championship['modality'] ?? 'misto')) ?></span>
                     <span><i class="fa-solid fa-calendar"></i><?= e(date('d/m/Y', strtotime($championship['event_date']))) ?></span>
                     <span><i class="fa-solid fa-location-dot"></i><?= e($championship['location']) ?></span>
                     <span><i class="fa-solid fa-user-tie"></i><?= e($championship['organizer_name'] ?? 'Organizador') ?></span>
@@ -23,7 +24,7 @@
                     <?php if (!$registrationsClosed): ?>
                         <button class="btn btn-warning btn-lg" data-bs-toggle="collapse" data-bs-target="#registerForm"><i class="fa-solid fa-user-plus"></i> Participar</button>
                     <?php else: ?>
-                        <span class="badge text-bg-secondary"><?= $isFull ? 'Vagas esgotadas' : 'Inscrições encerradas' ?></span>
+                        <span class="badge text-bg-secondary"><?= $closedLabel ?></span>
                     <?php endif; ?>
                     <?php $mapLink = (string) ($championship['map_link'] ?? ''); ?>
                     <?php if (filter_var($mapLink, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $mapLink)): ?><a class="btn btn-outline-light btn-lg" target="_blank" rel="noopener" href="<?= e($mapLink) ?>">Abrir mapa</a><?php endif; ?>
@@ -84,7 +85,7 @@
                         </form>
                     </div>
                 <?php else: ?>
-                    <div class="alert alert-secondary mb-0"><?= $isFull ? 'Vagas esgotadas' : 'Inscrições encerradas' ?></div>
+                    <div class="alert alert-secondary mb-0"><?= $closedLabel ?></div>
                 <?php endif; ?>
                 <hr>
                 <form method="post" action="<?= url('/campeonatos/' . $championship['id'] . '/avaliar') ?>" class="stack-form">
