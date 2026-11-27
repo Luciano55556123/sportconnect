@@ -27,6 +27,42 @@ class AdminController extends Controller
         ]);
     }
 
+    public function pendingChampionships(): void
+    {
+        $this->requireAuth('admin');
+        $this->view('admin/pending_championships', [
+            'title' => 'Campeonatos pendentes',
+            'championships' => (new Championship())->search(['editorial_status' => 'pending_review'], 500),
+        ]);
+    }
+
+    public function reviewChampionship(string $id): void
+    {
+        $this->requireAuth('admin');
+        verify_csrf();
+        $decision = (string) ($_POST['editorial_status'] ?? '');
+        $reason = trim((string) ($_POST['rejection_reason'] ?? ''));
+        if (!in_array($decision, ['published', 'rejected'], true)
+            || ($decision === 'rejected' && $reason === '') || strlen($reason) > 1000) {
+            flash('error', 'Escolha uma decisão válida e informe o motivo da rejeição.');
+            $this->redirect('/admin/campeonatos-pendentes');
+        }
+        $model = new Championship();
+        $championship = $model->find((int) $id);
+        if (!$championship || !$model->reviewPublication((int) $id, (int) Auth::user()['id'], $decision, $reason)) {
+            flash('error', 'Este campeonato não está aguardando aprovação.');
+            $this->redirect('/admin/campeonatos-pendentes');
+        }
+        try {
+            (new Notification())->create((int) $championship['organizer_id'],
+                'O campeonato ' . $championship['name'] . ($decision === 'published' ? ' foi aprovado.' : ' foi rejeitado: ' . $reason));
+        } catch (\Throwable $exception) {
+            error_log('Falha ao notificar revisão de campeonato: ' . $exception->getMessage());
+        }
+        flash('success', 'Decisão registrada com sucesso.');
+        $this->redirect('/admin/campeonatos-pendentes');
+    }
+
     public function organizerRequests(): void
     {
         $this->requireAuth('admin');

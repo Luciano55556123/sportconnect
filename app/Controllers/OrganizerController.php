@@ -70,9 +70,14 @@ class OrganizerController extends Controller
             flash('error', 'Nao foi possivel salvar o campeonato. Revise os dados informados e tente novamente.');
             $this->redirect('/organizador/campeonatos/novo');
         }
-        (new Notification())->createForFavoriteSport((int) $_POST['sport_id'], 'Novo campeonato disponivel: ' . $_POST['name']);
-        flash('success', 'Campeonato cadastrado e atletas interessados notificados.');
-        $this->redirect('/campeonatos/' . $id);
+        try {
+            (new Notification())->createForAdmins('Novo campeonato aguardando aprovação: ' . $_POST['name'],
+                'Campeonato pendente', '/admin/campeonatos-pendentes');
+        } catch (\Throwable $exception) {
+            error_log('Falha ao notificar novo campeonato: ' . $exception->getMessage());
+        }
+        flash('success', 'Campeonato cadastrado e enviado para aprovação.');
+        $this->redirect('/organizador');
     }
 
     public function edit(string $id): void

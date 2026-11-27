@@ -2,17 +2,17 @@
 <section class="page-band"><div class="container"><h1>Painel administrativo</h1><p>Controle geral da plataforma.</p></div></section>
 <section class="container py-4">
     <div class="metric-grid">
-        <div><strong><?= count($users) ?></strong><span>Usuarios</span></div>
+        <div><strong><?= count($users) ?></strong><span>Usuários</span></div>
         <div><strong><?= count($championships) ?></strong><span>Campeonatos</span></div>
         <div><strong><?= count($sports) ?></strong><span>Esportes</span></div>
-        <div><strong><?= $pendingCount ?></strong><span>Solicitacoes pendentes</span></div>
+        <div><strong><?= $pendingCount ?></strong><span>Solicitações pendentes</span></div>
     </div>
 
     <div class="admin-alert mt-4 <?= $pendingCount > 0 ? 'has-pending' : '' ?>">
         <div>
-            <h2><i class="fa-solid fa-bell me-2"></i>Solicitacoes de organizador</h2>
+            <h2><i class="fa-solid fa-bell me-2"></i>Solicitações de organizador</h2>
             <?php if ($pendingCount > 0): ?>
-                <p><span class="badge text-bg-warning"><?= $pendingCount ?></span> <?= $pendingCount === 1 ? 'solicitacao aguardando analise' : 'solicitacoes aguardando analise' ?></p>
+                <p><span class="badge text-bg-warning"><?= $pendingCount ?></span> <?= $pendingCount === 1 ? 'solicitacao aguardando análise' : 'solicitacoes aguardando análise' ?></p>
             <?php else: ?>
                 <p>Nenhuma solicitacao pendente.</p>
             <?php endif; ?>
@@ -25,14 +25,15 @@
             <div class="panel">
                 <h2>Recursos</h2>
                 <div class="admin-links">
-                    <a href="<?= url('/admin/solicitacoes-organizador') ?>">Solicitacoes de Organizador<?php if ($pendingCount > 0): ?> <span class="badge text-bg-warning"><?= $pendingCount ?></span><?php endif; ?></a>
+                    <a href="<?= url('/admin/campeonatos-pendentes') ?>">Campeonatos pendentes</a>
+                    <a href="<?= url('/admin/solicitacoes-organizador') ?>">Solicitações de Organizador<?php if ($pendingCount > 0): ?> <span class="badge text-bg-warning"><?= $pendingCount ?></span><?php endif; ?></a>
                     <?php foreach (['usuarios', 'organizadores', 'campeonatos'] as $r): ?><a href="<?= url('/admin/' . $r) ?>"><?= e(ucfirst($r)) ?></a><?php endforeach; ?>
                 </div>
             </div>
         </div>
         <div class="col-lg-4">
             <div class="panel">
-                <h2>Notificacoes</h2>
+                <h2>Notificações</h2>
                 <?php foreach (($notifications ?? []) as $notification): ?>
                     <?php $link = $notification['link'] ?? ''; ?>
                     <?php if ($link !== ''): ?>

@@ -67,5 +67,7 @@ return [
     ['GET', '/admin/solicitacoes-organizador/{id}', [AdminController::class, 'showOrganizerRequest']],
     ['POST', '/admin/solicitacoes-organizador/{id}/aprovar', [OrganizerRequestController::class, 'approve']],
     ['POST', '/admin/solicitacoes-organizador/{id}/rejeitar', [OrganizerRequestController::class, 'reject']],
+    ['GET', '/admin/campeonatos-pendentes', [AdminController::class, 'pendingChampionships']],
+    ['POST', '/admin/campeonatos-pendentes/{id}/revisar', [AdminController::class, 'reviewChampionship']],
     ['GET', '/admin/{resource}', [AdminController::class, 'resource']],
 ];
