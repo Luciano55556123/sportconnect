@@ -1,15 +1,15 @@
-<section class="page-band"><div class="container"><h1>Historico</h1></div></section>
+<section class="page-band"><div class="container"><h1>Histórico</h1></div></section>
 <section class="container py-4">
     <div class="table-responsive panel">
         <table class="table table-hover align-middle">
-            <thead><tr><th>Campeonato</th><th>Data</th><th>Status</th><th>Pagamento</th><th>Acoes</th></tr></thead>
+            <thead><tr><th>Campeonato</th><th>Data</th><th>Status</th><th>Pagamento</th><th>Ações</th></tr></thead>
             <tbody>
             <?php
             $labels = [
                 'aguardando_pagamento' => 'Aguardando pagamento',
-                'pagamento_em_analise' => 'Pagamento em analise',
+                'pagamento_em_analise' => 'Pagamento em análise',
                 'awaiting_receipt' => 'Aguardando pagamento',
-                'under_review' => 'Pagamento em analise',
+                'under_review' => 'Pagamento em análise',
                 'paid' => 'Pagamento confirmado',
                 'waived' => 'Pagamento dispensado',
                 'refunded' => 'Reembolsado',
@@ -45,7 +45,7 @@
             <?php if (!$registrations): ?><tr><td colspan="5" class="text-center text-muted py-4">Você ainda não realizou inscrições online.</td></tr><?php endif; ?>
             <?php foreach ($registrations as $r): ?>
                 <?php
-                    $requiresPayment = !empty($r['championship_requires_payment']);
+                    $requiresPayment = in_array($r['championship_requires_payment'] ?? false, [true, 1, '1', 't', 'true'], true);
                     $registrationFee = (float) ($r['championship_registration_fee'] ?? 0);
                     $paid = $requiresPayment && $registrationFee > 0;
                     $paymentStatus = $r['payment_status'] ?? null;
@@ -66,7 +66,7 @@
                             <strong>R$ <?= number_format($registrationFee, 2, ',', '.') ?></strong>
                             <br><span class="badge text-bg-info"><?= e($paymentLabel) ?></span>
                         <?php else: ?>
-                            <span class="badge text-bg-success">Gratuito</span>
+                            <span class="badge text-bg-success"><?= $registrationFee > 0 ? 'Sem cobrança pela plataforma' : 'Gratuito' ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -74,24 +74,24 @@
                             <button class="btn btn-sm btn-outline-primary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#pix-<?= (int) $r['id'] ?>">Pagar via PIX</button>
                             <div class="collapse" id="pix-<?= (int) $r['id'] ?>">
                                 <div class="pix-payment mt-2">
-                                    <h2>Finalize sua inscricao</h2>
+                                    <h2>Finalize sua inscrição</h2>
                                     <p class="mb-1"><strong><?= e($r['championship_name']) ?></strong></p>
                                     <p class="mb-1">Status: <?= e($paymentLabel) ?></p>
                                     <p class="pix-amount">Valor: R$ <?= number_format($registrationFee, 2, ',', '.') ?></p>
                                     <?php if (!empty($r['pix_qr']) && !empty($r['pix_payload'])): ?>
                                         <img class="pix-qr" src="<?= e($r['pix_qr']) ?>" alt="QR Code PIX">
                                         <p class="text-muted mb-2">Escaneie o QR Code com o aplicativo do seu banco.</p>
-                                        <button class="btn btn-sm btn-outline-primary js-copy-pix mb-2" type="button" data-pix-code="<?= e($r['pix_payload']) ?>">Copiar codigo PIX</button>
+                                        <button class="btn btn-sm btn-outline-primary js-copy-pix mb-2" type="button" data-pix-code="<?= e($r['pix_payload']) ?>">Copiar código PIX</button>
                                         <label class="form-label mt-2">PIX Copia e Cola</label>
                                         <textarea class="form-control pix-code-field" rows="4" readonly><?= e($r['pix_payload']) ?></textarea>
                                     <?php else: ?>
-                                        <div class="alert alert-warning mb-2">Nao foi possivel gerar o QR Code PIX. Fale com o organizador.</div>
+                                        <div class="alert alert-warning mb-2">Não foi possível gerar o QR Code PIX. Fale com o organizador.</div>
                                     <?php endif; ?>
                                     <p class="mb-1">Ou utilize a chave PIX: <code><?= e($r['pix_key'] ?? '') ?></code></p>
                                     <p class="mb-1">Tipo: <?= e($r['pix_key_type'] ?? '') ?></p>
                                     <p class="mb-1">Recebedor: <?= e($r['pix_holder_name'] ?? '') ?></p>
                                     <?php if (!empty($r['pix_instructions'])): ?><p class="mb-2"><?= e($r['pix_instructions']) ?></p><?php endif; ?>
-                                    <h3>Ja realizou o pagamento?</h3>
+                                    <h3>Já realizou o pagamento?</h3>
                                     <?php
                                         $whatsappNumber = $normalizeBrazilianWhatsapp($r['championship_whatsapp_contato'] ?? '');
                                         $message = 'Ola! Realizei o pagamento da inscricao no campeonato ' . ($r['championship_name'] ?? '') . ' e estou enviando o comprovante para validacao.';

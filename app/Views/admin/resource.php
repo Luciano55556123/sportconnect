@@ -35,7 +35,7 @@ $rows = $isChampionship
                                 <td><?= (int) ($row['id'] ?? 0) ?></td>
                                 <td><?= e($row['name'] ?? '') ?></td>
                                 <td><?= e($row['city'] ?? '') ?></td>
-                                <td><?= e($row['status'] ?? '') ?></td>
+                                <td><?= e($isChampionship ? championship_status_label($row) : ($row['status'] ?? '')) ?></td>
                                 <td><a class="btn btn-sm btn-outline-primary" href="<?= url('/campeonatos/' . (int) $row['id']) ?>">Ver campeonato</a></td>
                             </tr>
                         <?php else: ?>

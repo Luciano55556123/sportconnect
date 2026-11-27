@@ -1,4 +1,4 @@
-<section class="page-band"><div class="container"><h1>Inscricoes recebidas</h1></div></section>
+<section class="page-band"><div class="container"><h1>Inscrições recebidas</h1></div></section>
 <section class="container py-4">
     <?php $activeFilter = $filter ?? 'all'; ?>
     <div class="d-flex flex-wrap gap-2 mb-3">
@@ -9,14 +9,14 @@
     </div>
     <div class="table-responsive panel">
         <table class="table align-middle">
-            <thead><tr><th>Campeonato</th><th>Participante</th><th>Data</th><th>Pagamento</th><th>Status</th><th>Acoes</th></tr></thead>
+            <thead><tr><th>Campeonato</th><th>Participante</th><th>Data</th><th>Pagamento</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody>
             <?php
             $labels = [
                 'aguardando_pagamento' => 'Aguardando pagamento',
-                'pagamento_em_analise' => 'Pagamento em analise',
+                'pagamento_em_analise' => 'Pagamento em análise',
                 'awaiting_receipt' => 'Aguardando pagamento',
-                'under_review' => 'Pagamento em analise',
+                'under_review' => 'Pagamento em análise',
                 'paid' => 'Confirmado',
                 'waived' => 'Dispensado',
                 'refunded' => 'Reembolsado',
@@ -30,11 +30,11 @@
             ];
             ?>
             <?php if (!$registrations): ?>
-                <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma inscricao recebida.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-4">Nenhuma inscrição recebida.</td></tr>
             <?php endif; ?>
             <?php foreach ($registrations as $r): ?>
                 <?php
-                    $paid = !empty($r['requires_payment']) && (float) ($r['registration_fee'] ?? 0) > 0;
+                    $paid = in_array($r['requires_payment'] ?? false, [true, 1, '1', 't', 'true'], true) && (float) ($r['registration_fee'] ?? 0) > 0;
                     $registrationStatus = (string) ($r['status'] ?? '');
                     $pending = $registrationStatus === 'pendente';
                 ?>
@@ -52,7 +52,7 @@
                                 <br><small class="text-muted">Comprovante via WhatsApp, quando enviado.</small>
                             <?php endif; ?>
                         <?php else: ?>
-                            <span class="badge text-bg-success">Gratuito</span>
+                            <span class="badge text-bg-success"><?= (float) ($r['registration_fee'] ?? 0) > 0 ? 'Sem cobrança pela plataforma' : 'Gratuito' ?></span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -62,9 +62,9 @@
                                 <?php if (($r['payment_status'] ?? '') === 'rejected'): ?>
                                     Pagamento rejeitado - entre em contato com o participante.
                                 <?php elseif (in_array($registrationStatus, ['aprovado', 'confirmada'], true)): ?>
-                                    Inscricao aprovada - pagamento ainda nao confirmado.
+                                    Inscrição aprovada — pagamento ainda não confirmado.
                                 <?php else: ?>
-                                    Inscricao pendente - pagamento ainda nao confirmado.
+                                    Inscrição pendente — pagamento ainda não confirmado.
                                 <?php endif; ?>
                             </small>
                         <?php endif; ?>
@@ -85,7 +85,7 @@
                                     <option value="pendente">Marcar como pendente</option>
                                     <option value="aprovado">Aprovar</option>
                                     <option value="rejeitado">Rejeitar</option>
-                                    <option value="cancelado">Cancelar inscricao</option>
+                                    <option value="cancelado">Cancelar inscrição</option>
                                 </select>
                                 <button class="btn btn-sm btn-primary">Atualizar</button>
                             </form>
@@ -120,7 +120,7 @@
             </p>
             <div class="table-responsive panel">
                 <table class="table align-middle">
-                    <thead><tr><th>Campeonato</th><th>Atleta</th><th>Equipe</th><th>Status</th><th>Acoes</th></tr></thead>
+                    <thead><tr><th>Campeonato</th><th>Atleta</th><th>Equipe</th><th>Status</th><th>Ações</th></tr></thead>
                     <tbody>
                     <?php
                     $managedStatusLabels = [

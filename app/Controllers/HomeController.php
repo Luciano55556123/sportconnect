@@ -22,7 +22,7 @@ class HomeController extends Controller
 
     public function privacy(): void
     {
-        $this->view('home/privacy', ['title' => 'Politica de privacidade']);
+        $this->view('home/privacy', ['title' => 'Política de privacidade']);
     }
 
     public function terms(): void

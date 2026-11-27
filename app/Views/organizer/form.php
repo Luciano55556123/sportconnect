@@ -10,7 +10,7 @@
         </div>
         <div class="col-md-3">
             <select class="form-select" name="status">
-                <?php foreach (['ativo' => 'Ativo', 'encerrado' => 'Encerrado', 'cancelado' => 'Cancelado'] as $value => $label): ?>
+                <?php foreach (['ativo' => 'Ativo', 'registration_open' => 'Inscrições abertas', 'registration_closed' => 'Inscrições encerradas', 'in_progress' => 'Em andamento', 'encerrado' => 'Encerrado', 'cancelado' => 'Cancelado'] as $value => $label): ?>
                     <option value="<?= e($value) ?>" <?= ($championship['status'] ?? 'ativo') === $value ? 'selected' : '' ?>><?= e($label) ?></option>
                 <?php endforeach; ?>
             </select>
