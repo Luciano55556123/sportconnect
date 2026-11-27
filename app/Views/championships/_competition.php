@@ -22,6 +22,7 @@ $isGoalSport = in_array($sportName, ['futebol', 'futsal', 'handebol'], true);
 $isPointSport = in_array($sportName, ['volei', 'vôlei', 'voleibol', 'basquete', 'beach tennis', 'tenis de mesa', 'tênis de mesa', 'tenis', 'tênis'], true);
 $scoreLabel = $isGoalSport ? 'Gols' : ($isPointSport ? 'Pontos' : 'Pontuação');
 $scoreField = $isGoalSport ? 'goals' : 'points';
+$hideScoreTotal = (int) ($championship['id'] ?? 0) === 23;
 $scoreTotal = 0;
 $setsByMatch = [];
 foreach ($sets as $set) {
@@ -84,6 +85,9 @@ $statCards = [
     ['icon' => $isGoalSport ? 'fa-solid fa-futbol' : 'fa-solid fa-volleyball', 'value' => $scoreTotal, 'label' => $scoreLabel],
     ['icon' => 'fa-solid fa-id-card', 'value' => (int) ($occupiedSpots ?? (new \App\Models\Championship())->occupiedSpots($championship)), 'label' => ($championship['registration_type'] ?? 'individual') === 'team' ? 'Equipes inscritas' : 'Participantes inscritos'],
 ];
+if ($hideScoreTotal) {
+    $statCards = array_values(array_filter($statCards, static fn(array $card): bool => $card['label'] !== $scoreLabel));
+}
 if ($isGoalSport) {
     $statCards[] = ['icon' => 'fa-solid fa-square', 'value' => $yellowTotal, 'label' => 'Cartões amarelos'];
     $statCards[] = ['icon' => 'fa-solid fa-square', 'value' => $redTotal, 'label' => 'Cartões vermelhos'];
@@ -98,7 +102,7 @@ if ($isGoalSport) {
             <?php endforeach; ?>
         </div>
 
-        <p class="small text-muted mb-3">O total de inscritos inclui cadastros do organizador e inscrições online válidas, sem duplicar participantes. <?= e($scoreLabel) ?> somados pelos placares das partidas concluídas; quando há sets, pelos placares dos sets.</p>
+        <p class="small text-muted mb-3">O total de inscritos inclui cadastros do organizador e inscrições online válidas, sem duplicar participantes. <?php if (!$hideScoreTotal): ?><?= e($scoreLabel) ?> somados pelos placares das partidas concluídas; quando há sets, pelos placares dos sets.<?php endif; ?></p>
         <section class="sc-progress-panel">
             <div>
                 <span class="sc-eyebrow">Progresso do campeonato</span>
@@ -124,6 +128,9 @@ if ($isGoalSport) {
             <button id="tab-goals" role="tab" aria-controls="panel-goals" aria-selected="false" data-tab-target="goals" type="button"><i class="<?= $isGoalSport ? 'fa-solid fa-futbol' : 'fa-solid fa-volleyball' ?>"></i><?= e($scoreLabel) ?></button>
             <?php if ($isGoalSport || $cardEvents): ?>
                 <button id="tab-cards" role="tab" aria-controls="panel-cards" aria-selected="false" data-tab-target="cards" type="button"><i class="fa-solid fa-square"></i>Cartões (<?= count($cardEvents) ?>)</button>
+            <?php endif; ?>
+            <?php if ($isGoalSport): ?>
+                <button id="tab-scorers" role="tab" aria-controls="panel-scorers" aria-selected="false" data-tab-target="scorers" type="button"><i class="fa-solid fa-futbol"></i>Artilharia</button>
             <?php endif; ?>
             <button id="tab-history" role="tab" aria-controls="panel-history" aria-selected="false" data-tab-target="history" type="button"><i class="fa-solid fa-clock-rotate-left"></i>Histórico</button>
         </nav>
@@ -274,6 +281,28 @@ if ($isGoalSport) {
                         </table>
                     </div>
                     <?php else: ?><p class="text-muted mb-0">Nenhum cartão registrado.</p><?php endif; ?>
+                </article>
+            </section>
+            <?php endif; ?>
+
+            <?php if ($isGoalSport): ?>
+            <section class="sc-tab-panel" id="panel-scorers" role="tabpanel" aria-labelledby="tab-scorers" data-tab-panel="scorers" hidden>
+                <article class="sc-panel">
+                    <div class="sc-panel-head"><div><span class="sc-eyebrow">Gols por jogador</span><h3>Artilharia do campeonato</h3></div><span><?= count($topScorers) ?> artilheiros</span></div>
+                    <?php if ($topScorers): ?>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead><tr><th>Posição</th><th>Jogador</th><th>Equipe</th><th>Gols</th></tr></thead>
+                                <tbody>
+                                <?php $rank = 0; $lastGoals = null; foreach ($topScorers as $index => $scorer): ?>
+                                    <?php $goals = (int) ($scorer['goals'] ?? 0); if ($goals !== $lastGoals) { $rank = $index + 1; $lastGoals = $goals; } ?>
+                                    <tr><td><?= $rank ?>º</td><td><?= e(($scorer['athlete_name'] ?? '') ?: 'Não informado') ?></td><td><?= e(($scorer['team_name'] ?? '') ?: 'Não informada') ?></td><td><strong><?= $goals ?></strong></td></tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="small text-muted mb-0">Classificação baseada nos gols registrados individualmente, que podem não abranger todos os gols dos placares.</p>
+                    <?php else: ?><p class="text-muted mb-0">Nenhum gol individual registrado.</p><?php endif; ?>
                 </article>
             </section>
             <?php endif; ?>
