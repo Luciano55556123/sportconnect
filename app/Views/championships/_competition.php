@@ -62,7 +62,7 @@ $statCards = [
     ['icon' => 'fa-solid fa-calendar-days', 'value' => (int) ($counts['matches'] ?? 0), 'label' => 'Partidas'],
     ['icon' => 'fa-solid fa-circle-check', 'value' => (int) ($counts['completed_matches'] ?? 0), 'label' => 'Concluídas'],
     ['icon' => 'fa-solid fa-volleyball', 'value' => (int) ($counts['goals'] ?? 0), 'label' => 'Eventos de pontos'],
-    ['icon' => 'fa-solid fa-id-card', 'value' => (int) ($championship['online_registrations_count'] ?? $championship['registrations_count'] ?? 0), 'label' => 'Inscrições online'],
+    ['icon' => 'fa-solid fa-id-card', 'value' => (int) ($occupiedSpots ?? (new \App\Models\Championship())->occupiedSpots($championship)), 'label' => ($championship['registration_type'] ?? 'individual') === 'team' ? 'Equipes inscritas' : 'Participantes inscritos'],
 ];
 ?>
 
@@ -74,7 +74,7 @@ $statCards = [
             <?php endforeach; ?>
         </div>
 
-        <p class="small text-muted mb-3">Equipes e atletas incluem cadastros feitos pelo organizador. Inscrições online contabilizam apenas solicitações registradas pela plataforma.</p>
+        <p class="small text-muted mb-3">O total de inscritos inclui cadastros do organizador e inscrições online válidas, sem duplicar participantes.</p>
         <section class="sc-progress-panel">
             <div>
                 <span class="sc-eyebrow">Progresso do campeonato</span>
