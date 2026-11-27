@@ -13,6 +13,13 @@ class Championship extends Model
                 JOIN users u ON u.id = c.organizer_id
                 WHERE 1 = 1';
         $params = [];
+        if (!empty($filters['public_only'])) {
+            $sql .= " AND c.editorial_status IN ('published', 'registration_open')";
+        }
+        if (!empty($filters['editorial_status'])) {
+            $sql .= ' AND c.editorial_status = ?';
+            $params[] = $filters['editorial_status'];
+        }
 
         if (is_string($filters['city'] ?? null) && trim($filters['city']) !== '') {
             $sql .= ' AND LOWER(c.city) LIKE LOWER(?)';
@@ -72,6 +79,7 @@ class Championship extends Model
     public function featured(): array
     {
         return $this->search([
+            'public_only' => true,
             'status' => $this->openStatuses(),
             'future_from' => date('Y-m-d'),
         ], 6);
@@ -80,6 +88,7 @@ class Championship extends Model
     public function upcoming(int $limit = 50): array
     {
         return $this->search([
+            'public_only' => true,
             'status' => $this->openStatuses(),
             'future_from' => date('Y-m-d'),
         ], $limit);
@@ -90,7 +99,7 @@ class Championship extends Model
         $statuses = $this->openStatuses();
         $placeholders = implode(', ', array_fill(0, count($statuses), '?'));
         $stmt = $this->db->prepare(
-            "SELECT COUNT(*) FROM championships WHERE status IN ({$placeholders}) AND event_date >= ?"
+            "SELECT COUNT(*) FROM championships WHERE editorial_status IN ('published', 'registration_open') AND status IN ({$placeholders}) AND event_date >= ?"
         );
         $stmt->execute([...$statuses, date('Y-m-d')]);
         return (int) $stmt->fetchColumn();
@@ -112,6 +121,7 @@ class Championship extends Model
              FROM championships c
              JOIN sports s ON s.id = c.sport_id
              JOIN users u ON u.id = c.organizer_id
+             WHERE c.editorial_status IN (\'published\', \'registration_open\')
              ORDER BY c.views DESC, c.event_date ASC LIMIT 6'
         )->fetchAll();
     }
@@ -213,10 +223,10 @@ class Championship extends Model
         $sql = 'INSERT INTO championships
             (organizer_id, sport_id, name, city, location, map_link, event_date, event_time, registration_fee,
              prize, max_participants, description, rules_file, category, modality, status, image,
-             whatsapp_contato, email_contato, requires_payment, pix_key, pix_key_type, pix_holder_name, pix_receiver_city, pix_instructions)
+             whatsapp_contato, email_contato, requires_payment, pix_key, pix_key_type, pix_holder_name, pix_receiver_city, pix_instructions, editorial_status, publication_requested_at)
              VALUES (:organizer_id, :sport_id, :name, :city, :location, :map_link, :event_date, :event_time,
              :registration_fee, :prize, :max_participants, :description, :rules_file, :category, :modality, :status, :image,
-             :whatsapp_contato, :email_contato, :requires_payment, :pix_key, :pix_key_type, :pix_holder_name, :pix_receiver_city, :pix_instructions)';
+             :whatsapp_contato, :email_contato, :requires_payment, :pix_key, :pix_key_type, :pix_holder_name, :pix_receiver_city, :pix_instructions, \'pending_review\', CURRENT_TIMESTAMP)';
         if ($this->db->getAttribute(\PDO::ATTR_DRIVER_NAME) === 'pgsql') {
             $sql .= ' RETURNING id';
         }
@@ -238,10 +248,23 @@ class Championship extends Model
             prize=:prize, max_participants=:max_participants, description=:description, rules_file=:rules_file,
             category=:category, modality=:modality, status=:status, image=:image, email_contato=:email_contato,
             whatsapp_contato=:whatsapp_contato, requires_payment=:requires_payment, pix_key=:pix_key, pix_key_type=:pix_key_type,
-            pix_holder_name=:pix_holder_name, pix_receiver_city=:pix_receiver_city, pix_instructions=:pix_instructions
+            pix_holder_name=:pix_holder_name, pix_receiver_city=:pix_receiver_city, pix_instructions=:pix_instructions,
+            editorial_status=CASE WHEN editorial_status IN (\'draft\', \'rejected\') THEN \'pending_review\' ELSE editorial_status END
             WHERE id=:id AND organizer_id=:organizer_id'
         );
         $stmt->execute($payload);
+    }
+
+    public function reviewPublication(int $id, int $reviewerId, string $decision, string $reason): bool
+    {
+        if (!in_array($decision, ['published', 'rejected'], true)) return false;
+        $stmt = $this->db->prepare(
+            "UPDATE championships SET editorial_status = ?, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP,
+             rejection_reason = ?, published_at = CASE WHEN ? = 'published' THEN CURRENT_TIMESTAMP ELSE published_at END
+             WHERE id = ? AND editorial_status = 'pending_review'"
+        );
+        $stmt->execute([$decision, $reviewerId, $reason === '' ? null : $reason, $decision, $id]);
+        return $stmt->rowCount() > 0;
     }
 
     public function byOrganizer(int $organizerId): array
@@ -329,7 +352,7 @@ class Championship extends Model
         $stmt = $this->db->prepare(
             'SELECT c.id, c.name, c.city, c.event_date, s.name AS sport_name
              FROM championships c JOIN sports s ON s.id = c.sport_id
-             WHERE c.status IN (' . implode(',', array_fill(0, count($statuses), '?')) . ')
+             WHERE c.editorial_status IN (\'published\', \'registration_open\') AND c.status IN (' . implode(',', array_fill(0, count($statuses), '?')) . ')
              ORDER BY c.event_date ASC'
         );
         $stmt->execute($statuses);

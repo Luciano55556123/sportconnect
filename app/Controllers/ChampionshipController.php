@@ -21,7 +21,7 @@ class ChampionshipController extends Controller
 {
     public function index(): void
     {
-        $filters = [];
+        $filters = ['public_only' => true];
         foreach (['q', 'city', 'sport_id', 'date', 'max_price', 'category', 'modality', 'status'] as $key) {
             $filters[$key] = is_string($_GET[$key] ?? null) ? trim($_GET[$key]) : '';
         }
@@ -37,12 +37,12 @@ class ChampionshipController extends Controller
     {
         $model = new Championship();
         $championship = $model->find((int) $id);
-        if (!$championship) {
+        if (!$championship || !championship_can_view($championship)) {
             http_response_code(404);
             $this->view('errors/404', ['title' => 'Campeonato nao encontrado']);
             return;
         }
-        $model->incrementViews((int) $id);
+        if (championship_is_public($championship)) $model->incrementViews((int) $id);
         $competition = new CompetitionManagement();
         $competitionData = $competition->overview((int) $id);
         $this->view('championships/show', [
@@ -71,15 +71,13 @@ class ChampionshipController extends Controller
             return;
         }
 
-        $registrationsOpen = in_array($championship['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true);
-        if (in_array(($championship['status'] ?? ''), ['encerrado', 'cancelado'], true)
-            || !$registrationsOpen || ($championship['event_date'] ?? '') < date('Y-m-d')) {
+        if (!championship_registration_open($championship)) {
             flash('error', 'As inscrições para este campeonato estão encerradas.');
             $this->redirect('/campeonatos/' . $id);
         }
 
         if ((new Registration())->existsForUser($championshipId, $userId)) {
-            flash('error', 'Voce ja esta inscrito neste campeonato.');
+            flash('error', 'Você já está inscrito neste campeonato.');
             $this->redirect('/campeonatos/' . $id);
         }
 
@@ -113,21 +111,16 @@ class ChampionshipController extends Controller
             // duas inscricoes simultaneas ocuparem a ultima vaga.
             $step = 'check available spots';
             $lockedStmt = $db->prepare(
-                'SELECT id, status, registrations_open, max_participants, registration_type
+                'SELECT id, status, editorial_status, event_date, registration_deadline, registrations_open, max_participants, registration_type
                  FROM championships WHERE id = ? FOR UPDATE'
             );
             $lockedStmt->execute([$championshipId]);
             $lockedChampionship = $lockedStmt->fetch();
-            $stillOpen = $lockedChampionship && in_array(
-                $lockedChampionship['registrations_open'] ?? false,
-                [true, 1, '1', 't', 'true', 'yes', 'on'],
-                true
-            );
-            if (!$stillOpen || in_array(($lockedChampionship['status'] ?? ''), ['encerrado', 'cancelado'], true)) {
-                throw new \DomainException('As inscricoes para este campeonato estao encerradas.');
+            if (!$lockedChampionship || !championship_registration_open($lockedChampionship)) {
+                throw new \DomainException('As inscrições para este campeonato estão encerradas.');
             }
             if ($registrationModel->existsForUser($championshipId, $userId)) {
-                throw new \DomainException('Voce ja esta inscrito neste campeonato.');
+                throw new \DomainException('Você já está inscrito neste campeonato.');
             }
             $maxParticipants = (int) ($lockedChampionship['max_participants'] ?? 0);
             if ($maxParticipants > 0
@@ -193,7 +186,7 @@ class ChampionshipController extends Controller
             $this->logRegistrationError($exception, $championshipId, $userId, 'send registration emails');
         }
 
-        flash('success', $isPaid ? 'Inscricao realizada. Aguardando pagamento.' : 'Inscricao enviada. Status: pendente.');
+        flash('success', $isPaid ? 'Inscrição realizada. Aguardando pagamento.' : 'Inscrição enviada. Status: pendente.');
         $this->redirect('/atleta/historico');
     }
 
@@ -201,6 +194,11 @@ class ChampionshipController extends Controller
     {
         $this->requireAuth('athlete');
         verify_csrf();
+        $championship = (new Championship())->find((int) $id);
+        if (!$championship || !championship_is_public($championship)) {
+            flash('error', 'Campeonato indisponível.');
+            $this->redirect('/campeonatos');
+        }
         $active = (new Favorite())->toggle(Auth::user()['id'], (int) $id);
         flash('success', $active ? 'Campeonato salvo nos favoritos.' : 'Campeonato removido dos favoritos.');
         $this->redirect('/campeonatos/' . $id);
@@ -216,8 +214,9 @@ class ChampionshipController extends Controller
             'options' => ['min_range' => 1, 'max_range' => 5],
         ]);
         $comment = trim((string) ($_POST['comment'] ?? ''));
+        $championship = (new Championship())->find((int) $id);
         if ($rating === false || strlen($comment) > 1500
-            || !(new Championship())->find((int) $id)) {
+            || !$championship || !championship_is_public($championship)) {
             flash('error', 'Informe uma avaliacao de 1 a 5 estrelas e um comentario valido.');
             $this->redirect('/campeonatos/' . $id);
         }
@@ -239,7 +238,7 @@ class ChampionshipController extends Controller
     {
         $championship = (new Championship())->find((int) $id);
         $rule = (string) ($championship['rules_file'] ?? '');
-        if ($rule === '') {
+        if (!$championship || !championship_can_view($championship) || $rule === '') {
             http_response_code(404);
             $this->view('errors/404', ['title' => 'Regulamento nao encontrado']);
             return;

@@ -23,7 +23,7 @@ class Favorite extends Model
             'SELECT c.*, s.name AS sport_name FROM favorites f
              JOIN championships c ON c.id = f.championship_id
              JOIN sports s ON s.id = c.sport_id
-             WHERE f.user_id = ? ORDER BY f.created_at DESC'
+             WHERE f.user_id = ? AND c.editorial_status IN (\'published\', \'registration_open\') ORDER BY f.created_at DESC'
         );
         $stmt->execute([$userId]);
         return $stmt->fetchAll();

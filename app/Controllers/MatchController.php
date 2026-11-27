@@ -16,7 +16,7 @@ class MatchController extends Controller
     {
         $championship = (new Championship())->find((int) $championshipId);
         $match = (new CompetitionMatch())->findInChampionship((int) $matchId, (int) $championshipId);
-        if (!$championship || !$match) {
+        if (!$championship || !championship_can_view($championship) || !$match) {
             http_response_code(404);
             $this->view('errors/404', ['title' => 'Partida nao encontrada']);
             return;
@@ -36,7 +36,7 @@ class MatchController extends Controller
     {
         $championship = (new Championship())->find((int) $championshipId);
         $team = (new Team())->findInChampionship((int) $teamId, (int) $championshipId);
-        if (!$championship || !$team) {
+        if (!$championship || !championship_can_view($championship) || !$team) {
             http_response_code(404);
             $this->view('errors/404', ['title' => 'Equipe nao encontrada']);
             return;
@@ -54,7 +54,7 @@ class MatchController extends Controller
     {
         $championship = (new Championship())->find((int) $championshipId);
         $athlete = (new Athlete())->findInChampionship((int) $athleteId, (int) $championshipId);
-        if (!$championship || !$athlete) {
+        if (!$championship || !championship_can_view($championship) || !$athlete) {
             http_response_code(404);
             $this->view('errors/404', ['title' => 'Participante nao encontrado']);
             return;

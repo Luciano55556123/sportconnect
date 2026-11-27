@@ -74,9 +74,21 @@ function championship_is_demo(array $c): bool
     return in_array($c['is_demo'] ?? false, [true, 1, '1', 't', 'true'], true);
 }
 
+function championship_is_public(array $c): bool
+{
+    return in_array($c['editorial_status'] ?? '', ['published', 'registration_open'], true);
+}
+
+function championship_can_view(array $c): bool
+{
+    if (championship_is_public($c)) return true;
+    $user = Auth::user();
+    return $user && (($user['role'] ?? '') === 'admin' || (int) ($user['id'] ?? 0) === (int) ($c['organizer_id'] ?? -1));
+}
+
 function championship_registration_open(array $c): bool
 {
-    return in_array($c['status'] ?? '', ['ativo', 'registration_open', 'published'], true)
+    return championship_is_public($c) && in_array($c['status'] ?? '', ['ativo', 'registration_open', 'published'], true)
         && in_array($c['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true)
         && !empty($c['event_date']) && $c['event_date'] >= date('Y-m-d')
         && (empty($c['registration_deadline']) || $c['registration_deadline'] >= date('Y-m-d'));
@@ -84,6 +96,7 @@ function championship_registration_open(array $c): bool
 
 function championship_status_label(array $c): string
 {
+    if (!championship_is_public($c)) return ['draft'=>'Rascunho', 'pending_review'=>'Aguardando aprovação', 'rejected'=>'Rejeitado', 'suspended'=>'Suspenso', 'cancelled'=>'Cancelado'][$c['editorial_status'] ?? ''] ?? 'Não publicado';
     if (championship_registration_open($c)) return 'Inscrições abertas';
     return ['ativo'=>'Inscrições encerradas', 'registration_open'=>'Inscrições encerradas',
         'published'=>'Inscrições encerradas', 'registration_closed'=>'Inscrições encerradas',
