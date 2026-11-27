@@ -33,7 +33,8 @@ foreach ($matches as $match) {
     $mid = (int) ($match['id'] ?? 0);
     $scoreTotal += !$isGoalSport && isset($setsByMatch[$mid]) ? $setsByMatch[$mid] : (int) ($match['home_score'] ?? 0) + (int) ($match['away_score'] ?? 0);
 }
-$yellowTotal = count(array_filter($events, static fn(array $e): bool => ($e['event_type'] ?? '') === 'cartao_amarelo'));
+$cardEvents = array_values(array_filter($events, static fn(array $e): bool => in_array($e['event_type'] ?? '', ['cartao_amarelo', 'cartao_vermelho'], true)));
+$yellowTotal = count(array_filter($cardEvents, static fn(array $e): bool => ($e['event_type'] ?? '') === 'cartao_amarelo'));
 $redTotal = count(array_filter($events, static fn(array $e): bool => ($e['event_type'] ?? '') === 'cartao_vermelho'));
 $topScorers = array_values(array_filter($statistics, static fn(array $row): bool => (int) ($row[$scoreField] ?? 0) > 0));
 usort($topScorers, static fn(array $a, array $b): int => (int) ($b[$scoreField] ?? 0) <=> (int) ($a[$scoreField] ?? 0));
@@ -121,6 +122,9 @@ if ($isGoalSport) {
             <button id="tab-stats" role="tab" aria-controls="panel-stats" aria-selected="false" data-tab-target="stats" type="button"><i class="fa-solid fa-chart-simple"></i>Estatísticas</button>
             <button id="tab-events" role="tab" aria-controls="panel-events" aria-selected="false" data-tab-target="events" type="button"><i class="fa-solid fa-bolt"></i>Eventos</button>
             <button id="tab-goals" role="tab" aria-controls="panel-goals" aria-selected="false" data-tab-target="goals" type="button"><i class="<?= $isGoalSport ? 'fa-solid fa-futbol' : 'fa-solid fa-volleyball' ?>"></i><?= e($scoreLabel) ?></button>
+            <?php if ($isGoalSport || $cardEvents): ?>
+                <button id="tab-cards" role="tab" aria-controls="panel-cards" aria-selected="false" data-tab-target="cards" type="button"><i class="fa-solid fa-square"></i>Cartões (<?= count($cardEvents) ?>)</button>
+            <?php endif; ?>
             <button id="tab-history" role="tab" aria-controls="panel-history" aria-selected="false" data-tab-target="history" type="button"><i class="fa-solid fa-clock-rotate-left"></i>Histórico</button>
         </nav>
 
@@ -247,10 +251,37 @@ if ($isGoalSport) {
                 </div>
             </section>
 
+            <?php if ($isGoalSport || $cardEvents): ?>
+            <section class="sc-tab-panel" id="panel-cards" role="tabpanel" aria-labelledby="tab-cards" data-tab-panel="cards" hidden>
+                <article class="sc-panel">
+                    <div class="sc-panel-head"><div><span class="sc-eyebrow">Disciplina</span><h3>Cartões por jogador</h3></div><span><?= $yellowTotal ?> amarelos / <?= $redTotal ?> vermelhos</span></div>
+                    <?php if ($cardEvents): ?>
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead><tr><th>Jogador</th><th>Equipe</th><th>Cartão</th><th>Partida</th><th>Minuto</th></tr></thead>
+                            <tbody>
+                            <?php foreach ($cardEvents as $cardEvent): ?>
+                                <?php $red = ($cardEvent['event_type'] ?? '') === 'cartao_vermelho'; ?>
+                                <tr>
+                                    <td><?= e(($cardEvent['athlete_name'] ?? '') ?: 'Não informado') ?></td>
+                                    <td><?= e(($cardEvent['team_name'] ?? '') ?: 'Não informada') ?></td>
+                                    <td><span class="badge <?= $red ? 'text-bg-danger' : 'text-bg-warning' ?>"><i class="fa-solid fa-square me-1"></i><?= $red ? 'Vermelho' : 'Amarelo' ?></span></td>
+                                    <td><?= e(($cardEvent['home_team'] ?? '') ?: 'A definir') ?> × <?= e(($cardEvent['away_team'] ?? '') ?: 'A definir') ?></td>
+                                    <td><?= isset($cardEvent['minute']) ? (int) $cardEvent['minute'] . "'" : '—' ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php else: ?><p class="text-muted mb-0">Nenhum cartão registrado.</p><?php endif; ?>
+                </article>
+            </section>
+            <?php endif; ?>
+
             <section class="sc-tab-panel" id="panel-history" role="tabpanel" aria-labelledby="tab-history" data-tab-panel="history" hidden>
                 <div class="sc-dashboard-grid">
-                    <article class="sc-panel"><div class="sc-panel-head"><h3>Relatorios</h3></div><?php foreach ($reports as $report): ?><p class="sc-log"><strong><?= e($report['referee_name'] ?? 'Relatorio') ?></strong><span><?= e($report['summary'] ?? '') ?></span></p><?php endforeach; ?><?php if (!$reports): ?><p class="text-muted mb-0">Nenhum relatorio registrado.</p><?php endif; ?></article>
-                    <article class="sc-panel"><div class="sc-panel-head"><h3>Operacoes</h3></div><p class="sc-log"><strong>Sets registrados</strong><span><?= count($sets) ?> registros</span></p><p class="sc-log"><strong>Reagendamentos</strong><span><?= count($reschedules) ?> registros</span></p><p class="sc-log"><strong>Partidas concluidas</strong><span><?= (int) ($counts['completed_matches'] ?? 0) ?> registros</span></p></article>
+                    <article class="sc-panel"><div class="sc-panel-head"><h3>Relatórios</h3></div><?php foreach ($reports as $report): ?><p class="sc-log"><strong><?= e($report['referee_name'] ?? 'Relatorio') ?></strong><span><?= e($report['summary'] ?? '') ?></span></p><?php endforeach; ?><?php if (!$reports): ?><p class="text-muted mb-0">Nenhum relatorio registrado.</p><?php endif; ?></article>
+                    <article class="sc-panel"><div class="sc-panel-head"><h3>Operações</h3></div><p class="sc-log"><strong>Sets registrados</strong><span><?= count($sets) ?> registros</span></p><p class="sc-log"><strong>Reagendamentos</strong><span><?= count($reschedules) ?> registros</span></p><p class="sc-log"><strong>Partidas concluídas</strong><span><?= (int) ($counts['completed_matches'] ?? 0) ?> registros</span></p></article>
                 </div>
             </section>
         </div>
