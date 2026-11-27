@@ -69,6 +69,30 @@ function whatsapp_url(?string $phone, string $message): ?string
     return 'https://wa.me/' . $number . '?text=' . rawurlencode($message);
 }
 
+function championship_is_demo(array $c): bool
+{
+    return in_array($c['is_demo'] ?? false, [true, 1, '1', 't', 'true'], true);
+}
+
+function championship_registration_open(array $c): bool
+{
+    return in_array($c['status'] ?? '', ['ativo', 'registration_open', 'published'], true)
+        && in_array($c['registrations_open'] ?? false, [true, 1, '1', 't', 'true', 'yes', 'on'], true)
+        && !empty($c['event_date']) && $c['event_date'] >= date('Y-m-d')
+        && (empty($c['registration_deadline']) || $c['registration_deadline'] >= date('Y-m-d'));
+}
+
+function championship_status_label(array $c): string
+{
+    if (championship_registration_open($c)) return 'Inscrições abertas';
+    return ['ativo'=>'Inscrições encerradas', 'registration_open'=>'Inscrições encerradas',
+        'published'=>'Inscrições encerradas', 'registration_closed'=>'Inscrições encerradas',
+        'in_progress'=>'Em andamento', 'em_andamento'=>'Em andamento', 'encerrado'=>'Encerrado',
+        'finished'=>'Encerrado', 'cancelado'=>'Cancelado', 'cancelled'=>'Cancelado',
+        'draft'=>'Rascunho', 'pending_review'=>'Aguardando aprovação', 'rejected'=>'Rejeitado',
+        'suspended'=>'Suspenso'][$c['status'] ?? ''] ?? 'Inscrições encerradas';
+}
+
 function money_br(float $amount): string
 {
     return 'R$ ' . number_format($amount, 2, ',', '.');

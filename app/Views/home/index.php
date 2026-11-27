@@ -2,9 +2,9 @@
     <div class="container hero-content">
         <div class="row align-items-center g-4">
             <div class="col-lg-7">
-                <span class="badge text-bg-warning mb-3">Campeonatos regionais em um so lugar</span>
+                <span class="badge text-bg-warning mb-3">Campeonatos regionais em um só lugar</span>
                 <h1>Ponto Competitivo</h1>
-                <p class="lead">Encontre eventos esportivos, inscreva sua equipe e receba recomendacoes inteligentes conforme seu perfil.</p>
+                <p class="lead">Encontre eventos esportivos, inscreva sua equipe e receba recomendações inteligentes conforme seu perfil.</p>
                 <form class="search-bar" action="<?= url('/campeonatos') ?>" method="get">
                     <input class="form-control form-control-lg" name="q" placeholder="Buscar por nome, cidade ou organizador">
                     <button class="btn btn-warning btn-lg" aria-label="Pesquisar campeonatos"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -30,7 +30,7 @@
 </section>
 
 <section class="container pb-4">
-    <div class="section-heading"><h2>Proximos campeonatos</h2><span>Eventos em destaque</span></div>
+    <div class="section-heading"><h2>Próximos campeonatos</h2><span>Eventos em destaque</span></div>
     <div class="row g-4">
         <?php foreach ($featured as $event): require BASE_PATH . '/app/Views/championships/_card.php'; endforeach; ?>
         <?php if (!$featured): ?><p class="text-muted">Nenhum campeonato futuro disponível no momento. <a href="<?= url('/campeonatos') ?>">Ver todos os campeonatos</a>.</p><?php endif; ?>
@@ -38,7 +38,7 @@
 </section>
 
 <section class="container py-4">
-    <div class="section-heading"><h2>Mais procurados</h2><span>Ordenados por visualizacoes</span></div>
+    <div class="section-heading"><h2>Mais procurados</h2><span>Ordenados por visualizações</span></div>
     <div class="row g-4">
         <?php foreach ($mostViewed as $event): require BASE_PATH . '/app/Views/championships/_card.php'; endforeach; ?>
         <?php if (!$mostViewed): ?><p class="text-muted">Nenhum campeonato encontrado.</p><?php endif; ?>

@@ -6,11 +6,12 @@
             <div class="d-flex justify-content-between gap-2 mb-2">
                 <span class="badge text-bg-primary"><?= e($event['sport_name']) ?></span>
                 <span class="d-flex align-items-center gap-2">
-                    <?php if ($status === 'encerrado'): ?><span class="badge text-bg-secondary">Encerrado</span><?php endif; ?>
+                    <span class="badge text-bg-secondary"><?= e(championship_status_label($event)) ?></span>
                     <span class="small text-muted"><?= e(date('d/m/Y', strtotime($event['event_date']))) ?></span>
                 </span>
             </div>
             <h3><?= e($event['name']) ?></h3>
+            <?php if (championship_is_demo($event)): ?><span class="badge text-bg-warning mb-2">Demonstrativo</span><?php endif; ?>
             <p class="text-muted mb-2"><i class="fa-solid fa-location-dot me-1"></i><?= e($event['city']) ?> - <?= e($event['location']) ?></p>
             <?php if (isset($event['compatibility'])): ?>
                 <div class="compat mb-3"><span style="width: <?= (int) $event['compatibility'] ?>%"></span></div>

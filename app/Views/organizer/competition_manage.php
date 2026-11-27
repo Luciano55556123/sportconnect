@@ -9,7 +9,7 @@ $matchesTotal = (int) (($competitionData['summary']['counts']['matches'] ?? 0));
         <div class="sc-manage-grid">
             <div class="sc-manage-copy">
                 <a class="sc-back-link" href="<?= url('/organizador') ?>"><i class="fa-solid fa-arrow-left"></i> Voltar ao painel</a>
-                <span class="sc-status-chip"><?= e($championship['status'] ?? '') ?></span>
+                <span class="sc-status-chip"><?= e(championship_status_label($championship)) ?></span>
                 <h1><?= e($championship['name'] ?? '') ?></h1>
                 <div class="sc-hero-meta">
                     <span><i class="fa-solid fa-trophy"></i><?= e($championship['sport_name'] ?? '') ?></span>
